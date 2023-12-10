@@ -1,16 +1,15 @@
-  /* * { outline: 1px solid rgb(97, 97, 97) }   */
+ /* * { outline: 1px solid rgb(97, 97, 97) }    */
 
 
-
-  body {
+body {
     margin: 0;
     overflow: hidden;
 
-    background-image: url('images/background.jpg'); /* Path to your background image */
+    background-image: url('images/background.jpg');
     background-size: cover;
-    background-position: center;
+    background-position: top;
     background-repeat: no-repeat;
-    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
     color: #FFFFFF;
 }
 
@@ -25,10 +24,7 @@
 }
 
 .panel-left {
-
-    background: rgb(105,7,11);
-    background: linear-gradient(0deg, rgba(105,7,11,1) 0%, rgba(76,6,15,1) 16%, rgba(4,2,24,0) 41%, rgba(0,0,0,0) 100%);
-
+    /* background: linear-gradient(0deg, rgba(75, 5, 5, 1) 0%, rgba(75, 5, 5, 1) 10%, rgba(75, 5, 5, 0) 45%, rgba(0, 0, 0, 0) 100%); */
 }
 
 .panel-center {
@@ -37,53 +33,61 @@
 }
 
 .panel-right {
-    background-color: #f0f0f033; /* Adjust as needed */
+    /* background: linear-gradient(0deg, rgba(190, 255, 19, 1) 0%, rgba(190, 181, 0, 1) 10%, rgba(7, 0, 53, 0) 45%, rgba(0, 0, 0, 0) 100%); */
+}
+/* Your existing styles */
+
+.panel-left {
+    /* background: linear-gradient(0deg, rgba(75,5,5,1) 0%, rgba(75,5,5,1) 10%, rgba(75,5,5,0) 45%, rgba(0,0,0,0) 100%); */
+}
+
+.panel-right {
+    /* background: linear-gradient(0deg, rgba(190,255,19,1) 0%, rgba(190,181,0,1) 10%, rgba(7,0,53,0) 45%, rgba(0,0,0,0) 100%); */
 }
 
 .player-card {
-        background-image: url('images/gods/war.png'); 
-
-        background-position: bottom; 
-        background-repeat: no-repeat;
+    /* Your existing styles */
+    background-position: bottom left;
+    background-repeat: no-repeat;
+    height: 100%; /* Ensure player card takes full height of the panel */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Align content to the bottom of the card */
 }
 
+/* Add styling for winner-panel and loser-panel if needed */
+
+/* 
+.player-card {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: bottom left;
+    background-repeat: no-repeat;
+} */
+
 .center-top {
-    /* padding: 20px; */
-    background-color: #dcdcdc00; /* Adjust as needed */
+    background-color: #dcdcdc00;
     text-align: center;
-    /* height: 20%; */
-    
 }
 
 .gods-text {
     font-family: 'Gabriola', cursive;
     color: white;
     font-size: 2in;
-    text-shadow: 4px 4px 4px #000; /* Adjust the shadow values as needed */
+    text-shadow: 4px 4px 4px #000;
 }
-
-/* .center-bottom {
-    flex: 1;
-    overflow-y: auto;
-} */
 
 #match-list {
     padding: 20px;
-    /* Add other styles for the match list as needed */
 }
 
 .match-banner {
-
     background-color: #333;
 }
 
-
-.panel-right {
-    background-color: #f0f0f033; /* Adjust as needed */
-}
-
 .footer {
-    background-color: #333; /* Adjust as needed */
+    background-color: #333;
     color: #fff;
     padding: 10px;
     text-align: center;
