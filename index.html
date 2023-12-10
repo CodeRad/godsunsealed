@@ -46,27 +46,33 @@
         const godThemes = {
             war: {
                 gradient: 'linear-gradient(0deg, rgba(75,5,5,1) 0%, rgba(75,5,5,1) 10%, rgba(75,5,5,0) 20%, rgba(0,0,0,0) 50%, rgba(75,5,5,1) 90%, rgba(75,5,5,1) 100%)',
-                image: 'images/gods/war.png'
+                image: 'images/gods/war.png',
+                name: 'Auros'
             },
             death: {
                 gradient: 'linear-gradient(0deg, rgba(50,50,50,1) 0%, rgba(50,50,50,1) 10%, rgba(0,50,50,0) 20%, rgba(0,0,0,0) 50%, rgba(50,50,50,1) 90%, rgba(50,50,50,1) 100%)',
-                image: 'images/gods/death.png'
+                image: 'images/gods/death.png',
+                name: 'Malissus'
             },
             deception: {
                 gradient: 'linear-gradient(0deg, rgba(100,15,255,1) 0%, rgba(100,15,255,1) 10%, rgba(100,15,255,0) 20%, rgba(0,0,0,0) 50%, (100,15,255,1) 90%, rgba(100,15,255,1) 100%)',
-                image: 'images/gods/deception.png'
+                image: 'images/gods/deception.png',
+                name: 'Ludia'
             },
             nature: {
                 gradient: 'linear-gradient(0deg, rgba(5,75,30,1) 0%, rgba(5,75,30,1) 10%, rgba(5,75,30,0) 20%, rgba(0,0,0,0) 50%, rgba(5,75,30,1) 90%, rgba(5,75,30,1) 100%)',
-                image: 'images/gods/nature.png'
+                image: 'images/gods/nature.png',
+                name: 'Aeona'
             },
             magic: {
                 gradient: 'linear-gradient(0deg, rgba(20,175,255,1) 0%, rgba(20,175,255,1) 11%, rgba(20,175,255,0) 20%, rgba(0,0,0,0) 50%, rgba(20,175,255,1) 90%, rgba(20,175,255,1) 100%)',
-                image: 'images/gods/magic.png'
+                image: 'images/gods/magic.png',
+                name: 'Elyrian'
             },
             light: {
                 gradient: 'linear-gradient(0deg, rgba(100,150,15,1) 0%, rgba(100,150,15,1) 11%, rgba(100,150,15,0) 20%, rgba(0,0,0,0) 50%, rgba(100,150,15,1) 90%, rgba(100,150,15,1) 100%)',
-                image: 'images/gods/light.png'
+                image: 'images/gods/light.png',
+                name: 'Lysander'
             }
         };
 
@@ -171,11 +177,7 @@
     </div>
 `;
 
-            // winnerPanel.innerHTML = `
-            //     <div class="player-card" style="background: ${godThemes[match.player_info[0].god].gradient} url('${godThemes[match.player_info[0].god].image}') bottom left no-repeat;">
-            //         <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})</p>
-            //     </div>
-            // `;
+
 
             // Loser Panel
             loserPanel.innerHTML = `

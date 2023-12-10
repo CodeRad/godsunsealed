@@ -6,7 +6,7 @@ body {
     overflow: hidden;
     background-color: #000;
     background-image: url('images/background.jpg');
-    background-size: cover%;
+    background-size: cover;
     background-position-x: center;
     background-position-y: 80%;
     background-repeat: no-repeat;
@@ -25,7 +25,7 @@ body {
 }
 
 .panel-left {
-    /* background: linear-gradient(0deg, rgba(75, 5, 5, 1) 0%, rgba(75, 5, 5, 1) 10%, rgba(75, 5, 5, 0) 45%, rgba(0, 0, 0, 0) 100%); */
+    width: 30%;
 }
 
 .panel-center {
@@ -35,17 +35,9 @@ body {
 }
 
 .panel-right {
-    /* background: linear-gradient(0deg, rgba(190, 255, 19, 1) 0%, rgba(190, 181, 0, 1) 10%, rgba(7, 0, 53, 0) 45%, rgba(0, 0, 0, 0) 100%); */
-}
-/* Your existing styles */
-
-.panel-left {
-    /* background: linear-gradient(0deg, rgba(75,5,5,1) 0%, rgba(75,5,5,1) 10%, rgba(75,5,5,0) 45%, rgba(0,0,0,0) 100%); */
+    width: 30%;
 }
 
-.panel-right {
-    /* background: linear-gradient(0deg, rgba(190,255,19,1) 0%, rgba(190,181,0,1) 10%, rgba(7,0,53,0) 45%, rgba(0,0,0,0) 100%); */
-}
 
 .player-card {
     /* Your existing styles */
