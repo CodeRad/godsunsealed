@@ -4,9 +4,10 @@
 body {
     margin: 0;
     overflow: hidden;
-
+    background-color: #000;
     background-image: url('images/background.jpg');
-    background-size: cover;
+    background-size: cover%;
+    background-position-x: center;
     background-position-y: 80%;
     background-repeat: no-repeat;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -29,6 +30,7 @@ body {
 
 .panel-center {
     display: flex;
+    width: 100%;
     flex-direction: column;
 }
 
