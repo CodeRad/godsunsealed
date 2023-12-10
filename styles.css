@@ -1,0 +1,27 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Designer', sans-serif;
+}
+
+#match-list {
+    margin: 20px;
+}
+
+.match-banner {
+    background-color: #333; /* Dark grey background color */
+    color: #ffd700; /* Gold text color */
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Black drop shadow */
+}
+
+/* Add more styles as needed */
+
+body {
+    background-image: url('images/background.jpg'); /* Path to your background image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
