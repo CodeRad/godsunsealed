@@ -77,14 +77,13 @@
 
                 matchInfoDiv.innerHTML += `
                     <div>
-                        <p>Match ID: ${match.game_id}</p>
                         <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})
-                        Loser: ${playerLostInfo.username} (Rank: ${playerLostRank.rank_level})</p>
-                        <p>God and God Power: ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})</p>
+                        Loser: ${playerLostInfo.username} (Rank: ${playerLostRank.rank_level})
+                        God and God Power: ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})</p>
                         <p>Start Time: ${matchStartTime}
-                        End Time: ${matchEndTime}</p>
-                        <p>Game Mode: ${match.game_mode === 7 ? 'Sealed' : 'Constructed'}</p>
-                        <p>Duration: ${Math.floor((match.end_time - match.start_time) / 60)} minutes
+                        End Time: ${matchEndTime}
+                        Game Mode: ${match.game_mode === 7 ? 'Sealed' : 'Constructed'}
+                        Duration: ${Math.floor((match.end_time - match.start_time) / 60)} minutes
                         Rounds: ${match.total_rounds}</p>
                         <hr>
                     </div>
