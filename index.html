@@ -18,21 +18,17 @@
         async function fetchMatchData() {
             try {
                 const endTime = Math.floor(Date.now() / 1000); // Current time in seconds
-                const startTime = endTime - 100; // time in seconds ago
+                const startTime = endTime - 60 * 3; // time in seconds ago
 
                 // Fetch match data
                 const matchResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=100`);
-
                 const matchData = await matchResponse.json();
 
                 matchData.records.sort((a, b) => b.end_time - a.end_time);
 
-                console.log(matchData);
+                //console.log(matchData.records.filter(match => match.game_mode === 7));
 
-
-
-
-                displayMatchInfo(matchData.records);
+                displayMatchInfo(matchData.records.filter(match => match.game_mode === 7));
             } catch (error) {
                 console.error('Error fetching match data:', error);
             }
