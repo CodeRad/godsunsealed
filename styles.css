@@ -1,27 +1,95 @@
-body {
+  /* * { outline: 1px solid rgb(97, 97, 97) }   */
+
+
+
+  body {
     margin: 0;
-    padding: 0;
-    font-family: 'Designer', sans-serif;
-}
+    overflow: hidden;
 
-#match-list {
-    margin: 20px;
-}
-
-.match-banner {
-    background-color: #333; /* Dark grey background color */
-    color: #ffd700; /* Gold text color */
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Black drop shadow */
-}
-
-/* Add more styles as needed */
-
-body {
     background-image: url('images/background.jpg'); /* Path to your background image */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    font-family:Verdana, Geneva, Tahoma, sans-serif;
+    color: #FFFFFF;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+}
+
+.panel {
+    flex: 1;
+    box-sizing: border-box;
+}
+
+.panel-left {
+
+    background: rgb(105,7,11);
+    background: linear-gradient(0deg, rgba(105,7,11,1) 0%, rgba(76,6,15,1) 16%, rgba(4,2,24,0) 41%, rgba(0,0,0,0) 100%);
+
+}
+
+.panel-center {
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-right {
+    background-color: #f0f0f033; /* Adjust as needed */
+}
+
+.player-card {
+        background-image: url('images/gods/war.png'); 
+
+        background-position: bottom; 
+        background-repeat: no-repeat;
+}
+
+.center-top {
+    /* padding: 20px; */
+    background-color: #dcdcdc00; /* Adjust as needed */
+    text-align: center;
+    /* height: 20%; */
+    
+}
+
+.gods-text {
+    font-family: 'Gabriola', cursive;
+    color: white;
+    font-size: 2in;
+    text-shadow: 4px 4px 4px #000; /* Adjust the shadow values as needed */
+}
+
+/* .center-bottom {
+    flex: 1;
+    overflow-y: auto;
+} */
+
+#match-list {
+    padding: 20px;
+    /* Add other styles for the match list as needed */
+}
+
+.match-banner {
+
+    background-color: #333;
+}
+
+
+.panel-right {
+    background-color: #f0f0f033; /* Adjust as needed */
+}
+
+.footer {
+    background-color: #333; /* Adjust as needed */
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
+
+.gods-text {
+    font-family: 'Gabriola', cursive;
+    font-weight: bold;
 }

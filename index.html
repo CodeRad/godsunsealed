@@ -5,14 +5,44 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gods Unsealed Matches</title>
     <link rel="stylesheet" href="styles.css">
-
+    <title>Gods Unsealed</title>
 </head>
 
 <body>
-    <h1>Gods Unsealed Matches</h1>
-    <div id="match-list"></div>
+    <div class="container">
+        <div class="panel panel-left">
+            <div class="player-card">warr</div>
+        </div>
+
+        <div class="panel panel-center">
+            <div class="center-top">
+                <h1><span class="gods-text">GODS</span><br>Unsealed</h1>
+                <button id="button1">Button 1</button>
+                <button id="button2">Button 2</button>
+            </div>
+
+            <div class="center-bottom">
+                <div id="match-list">
+                    <!-- Content for the scrollable match list -->
+                    <!-- Add dynamically generated match content here -->
+                </div>
+            </div>
+        </div>
+
+        <div class="panel panel-right">
+            <!-- Content for the right panel -->
+        </div>
+    </div>
+
+    <div class="footer">
+        test
+        <!-- Content for the footer -->
+    </div>
+
+
+
+
 
     <script>
 
@@ -78,7 +108,13 @@
                 const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
                 matchInfoDiv.innerHTML += `
-                    <div>
+                    <div class='match-banner'>
+                        <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})
+                        Loser: ${playerLostInfo.username} (Rank: ${playerLostRank.rank_level})
+                    </div>
+                `;
+/*                 matchInfoDiv.innerHTML += `
+                    <div class='match-banner'>
                         <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})
                         Loser: ${playerLostInfo.username} (Rank: ${playerLostRank.rank_level})
                         God and God Power: ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})</p>
@@ -89,7 +125,7 @@
                         Rounds: ${match.total_rounds}</p>
                         <hr>
                     </div>
-                `;
+                `; */
             }
         }
 
@@ -98,4 +134,4 @@
     </script>
 </body>
 
-</html>
+</html> 
