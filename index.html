@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gods Unsealed Matches</title>
+</head>
+
+<body>
+    <h1>Gods Unsealed Matches</h1>
+    <div id="match-info"></div>
+
+    <script>
+        // Replace 'YOUR_API_KEY' with your actual API key
+        const apiKey = 'YOUR_API_KEY';
+
+
+
+
+        // Function to fetch match data
+        async function fetchMatchData() {
+            try {
+                const endTime = Math.floor(Date.now() / 1000); // Current time in seconds
+                const startTime = endTime - 300; // 5 minutes ago
+
+                // Fetch match data
+                const matchResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&order_direction=desc`, {
+                    // headers: {
+                    //     'Authorization': `Bearer ${apiKey}`
+                    // }
+                });
+
+                const matchData = await matchResponse.json();
+                displayMatchInfo(matchData.records);
+            } catch (error) {
+                console.error('Error fetching match data:', error);
+            }
+        }
+
+        // Function to fetch user info
+        async function fetchUserInfo(userId) {
+            try {
+                // Fetch user info
+                const userInfoResponse = await fetch(`https://api.godsunchained.com/v0/properties?user_id=${userId}`, {
+                    // headers: {
+                    //     'Authorization': `Bearer ${apiKey}`
+                    // }
+                });
+
+                const userInfo = await userInfoResponse.json();
+                return userInfo.records[0];
+            } catch (error) {
+                console.error('Error fetching user info:', error);
+                return null;
+            }
+        }
+
+        // Function to fetch user rank
+        async function fetchUserRank(userId) {
+            try {
+                // Fetch user rank
+                const userRankResponse = await fetch(`https://api.godsunchained.com/v0/rank?user_id=${userId}`, {
+                    // headers: {
+                    //     'Authorization': `Bearer ${apiKey}`
+                    // }
+                });
+
+                const userRank = await userRankResponse.json();
+                return userRank.records[0];
+            } catch (error) {
+                console.error('Error fetching user rank:', error);
+                return null;
+            }
+        }
+
+        // Function to display match information
+        async function displayMatchInfo(matches) {
+            const matchInfoDiv = document.getElementById('match-info');
+
+            for (const match of matches) {
+                const playerWonInfo = await fetchUserInfo(match.player_won);
+                const playerLostInfo = await fetchUserInfo(match.player_lost);
+                const playerWonRank = await fetchUserRank(match.player_won);
+                const playerLostRank = await fetchUserRank(match.player_lost);
+
+                const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                matchInfoDiv.innerHTML += `
+                    <div>
+                        <p>Match ID: ${match.game_id}</p>
+                        <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.xp_level})</p>
+                        <p>Loser: ${playerLostInfo.username} (Rank: ${playerLostRank.xp_level})</p>
+                        <p>God and God Power: ${playerWonInfo.god} (${playerWonInfo.god_power}) vs ${playerLostInfo.god} (${playerLostInfo.god_power})</p>
+                        <p>Start Time: ${matchStartTime}</p>
+                        <p>End Time: ${matchEndTime}</p>
+                        <p>Game Mode: ${match.game_mode === 7 ? 'Sealed' : 'Constructed'}</p>
+                        <p>Duration: ${Math.floor((match.end_time - match.start_time) / 60)} minutes</p>
+                        <p>Rounds: ${match.total_rounds}</p>
+                        <hr>
+                    </div>
+                `;
+            }
+        }
+
+        // Fetch and display match data on page load
+        fetchMatchData();
+    </script>
+</body>
+
+</html>
