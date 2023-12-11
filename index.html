@@ -55,7 +55,7 @@
                 name: 'Malissus'
             },
             deception: {
-                gradient: 'linear-gradient(0deg, rgba(100,15,255,1) 0%, rgba(100,15,255,1) 10%, rgba(100,15,255,0) 20%, rgba(0,0,0,0) 50%, (100,15,255,1) 90%, rgba(100,15,255,1) 100%)',
+                gradient: 'linear-gradient(0deg, rgba(100,15,255,1) 0%, rgba(100,15,255,1) 10%, rgba(100,15,255,0) 20%, rgba(0,0,0,0) 50%, rgba(100,15,255,1) 90%, rgba(100,15,255,1) 100%)',
                 image: 'images/gods/deception.png',
                 name: 'Ludia'
             },
@@ -65,20 +65,38 @@
                 name: 'Aeona'
             },
             magic: {
-                gradient: 'linear-gradient(0deg, rgba(20,175,255,1) 0%, rgba(20,175,255,1) 11%, rgba(20,175,255,0) 20%, rgba(0,0,0,0) 50%, rgba(20,175,255,1) 90%, rgba(20,175,255,1) 100%)',
+                gradient: 'linear-gradient(0deg, rgba(20,175,255,1) 0%, rgba(20,175,255,1) 10%, rgba(20,175,255,0) 20%, rgba(0,0,0,0) 50%, rgba(20,175,255,1) 90%, rgba(20,175,255,1) 100%)',
                 image: 'images/gods/magic.png',
                 name: 'Elyrian'
             },
             light: {
-                gradient: 'linear-gradient(0deg, rgba(100,150,15,1) 0%, rgba(100,150,15,1) 11%, rgba(100,150,15,0) 20%, rgba(0,0,0,0) 50%, rgba(100,150,15,1) 90%, rgba(100,150,15,1) 100%)',
+                gradient: 'linear-gradient(0deg, rgba(100,150,15,1) 0%, rgba(100,150,15,1) 10%, rgba(100,150,15,0) 20%, rgba(0,0,0,0) 50%, rgba(100,150,15,1) 90%, rgba(100,150,15,1) 100%)',
                 image: 'images/gods/light.png',
                 name: 'Lysander'
             }
         };
 
         const godPowerNames = {
-            100001: 'God Power 1 Name',
-            100002: 'God Power 2 Name',
+            100106: 'Soul Burn',
+            102403: 'Create',
+            100111: 'Fourish',
+            100115: 'Summon Acolyte',
+            100113: 'Fury',
+            102403: 'Create',
+            100121: 'whatever the badger is called',
+            100119: 'Flip',
+            100127: 'Mage Bolt',
+            102403: 'Create',
+            102402: 'Fracture',
+            100117: 'Heal',            
+            100125: 'Theivery',
+            101307: 'whatever summons the raiders',
+            // 100106: 'death fire power',
+            // 102403: 'Create',
+            // 100106: 'death fire power',
+            // 102403: 'Create',
+            // 100106: 'death fire power',
+            // 102403: 'Create',
             // ... add other mappings
         };
 
@@ -94,7 +112,7 @@
                 matchData.records.sort((a, b) => b.end_time - a.end_time);
                 matchesData = matchData.records;
 
-                displayMatchInfo(matchesData.filter(match => match.game_mode === 7));
+                displayMatchList(matchesData.filter(match => match.game_mode === 7));
             } catch (error) {
                 console.error('Error fetching match data:', error);
             }
@@ -124,8 +142,10 @@
             }
         }
 
+        // Function to fetch user past matches
+
         // Function to display match information
-        async function displayMatchInfo(matches) {
+        async function displayMatchList(matches) {
             const matchInfoDiv = document.getElementById('match-list');
 
             for (const match of matches) {
@@ -138,7 +158,7 @@
                 const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
                 matchInfoDiv.innerHTML += `
-                    <div class='match-banner'>
+                    <div class='match-banner' onclick="handleMatchClick(${match})">
                         <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})
                         Loser: ${playerLostInfo.username} (Rank: ${playerLostRank.rank_level})<br>
                         ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
@@ -158,17 +178,23 @@
             const playerWonRank = await fetchUserRank(match.player_won);
             const playerLostRank = await fetchUserRank(match.player_lost);
 
-            // Winner Panel
-            // winnerPanel.innerHTML = `
-            //     <div class="player-card" style="background: ${godThemes[match.player_info[0].god].gradient}">
-            //         <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})</p>
-            //     </div>
-            // `;
-
-             // Winner Panel
+        // Winner Panel
              winnerPanel.innerHTML = `
-    <div class="player-card" style="position: relative; overflow: hidden;">
-        <div class="background-overlay" style="background: ${godThemes[match.player_info[0].god].gradient}; position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>
+    <div class="player-card" style="background: ${godThemes[match.player_info[0].god].gradient};"></div>
+        <div class="outcome winner">WINNER</div><br>
+        <div class="player-overview">
+            <div>
+            <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp" float="right" align="top"><br>
+            
+            ${godPowerNames[match.player_info[0].god_power]}
+            </div>
+            <div>
+
+                ${match.player_won}<br>
+                ${playerWonInfo.username}<br><br>
+                Current Sealed Status: Foo Wins, Bar Losses. (Incomplete)
+            </div>    
+
         <img src="${godThemes[match.player_info[0].god].image}" alt="${match.player_info[0].god}">
         <div style="position: absolute; bottom: 0; left: 60px; color: white;">
             <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})</p>
