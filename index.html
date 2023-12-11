@@ -95,6 +95,38 @@
             // 100106: 'drawdraw'
         };
 
+        // Function to create card elements
+        function createCardElement(cardId) {
+            const cardElement = document.createElement('img');
+            cardElement.src = `https://images.godsunchained.com/art2/250/${cardId}.webp`;
+            cardElement.alt = `Card ${cardId}`;
+            cardElement.className = 'card-icon';
+            return cardElement;
+        }
+
+        // Function to display card list
+        function displayCardList(cardIds) {
+            const cardListDiv = document.getElementById('card-list');
+
+            // Clear previous content
+            cardListDiv.innerHTML = '';
+
+            // Create and append card elements
+            for (const cardId of cardIds) {
+                const cardElement = createCardElement(cardId);
+                cardListDiv.appendChild(cardElement);
+            }
+        }
+
+        // Example card IDs (replace with actual card IDs from your match info)
+        const exampleCardIds = [400, 401, 402, 403, 404, 405, 406, 407, 408, 409,
+                                 410, 411, 412, 413, 414, 415, 416, 417, 418, 419,
+                                 420, 421, 422, 423, 424, 425, 426, 427, 428, 429];
+
+        // Display the example card list
+
+
+
         // Function to fetch match data
         async function fetchMatchData() {
             try {
@@ -220,9 +252,15 @@
                     </div>
                 </div>
             </div>
+
+            <div class="card-list" id="card-list"></div>
+
+
             <img src="${godThemes[match.player_info[0].god].image}" alt="${match.player_info[0].god}" position: absolute; style="margin-top: auto;">
         </div>
     `;
+        console.log(match.player_info[0].cards);
+    displayCardList(match.player_info[0].cards);
 
     // Loser Panel
     loserPanel.innerHTML = `
