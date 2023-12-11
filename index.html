@@ -95,28 +95,64 @@
             // 100106: 'drawdraw'
         };
 
-        // Function to create card elements
-        function createCardElement(cardId) {
-            const cardElement = document.createElement('img');
-            cardElement.src = `https://images.godsunchained.com/art2/250/${cardId}.webp`;
-            cardElement.title = `Card ${cardId}`;
-            cardElement.className = 'card-icon';
-            return cardElement;
-        }
+// Function to create card elements
+async function createCardElement(cardId) {
+    try {
+        const cardInfo = await fetchCardInfo(cardId);
+        const cardElement = document.createElement('img');
 
-        // Function to display card list
-        function displayCardList(cardIds) {
-            const cardListDiv = document.getElementById('card-list');
+        cardElement.src = `https://images.godsunchained.com/art2/250/${cardId}.webp`;
+        cardElement.title = `${cardInfo.name} (Mana: ${cardInfo.mana})`;
+        cardElement.className = 'card-icon';
 
-            // Clear previous content
-            cardListDiv.innerHTML = '';
+        return cardElement;
+    } catch (error) {
+        console.error('Error fetching card information:', error);
+        return null;
+    }
+}
 
-            // Create and append card elements
-            for (const cardId of cardIds) {
-                const cardElement = createCardElement(cardId);
-                cardListDiv.appendChild(cardElement);
-            }
-        }
+
+// Function to display card list
+async function displayCardList(cardIds) {
+    const cardListDiv = document.getElementById('card-list');
+
+    // Clear previous content
+    cardListDiv.innerHTML = '';
+
+    // Fetch card information for all cards
+    const cardInfoArray = await Promise.all(cardIds.map(fetchCardInfo));
+
+    // Sort cards by mana cost
+    cardInfoArray.sort((a, b) => a.mana - b.mana);
+
+    // Create and append card elements
+    for (const cardInfo of cardInfoArray) {
+        const cardElement = document.createElement('img');
+        cardElement.src = `https://images.godsunchained.com/art2/250/${cardInfo.id}.webp`;
+        cardElement.title = `${cardInfo.name} - ${cardInfo.mana} mana`;
+        cardElement.className = 'card-icon';
+
+        cardListDiv.appendChild(cardElement);
+    }
+}
+
+
+
+// Function to fetch card data
+async function fetchCardInfo(cardId) {
+    try {
+        const response = await fetch(`https://api.godsunchained.com/v0/proto/${cardId}`);
+        const cardInfo = await response.json();
+        
+        console.log(`Card Name: ${cardInfo.name}, Mana: ${cardInfo.mana}`);
+        
+        return cardInfo;
+    } catch (error) {
+        console.error('Error fetching card info:', error);
+        return null;
+    }
+}
 
 // Function to fetch match data
 async function fetchMatchData() {
@@ -136,6 +172,7 @@ async function fetchMatchData() {
         console.error('Error fetching match data:', error);
     }
 }
+
 
 
         // async function fetchMatchDataById(matchId) {
@@ -193,7 +230,7 @@ async function fetchMatchData() {
                 const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-                console.log(match.game_id);
+                // console.log(match.game_id);
 
                 matchInfoDiv.innerHTML += `
                     <div class='match-banner'>
