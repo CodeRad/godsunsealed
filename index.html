@@ -34,8 +34,7 @@
     </div>
 
     <div class="footer">
-        test
-        <!-- Content for the footer -->
+        (C)opyright Code Rad 2023. All images property of Gods Unchained.
     </div>
 
     <script>
@@ -78,26 +77,22 @@
 
         const godPowerNames = {
             100106: 'Soul Burn',
-            102403: 'Create',
+            102405: 'Create',
             100111: 'Fourish',
             100115: 'Summon Acolyte',
-            100113: 'Fury',
-            102403: 'Create',
-            100121: 'whatever the badger is called',
+            100113: 'Enrage',
+            100121: 'badgerbadger',
             100119: 'Flip',
             100127: 'Mage Bolt',
-            102403: 'Create',
             102402: 'Fracture',
             100117: 'Heal',            
             100125: 'Theivery',
-            101307: 'whatever summons the raiders',
-            // 100106: 'death fire power',
-            // 102403: 'Create',
-            // 100106: 'death fire power',
-            // 102403: 'Create',
-            // 100106: 'death fire power',
-            // 102403: 'Create',
-            // ... add other mappings
+            101307: 'Raid',
+            100126: 'forseeforsee',
+            102406: 'igniteignite',
+            102401: 'Radiance',
+            // 102403: 'hiddenhidden',
+            // 100106: 'drawdraw'
         };
 
         // Function to fetch match data
@@ -117,6 +112,22 @@
                 console.error('Error fetching match data:', error);
             }
         }
+
+        // async function fetchMatchDataById(matchId) {
+        //     console.log("hello "+ matchId);
+        //     try {
+
+
+        //         const matchResponse = await fetch(`https://game-legacy.prod.prod.godsunchained.com/match/${matchId}`);
+        //         const matchData = await matchResponse.json();
+        //         console.log('can we make it here');
+        //         return matchData;
+        //     } catch (error) {
+        //         console.error('Error fetching user info:', error);
+        //         return null;
+        //     }
+        // }
+
 
         // Function to fetch user info
         async function fetchUserInfo(userId) {
@@ -143,7 +154,7 @@
         }
 
         // Function to fetch user past matches
-
+        
         // Function to display match information
         async function displayMatchList(matches) {
             const matchInfoDiv = document.getElementById('match-list');
@@ -157,8 +168,10 @@
                 const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                 const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
+                console.log(match.game_id);
+
                 matchInfoDiv.innerHTML += `
-                    <div class='match-banner' onclick="handleMatchClick(${match})">
+                    <div class='match-banner'>
                         <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})
                         Loser: ${playerLostInfo.username} (Rank: ${playerLostRank.rank_level})<br>
                         ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
@@ -169,54 +182,70 @@
         }
 
         // Function to handle match click event and populate panels
-        async function handleMatchClick(match) {
-            const winnerPanel = document.getElementById('winner-card');
-            const loserPanel = document.getElementById('loser-card');
+    async function handleMatchClick(match) {
+    //     console.log(matchId);
+    // const match = await fetchMatchDataById(matchId);
+    // if (!match) {
+    //     console.error('Match not found');
+    //     return;
+    // }
+    // console.log('we made it this far' + match);
 
-            const playerWonInfo = await fetchUserInfo(match.player_won);
-            const playerLostInfo = await fetchUserInfo(match.player_lost);
-            const playerWonRank = await fetchUserRank(match.player_won);
-            const playerLostRank = await fetchUserRank(match.player_lost);
+    const winnerPanel = document.getElementById('winner-card');
+    const loserPanel = document.getElementById('loser-card');
 
-        // Winner Panel
-             winnerPanel.innerHTML = `
-    <div class="player-card" style="background: ${godThemes[match.player_info[0].god].gradient};"></div>
-        <div class="outcome winner">WINNER</div><br>
-        <div class="player-overview">
-            <div>
-            <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp" float="right" align="top"><br>
-            
-            ${godPowerNames[match.player_info[0].god_power]}
+    // const playerWon = match.player_info.find(player => player.user_id === match.player_won);
+    // const playerLost = match.player_info.find(player => player.user_id === match.player_lost);
+
+    const playerWonInfo = await fetchUserInfo(match.player_won);
+    const playerLostInfo = await fetchUserInfo(match.player_lost);
+    const playerWonRank = await fetchUserRank(match.player_won);
+    const playerLostRank = await fetchUserRank(match.player_lost);
+
+    // Winner Panel
+    winnerPanel.innerHTML = `
+        <div class="player-card" style="background: ${godThemes[match.player_info[0].god].gradient};">
+            <div class="outcome winner">WINNER</div><br>
+            <div class="player-overview">
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="margin-right: 20px; text-align: center;">
+                        <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp" style="align: top;"><br>
+                        <p class="player-info-field">${godPowerNames[match.player_info[0].god_power]}</p>
+                    </div>
+                    <div>
+                        <p class="player-info-field">${match.player_won}</p>
+                        <p class="player-info-field">${playerWonInfo.username}</p>
+                        <p class="player-info-field">Contructed Rank: ${playerWonRank.rank_level}</p>
+                        <p class="player-info-field">Status: Foo Wins, Bar Losses. (Incomplete)</p>
+                    </div>
+                </div>
             </div>
-            <div>
-
-                ${match.player_won}<br>
-                ${playerWonInfo.username}<br><br>
-                Current Sealed Status: Foo Wins, Bar Losses. (Incomplete)
-            </div>    
-
-        <img src="${godThemes[match.player_info[0].god].image}" alt="${match.player_info[0].god}">
-        <div style="position: absolute; bottom: 0; left: 60px; color: white;">
-            <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})</p>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+            <img src="${godThemes[match.player_info[0].god].image}" alt="${match.player_info[0].god}" position: absolute; style="margin-top: auto;">
         </div>
-    </div>
-`;
+    `;
 
-
-
-            // Loser Panel
-            loserPanel.innerHTML = `
-            <div class="player-card" style="position: relative; overflow: hidden;">
-        <div class="background-overlay" style="background: ${godThemes[match.player_info[1].god].gradient}; position: absolute; top: 0; right: 0; bottom: 0; left: 0;"></div>
-        <img src="${godThemes[match.player_info[1].god].image}" alt="${match.player_info[1].god}">
-        <div style="position: absolute; bottom: 0; left: 60px; color: white;">
-            <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})</p>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    // Loser Panel
+    loserPanel.innerHTML = `
+        <div class="player-card" style="background: ${godThemes[match.player_info[1].god].gradient};">
+            <div class="outcome loser">LOSER</div><br>
+            <div class="player-overview">
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="margin-right: 20px; text-align: center;">
+                        <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp" style="align: top;"><br>
+                        <p>${godPowerNames[match.player_info[1].god_power]}</p>
+                    </div>
+                    <div>
+                        ${match.player_won}<br>
+                        ${playerWonInfo.username}<br><br>
+                        Contructed Rank: ${playerWonRank.rank_level}<br>
+                        Status: Foo Wins, Bar Losses. (Incomplete)
+                    </div>
+                </div>
+            </div>
+            <img src="${godThemes[match.player_info[1].god].image}" alt="${match.player_info[1].god}" position: absolute; style="margin-top: auto;">
         </div>
-    </div>
-            `;
-        }
+    `;
+}
 
         // Attach click event to the parent container
         const matchListDiv = document.getElementById('match-list');
@@ -227,8 +256,8 @@
                 handleMatchClick(matchesData[index]);
             }
         });
-
-        // Fetch and display match data on page load
+        
+// Fetch and display match data on page load
         fetchMatchData();
     </script>
 </body>

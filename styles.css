@@ -1,4 +1,4 @@
-  /* * { outline: 1px solid rgb(97, 97, 97) }     */
+  * { outline: 1px solid rgb(97, 97, 97) }    
 
 
 body {
@@ -12,6 +12,7 @@ body {
     background-repeat: no-repeat;
     font-family: Verdana, Geneva, Tahoma, sans-serif;
     color: #FFFFFF;
+    padding: 20px;
 }
 
 .container {
@@ -42,11 +43,11 @@ body {
 .player-card {
     background-position: bottom left;
     background-repeat: no-repeat;
-    height: 100%;
+    height: 96vh;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding: 20px;
+    /* padding: 20px; */
     border-radius: 20px;
 }
 
@@ -87,12 +88,23 @@ body {
     -3px  0   0 red;
 }
 
+.player-overview {
+
+    padding: 30px;
+
+}
+
+.player-info-field {
+    background-color: #00000044;
+    width: 100%;
+}
+
 .godpower-card {
-    height: 100px;
-    width: 100px; /* Set width to match the height for a perfect circle */
-    border-radius: 50%; /* Make it a circle with max rounded corners */
-    border: 3px solid black; /* 3px black border */
-    overflow: hidden; /* Ensure content doesn't overflow */
+    height: 120px;
+    width: 120px;
+    border-radius: 50%;
+    border: 3px solid black;
+    overflow: hidden;
 }
 
 
@@ -124,7 +136,11 @@ body {
 }
 
 .footer {
-    background-color: #333;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* background-color: #333; */
     color: #fff;
     padding: 10px;
     text-align: center;
