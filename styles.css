@@ -121,13 +121,6 @@ body {
     /* border: 3px solid black; */
     overflow: hidden;
     margin: 2px;
-}
-
-/* //////////////////////////////////////// */
-.card-icon {
-    margin: 5px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
     transition: transform 0.2s;
     position: relative;
     overflow: hidden;
