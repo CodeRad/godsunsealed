@@ -39,7 +39,6 @@ body {
     width: 30%;
 }
 
-
 .player-card {
     background-position: bottom left;
     background-repeat: no-repeat;
@@ -118,7 +117,6 @@ body {
     height: 50x;
     width: 50px;
     border-radius: 25%;
-    /* border: 3px solid black; */
     overflow: hidden;
     margin: 2px;
     transition: transform 0.2s;
@@ -136,9 +134,6 @@ body {
     background-color: #333;
     color: #fff;
 }
-
-/* //////////////////////////////////////// */
-
 
 .center-top {
     background-color: #dcdcdc00;
@@ -159,9 +154,6 @@ body {
 .match-banner {
     background-color: #333;
 }
-
-
-
 
 .footer {
     position: fixed;
