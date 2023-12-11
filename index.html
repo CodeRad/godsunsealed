@@ -96,24 +96,6 @@
             101309: 'Sacrifice'
         };
 
-// Function to create card elements
-async function createCardElement(cardId) {
-    try {
-        const cardInfo = await fetchCardInfo(cardId);
-        const cardElement = document.createElement('img');
-
-        cardElement.src = `https://images.godsunchained.com/art2/250/${cardId}.webp`;
-        cardElement.title = `(${cardInfo.mana}) ${cardInfo.name}`;
-        cardElement.className = 'card-icon';
-
-        return cardElement;
-    } catch (error) {
-        console.error('Error fetching card information:', error);
-        return null;
-    }
-}
-
-
 // Function to display card list
 async function displayCardList(cardIds) {
     const cardListDiv = document.getElementById('card-list');
@@ -131,7 +113,7 @@ async function displayCardList(cardIds) {
     for (const cardInfo of cardInfoArray) {
         const cardElement = document.createElement('img');
         cardElement.src = `https://images.godsunchained.com/art2/250/${cardInfo.id}.webp`;
-        cardElement.title = `${cardInfo.name} - ${cardInfo.mana} mana`;
+        cardElement.title = `(${cardInfo.mana}) ${cardInfo.name}`;
         cardElement.className = 'card-icon';
 
         cardListDiv.appendChild(cardElement);
