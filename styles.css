@@ -123,6 +123,29 @@ body {
     margin: 2px;
 }
 
+/* //////////////////////////////////////// */
+.card-icon {
+    margin: 5px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: transform 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-icon img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.card-icon:hover {
+    transform: scale(1.1);
+    background-color: #333;
+    color: #fff;
+}
+
+/* //////////////////////////////////////// */
+
 
 .center-top {
     background-color: #dcdcdc00;
