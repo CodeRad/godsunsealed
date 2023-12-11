@@ -1,4 +1,4 @@
-  * { outline: 1px solid rgb(97, 97, 97) }    
+  /* * { outline: 1px solid rgb(97, 97, 97) }     */
 
 
 body {
@@ -49,20 +49,19 @@ body {
     justify-content: flex-start;
     /* padding: 20px; */
     border-radius: 20px;
+    margin: 20px;
 }
 
 
 .outcome {
 
-    font-size: 72pt;
+    font-size: 60pt;
     font-weight: bolder;
     text-align: center;
 }
 
 .outcome.winner {
     color:gold;
-    font-size: 72pt;
-    font-weight: bolder;
     text-shadow:
     -3px -3px 0 black,
      0   -3px 0 black,
@@ -107,6 +106,23 @@ body {
     overflow: hidden;
 }
 
+.card-list-container {
+    
+}
+
+.card-list {
+    width: 100%;
+}
+
+.card-icon {
+    height: 50x;
+    width: 50px;
+    border-radius: 25%;
+    /* border: 3px solid black; */
+    overflow: hidden;
+    margin: 2px;
+}
+
 
 .center-top {
     background-color: #dcdcdc00;
@@ -130,10 +146,6 @@ body {
 
 
 
-.gods-text {
-    font-family: 'Gabriola', cursive;
-    font-weight: bold;
-}
 
 .footer {
     position: fixed;
