@@ -103,7 +103,7 @@ async function createCardElement(cardId) {
         const cardElement = document.createElement('img');
 
         cardElement.src = `https://images.godsunchained.com/art2/250/${cardId}.webp`;
-        cardElement.title = `${cardInfo.name} (Mana: ${cardInfo.mana})`;
+        cardElement.title = `(${cardInfo.mana}) ${cardInfo.name}`;
         cardElement.className = 'card-icon';
 
         return cardElement;
