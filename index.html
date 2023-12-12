@@ -75,7 +75,6 @@
                 name: 'Lysander'
             }
         };
-
         const godPowerNames = {
             100106: 'Soul Burn',
             102405: 'Create',
@@ -96,8 +95,8 @@
             101309: 'Sacrifice'
         };
 
-// Function to display card list
-async function displayCardList(cardIds, containerId) {
+        // Function to display card list
+        async function displayCardList(cardIds, containerId) {
     const cardListDiv = document.getElementById(containerId);
 
     // Clear previous content
@@ -120,10 +119,8 @@ async function displayCardList(cardIds, containerId) {
     }
 }
 
-
-
-// Function to fetch card data
-async function fetchCardInfo(cardId) {
+        // Function to fetch card data
+        async function fetchCardInfo(cardId) {
     try {
         const response = await fetch(`https://api.godsunchained.com/v0/proto/${cardId}`);
         const cardInfo = await response.json();
@@ -137,9 +134,8 @@ async function fetchCardInfo(cardId) {
     }
 }
 
-
-// Function to fetch match data
-async function fetchMatchData() {
+        // Function to fetch match data
+        async function fetchMatchData() {
     try {
         const itemsPerPage = 100; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
@@ -178,24 +174,6 @@ async function fetchMatchData() {
     }
 }
 
-
-
-        // async function fetchMatchDataById(matchId) {
-        //     console.log("hello "+ matchId);
-        //     try {
-
-
-        //         const matchResponse = await fetch(`https://game-legacy.prod.prod.godsunchained.com/match/${matchId}`);
-        //         const matchData = await matchResponse.json();
-        //         console.log('can we make it here');
-        //         return matchData;
-        //     } catch (error) {
-        //         console.error('Error fetching user info:', error);
-        //         return null;
-        //     }
-        // }
-
-
         // Function to fetch user info
         async function fetchUserInfo(userId) {
             try {
@@ -219,6 +197,25 @@ async function fetchMatchData() {
                 return null;
             }
         }
+
+        // Function to create a user ID icon
+function createUserIdIcon(userId) {
+    const userIdDigits = userId.toString().split('').map(Number);
+
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'user-id-icon';
+
+    for (const digit of userIdDigits) {
+        const digitDiv = document.createElement('div');
+        digitDiv.className = 'user-id-digit';
+        digitDiv.textContent = digit;
+        iconContainer.appendChild(digitDiv);
+    }
+
+    return iconContainer;
+}
+
+
 
         // Function to fetch user past matches
         
@@ -250,19 +247,12 @@ async function fetchMatchData() {
 
         // Function to handle match click event and populate panels
     async function handleMatchClick(match) {
-    //     console.log(matchId);
-    // const match = await fetchMatchDataById(matchId);
-    // if (!match) {
-    //     console.error('Match not found');
-    //     return;
-    // }
-    // console.log('we made it this far' + match);
+
 
     const winnerPanel = document.getElementById('winner-card');
     const loserPanel = document.getElementById('loser-card');
 
-    // const playerWon = match.player_info.find(player => player.user_id === match.player_won);
-    // const playerLost = match.player_info.find(player => player.user_id === match.player_lost);
+
 
     const playerWonInfo = await fetchUserInfo(match.player_won);
     const playerLostInfo = await fetchUserInfo(match.player_lost);

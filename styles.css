@@ -74,16 +74,16 @@ body {
 }
 
 .outcome.loser {
-    color:black;
+    color:rgb(214, 55, 55);
     text-shadow:
-    -3px -3px 0 red,
-     0   -3px 0 red,
-     3px -3px 0 red,
-     3px  0   0 red,
-     3px  3px 0 red,
-     0    3px 0 red,
-    -3px  3px 0 red,
-    -3px  0   0 red;
+    -3px -3px 0 black,
+     0   -3px 0 black,
+     3px -3px 0 black,
+     3px  0   0 black,
+     3px  3px 0 black,
+     0    3px 0 black,
+    -3px  3px 0 black,
+    -3px  0   0 black;
 }
 
 .player-overview {
@@ -123,12 +123,13 @@ body {
 .card-icon {
     height: 50px;
     width: 50px;
-    border-radius: 25%;
+    border-radius: 50%;
     overflow: hidden;
     margin: 2px;
     transition: transform 0.2s;
     position: relative;
     overflow: hidden;
+    z-index: 1;
 }
 
 /* .card-icon img {
@@ -137,9 +138,10 @@ body {
 } */
 
 .card-icon:hover {
-    transform: scale(1.1);
+    transform: scale(2.5);
     background-color: #333;
     color: #fff;
+    z-index: 2;
 }
 
 
