@@ -203,71 +203,48 @@ async function displayMatchList(matches) {
     }
 }
 
+// Function to display player information and card list
+async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
+    const panel = document.getElementById(panelId);
+    const godTheme = godThemes[playerMatchInfo.god];
+    const outcomeClass = isWinner ? 'winner' : 'loser';
+    const outcomeText = isWinner ? 'WINNER' : 'LOSER';
+
+    const playerInfo = await fetchUserInfo(playerMatchInfo.user_id);
+    const playerRank = await fetchUserRank(playerMatchInfo.user_id);
+
+    panel.innerHTML = `
+        <div class="player-card" style="background: ${godTheme.gradient};">
+            <div class="outcome ${outcomeClass}">${outcomeText}</div><br>
+            <div class="player-overview">
+                <div style="display: flex; align-items: flex-start;">
+                    <div style="margin-right: 20px; text-align: center;">
+                        <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp" style="align: top;"><br>
+                        <p class="player-info-field">${godPowerNames[playerMatchInfo.god_power]}</p>
+                    </div>
+                    <div>
+                        <p class="player-info-field">${playerInfo.user_id}</p>
+                        <p class="player-info-field">${playerInfo.username}</p>
+                        <p class="player-info-field">Constructed Rank: ${playerRank.rank_level}</p>
+                        <p class="player-info-field">Status: Foo Wins, Bar Losses.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
+            <img src="${godTheme.image}" alt="${playerMatchInfo.god}" style="margin-top: auto;">
+        </div>
+    `;
+
+    displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
+}
+
+
 // Function to handle match click event and populate panels
 async function handleMatchClick(match) {
 
+    displayPlayerPanel('winner-card', match.player_info[0], true);
+    displayPlayerPanel('loser-card', match.player_info[1], false);
 
-    const winnerPanel = document.getElementById('winner-card');
-    const loserPanel = document.getElementById('loser-card');
-
-
-
-    const playerWonInfo = await fetchUserInfo(match.player_won);
-    const playerLostInfo = await fetchUserInfo(match.player_lost);
-    const playerWonRank = await fetchUserRank(match.player_won);
-    const playerLostRank = await fetchUserRank(match.player_lost);
-
-    // Winner Panel
-    winnerPanel.innerHTML = `
-<div class="player-card" style="background: ${godThemes[match.player_info[0].god].gradient};">
-    <div class="outcome winner">WINNER</div><br>
-    <div class="player-overview">
-        <div style="display: flex; align-items: flex-start;">
-            <div style="margin-right: 20px; text-align: center;">
-                <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp" style="align: top;"><br>
-                <p class="player-info-field">${godPowerNames[match.player_info[0].god_power]}</p>
-            </div>
-            <div>
-                <p class="player-info-field">${match.player_won}</p>
-                <p class="player-info-field">${playerWonInfo.username}</p>
-                <p class="player-info-field">Contructed Rank: ${playerWonRank.rank_level}</p>
-                <p class="player-info-field">Status: Foo Wins, Bar Losses. (Incomplete)</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="card-list winner-card-list" id="winner-card-list"></div>
-
-
-    <img src="${godThemes[match.player_info[0].god].image}" alt="${match.player_info[0].god}" position: absolute; style="margin-top: auto;">
-</div>
-`;
-
-    displayCardList(match.player_info[0].cards, 'winner-card-list');
-
-    // Loser Panel
-    loserPanel.innerHTML = `
-<div class="player-card" style="background: ${godThemes[match.player_info[1].god].gradient};">
-<div class="outcome loser">LOSER</div><br>
-<div class="player-overview">
-    <div style="display: flex; align-items: flex-start;">
-        <div style="margin-right: 20px; text-align: center;">
-            <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp" style="align: top;"><br>
-            <p class="player-info-field">${godPowerNames[match.player_info[1].god_power]}</p>
-        </div>
-        <div>
-            <p class="player-info-field">${match.player_info[1].user_id}</p>
-            <p class="player-info-field">${playerLostInfo.username}</p>
-            <p class="player-info-field">Constructed Rank: ${playerLostRank.rank_level}</p>
-            <p class="player-info-field">Status: Foo Wins, Bar Losses. (Incomplete)</p>
-        </div>
-    </div>
-</div>
-<div class="card-list loser-card-list" id="loser-card-list"></div>
-<img src="${godThemes[match.player_info[1].god].image}" alt="${match.player_info[1].god}" style="margin-top: auto;">
-</div>
-`;
-    displayCardList(match.player_info[1].cards, 'loser-card-list');
 
 }
 
