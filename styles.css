@@ -10,7 +10,8 @@ body {
     background-position-x: center;
     background-position-y: 80%;
     background-repeat: no-repeat;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    /* font-family: Verdana, Geneva, Tahoma, sans-serif; */
+    font-family: 'Lilita One', sans-serif;
     color: #FFFFFF;
     padding: 20px;
 }
@@ -49,8 +50,8 @@ body {
     /* padding: 20px; */
     border-radius: 20px;
     margin: 20px;
+    position: relative;
 }
-
 
 .outcome {
 
@@ -102,7 +103,7 @@ body {
     height: 120px;
     width: 120px;
     border-radius: 50%;
-    border: 3px solid black;
+    /* border: 3px solid black; */
     overflow: hidden;
 }
 

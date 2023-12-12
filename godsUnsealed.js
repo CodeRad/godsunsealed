@@ -99,7 +99,7 @@ async function fetchMatchData() {
     try {
         const itemsPerPage = 100; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
-        const startTime = endTime - 60 * 30;
+        const startTime = endTime - 60 * 5; //5 minutes
 
         // Fetch the first page to get total records
         const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}`);
@@ -175,7 +175,83 @@ function createUserIdIcon(userId) {
     return iconContainer;
 }
 
-// Function to fetch user past matches
+// F// Function to fetch matches by player ID
+async function fetchMatchesByPlayerId(playerId) {
+    try {
+        const itemsPerPage = 100; // Specify the desired items per page
+        const endTime = Math.floor(Date.now() / 1000);
+        const startTime = endTime - 60 * 30;
+
+        // Fetch the first page to get total records for wins
+        const winsResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${playerId}`);
+        const winsData = await winsResponse.json();
+
+        // Fetch the first page to get total records for losses
+        const lossesResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${playerId}`);
+        const lossesData = await lossesResponse.json();
+
+        const totalWins = winsData.total;
+        const totalLosses = lossesData.total;
+
+        console.log(`Total wins for player ${playerId}:`, totalWins);
+        console.log(`Total losses for player ${playerId}:`, totalLosses);
+
+        // Calculate the number of pages needed for wins
+        const totalPagesWins = Math.ceil(totalWins / itemsPerPage);
+
+        // Fetch data for each page and concatenate the results for wins
+        let allWins = [];
+        for (let page = 1; page <= totalPagesWins; page++) {
+            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${playerId}&page=${page}`);
+            const pageData = await pageResponse.json();
+            allWins = allWins.concat(pageData.records);
+        }
+
+        // Calculate the number of pages needed for losses
+        const totalPagesLosses = Math.ceil(totalLosses / itemsPerPage);
+
+        // Fetch data for each page and concatenate the results for losses
+        let allLosses = [];
+        for (let page = 1; page <= totalPagesLosses; page++) {
+            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${playerId}&page=${page}`);
+            const pageData = await pageResponse.json();
+            allLosses = allLosses.concat(pageData.records);
+        }
+
+        // Combine wins and losses
+        const allMatches = allWins.concat(allLosses);
+
+        // Filter matches for game mode 7
+        const gameMode7Matches = allMatches.filter(match => match.game_mode === 7);
+
+        console.log(`Game mode 7 matches for player ${playerId}:`, gameMode7Matches.length);
+
+        // Calculate win percentage
+        const winCount = gameMode7Matches.filter(match => match.player_won === playerId).length;
+        const lossCount = gameMode7Matches.length - winCount;
+        const winPercentage = (winCount / gameMode7Matches.length) * 100;
+
+        console.log(`Wins: ${winCount}`);
+        console.log(`Losses: ${lossCount}`);
+        console.log(`Win Percentage: ${winPercentage.toFixed(2)}%`);
+
+        return {
+            totalWins,
+            totalLosses,
+            gameMode7Matches,
+            winCount,
+            lossCount,
+            winPercentage
+        };
+    } catch (error) {
+        console.error('Error fetching match data:', error);
+        return null;
+    }
+}
+
+
+
+
 
 // Function to display match information
 async function displayMatchList(matches) {
@@ -186,6 +262,8 @@ async function displayMatchList(matches) {
         const playerLostInfo = await fetchUserInfo(match.player_lost);
         const playerWonRank = await fetchUserRank(match.player_won);
         const playerLostRank = await fetchUserRank(match.player_lost);
+        const playerWonWinLoss = await fetchMatchesByPlayerId(match.player_won);
+        // const playerLostWinLoss = await fetchWinLossRecord(match.player_lost);        
 
         const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -194,8 +272,8 @@ async function displayMatchList(matches) {
 
         matchInfoDiv.innerHTML += `
             <div class='match-banner'>
-                <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})
-                Loser: ${playerLostInfo.username} (Rank: ${playerLostRank.rank_level})<br>
+                <p>Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) 
+                Loser: ${playerLostInfo.user_id} (Rank: ${playerLostRank.rank_level})<br>
                 ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
                 End Time: ${matchEndTime}</p>
             </div>
@@ -215,6 +293,7 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
 
     panel.innerHTML = `
         <div class="player-card" style="background: ${godTheme.gradient};">
+
             <div class="outcome ${outcomeClass}">${outcomeText}</div><br>
             <div class="player-overview">
                 <div style="display: flex; align-items: flex-start;">
