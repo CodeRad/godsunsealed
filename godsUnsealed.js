@@ -119,7 +119,7 @@ async function fetchMatchData() {
             allMatches = allMatches.concat(pageData.records);
         }
 
-        // Filter and sort the matches
+        // Filter by Sealed only and Sort by most recent
         const filteredMatches = allMatches.filter(match => match.game_mode === 7);
         filteredMatches.sort((a, b) => b.end_time - a.end_time);
 
@@ -129,6 +129,7 @@ async function fetchMatchData() {
         matchesData = filteredMatches;
 
         displayMatchList(matchesData);
+
     } catch (error) {
         console.error('Error fetching match data:', error);
     }
@@ -175,10 +176,10 @@ function createUserIdIcon(userId) {
     return iconContainer;
 }
 
-// F// Function to fetch matches by player ID
+// Function to fetch matches by player ID
 async function fetchMatchesByPlayerId(playerId) {
     try {
-        const itemsPerPage = 100; // Specify the desired items per page
+        const itemsPerPage = 100;
         const endTime = Math.floor(Date.now() / 1000);
         const startTime = endTime - 60 * 60 * 24 * 3;
 
@@ -221,28 +222,14 @@ async function fetchMatchesByPlayerId(playerId) {
         // Combine wins and losses
         const allMatches = allWins.concat(allLosses);
 
-        // Filter matches for game mode 7
+        // Filter by Sealed only and Sort by most recent
         const filteredMatches = allMatches.filter(match => match.game_mode === 7);
+        filteredMatches.sort((a, b) => b.end_time - a.end_time);
 
         console.log(`Game mode 7 matches for player ${playerId}:`, filteredMatches.length);
 
-        // Calculate win percentage
-        const winCount = filteredMatches.filter(match => match.player_won === playerId).length;
-        const lossCount = filteredMatches.length - winCount;
-        const winPercentage = (winCount / filteredMatches.length) * 100;
+        return filteredMatches;
 
-        console.log(`Wins: ${winCount}`);
-        console.log(`Losses: ${lossCount}`);
-        console.log(`Win Percentage: ${winPercentage.toFixed(2)}%`);
-
-        return {
-            totalWins,
-            totalLosses,
-            filteredMatches,
-            winCount,
-            lossCount,
-            winPercentage
-        };
     } catch (error) {
         console.error('Error fetching match data:', error);
         return null;
@@ -251,7 +238,18 @@ async function fetchMatchesByPlayerId(playerId) {
 
 async function getPlayerMatchStats(playerId) {
 
-    // call fetchMatchesByPlayerId
+    const matches = await fetchMatchesByPlayerId(playerId);
+    const winCount = matches.filter(match => match.player_won === playerId).length;
+    const lossCount = matches.length - winCount;
+    const winPercentage = (winCount / matches.length) * 100;
+
+    console.log(`${playerId} Wins: ${winCount} Losses: ${lossCount} Win Percentage: ${winPercentage.toFixed(2)}%`);
+
+    return {
+        winCount,
+        lossCount,
+        winPercentage
+    };
 }
 
 
@@ -266,7 +264,7 @@ async function displayMatchList(matches) {
         const playerLostInfo = await fetchUserInfo(match.player_lost);
         const playerWonRank = await fetchUserRank(match.player_won);
         const playerLostRank = await fetchUserRank(match.player_lost);
-        const playerWonMatchInfo = await fetchMatchesByPlayerId(match.player_won);
+        const playerWonMatchInfo = await getPlayerMatchStats(match.player_won);
 
 
         // const playerLostWinLoss = await fetchWinLossRecord(match.player_lost);        
@@ -278,7 +276,7 @@ async function displayMatchList(matches) {
 
         matchInfoDiv.innerHTML += `
             <div class='match-banner'>
-                <p>Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) WL ${playerWonMatchInfo.winPercentage.toFixed(0)}
+                <p>Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) WL ${playerWonMatchInfo.winPercentage.toFixed(2)}
                 Loser: ${playerLostInfo.user_id} (Rank: ${playerLostRank.rank_level})<br>
                 ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
                 End Time: ${matchEndTime}</p>
