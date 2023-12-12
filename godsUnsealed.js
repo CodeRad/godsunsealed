@@ -237,20 +237,57 @@ async function fetchMatchesByPlayerId(playerId) {
 }
 
 async function getPlayerMatchStats(playerId) {
-
     const matches = await fetchMatchesByPlayerId(playerId);
-    const winCount = matches.filter(match => match.player_won === playerId).length;
-    const lossCount = matches.length - winCount;
-    const winPercentage = (winCount / matches.length) * 100;
 
-    console.log(`${playerId} Wins: ${winCount} Losses: ${lossCount} Win Percentage: ${winPercentage.toFixed(2)}%`);
+    // Get overall Sealed mode W/L
+    const winCountOverall = matches.filter(match => match.player_won === playerId).length;
+    const lossCountOverall = matches.length - winCountOverall;
+    const winPercentageOverall = (winCountOverall / matches.length) * 100;
+
+    console.log(`${playerId} Overall Wins: ${winCountOverall} Losses: ${lossCountOverall} Win Percentage: ${winPercentageOverall.toFixed(2)}%`);
+
+    // Get Sealed Set information
+
+    // Trim data to last 10 matches before we search for Game 1
+    const recentMatches = matches.slice(0, 10);
+
+    // Function to compare two card lists and determine if they have significant changes
+    const hasSignificantDeckChange = (deck1, deck2) => {
+        const changedCardCount = deck1.filter(card => !deck2.includes(card)).length;
+        const changePercentage = (changedCardCount / deck1.length) * 100;
+        return changePercentage >= 50; // You can adjust the threshold as needed
+    };
+
+    // Find the index of the first game in the set
+    let firstGameIndex = recentMatches.length - 1;
+    for (let i = recentMatches.length - 2; i >= 0; i--) {
+        const currentDeck = recentMatches[i].player_info[0].cards;
+        const previousDeck = recentMatches[i + 1].player_info[0].cards;
+
+        if (hasSignificantDeckChange(currentDeck, previousDeck)) {
+            // Found the first game with significant deck change
+            firstGameIndex = i;
+        } else {
+            // No significant deck change, stop searching
+            break;
+        }
+    }
+
+    // Count wins and losses in the sealed set
+    const winCountInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_won === playerId).length;
+    const lossCountInSet = recentMatches.slice(firstGameIndex).length - winCountInSet;
+
+    console.log(`${playerId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
 
     return {
-        winCount,
-        lossCount,
-        winPercentage
+        winCountOverall,
+        lossCountOverall,
+        winPercentageOverall,
+        winCountInSet,
+        lossCountInSet
     };
 }
+
 
 // Function to display match information
 async function displayMatchList(matches) {
@@ -262,6 +299,8 @@ async function displayMatchList(matches) {
         const playerWonRank = await fetchUserRank(match.player_won);
         const playerLostRank = await fetchUserRank(match.player_lost);
         const playerWonMatchInfo = await getPlayerMatchStats(match.player_won);
+        const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost);
+        
 
 
         // const playerLostWinLoss = await fetchWinLossRecord(match.player_lost);        
@@ -272,13 +311,19 @@ async function displayMatchList(matches) {
         // console.log(match.game_id);
 
         matchInfoDiv.innerHTML += `
-            <div class='match-banner'>
-                <p>Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) WL ${playerWonMatchInfo.winPercentage.toFixed(2)}
-                Loser: ${playerLostInfo.user_id} (Rank: ${playerLostRank.rank_level})<br>
+        <div class='match-banner'>
+            <p>
+                Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
+                (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L in set)
+                <br>
+                Loser: ${playerLostInfo.user_id} (Rank: ${playerLostRank.rank_level}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
+                (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L in set)
+                <br>
                 ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
-                End Time: ${matchEndTime}</p>
-            </div>
-        `;
+                End Time: ${matchEndTime}
+            </p>
+        </div>
+    `;
     }
 }
 
