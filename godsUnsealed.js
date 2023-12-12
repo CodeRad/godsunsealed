@@ -258,20 +258,24 @@ async function getPlayerMatchStats(playerId) {
         return changePercentage >= 50; // You can adjust the threshold as needed
     };
 
-    // Find the index of the first game in the set
-    let firstGameIndex = recentMatches.length - 1;
-    for (let i = recentMatches.length - 2; i >= 0; i--) {
-        const currentDeck = recentMatches[i].player_info[0].cards;
-        const previousDeck = recentMatches[i + 1].player_info[0].cards;
+// Find the index of the first game in the set
+let firstGameIndex = recentMatches.length - 1;
+for (let i = recentMatches.length - 2; i >= 0; i--) {
+    const playerIndex = recentMatches[i].player_won === playerId ? 0 : 1;
+    const currentDeck = recentMatches[i].player_info[playerIndex].cards;
+    const previousDeck = recentMatches[i + 1].player_info[playerIndex].cards;
 
-        if (hasSignificantDeckChange(currentDeck, previousDeck)) {
-            // Found the first game with significant deck change
-            firstGameIndex = i;
-        } else {
-            // No significant deck change, stop searching
-            break;
-        }
+    if (hasSignificantDeckChange(currentDeck, previousDeck)) {
+        // Found the first game with significant deck change
+        firstGameIndex = i;
+    } else {
+        // No significant deck change, stop searching
+        console.log(`No significant deck change detected between game ${i + 1} and game ${i}`);
+        console.log(`Current Deck (Player ${playerIndex + 1}):`, currentDeck);
+        console.log(`Previous Deck (Player ${playerIndex + 1}):`, previousDeck);
+        break;
     }
+}
 
     // Count wins and losses in the sealed set
     const winCountInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_won === playerId).length;
@@ -298,8 +302,8 @@ async function displayMatchList(matches) {
         const playerLostInfo = await fetchUserInfo(match.player_lost);
         const playerWonRank = await fetchUserRank(match.player_won);
         const playerLostRank = await fetchUserRank(match.player_lost);
-        const playerWonMatchInfo = await getPlayerMatchStats(match.player_won);
-        const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost);
+        const playerWonMatchInfo = await getPlayerMatchStats(match.player_won); //4637372 waldo
+        const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost); //205626 majic
         
 
 
