@@ -222,14 +222,14 @@ async function fetchMatchesByPlayerId(playerId) {
         const allMatches = allWins.concat(allLosses);
 
         // Filter matches for game mode 7
-        const gameMode7Matches = allMatches.filter(match => match.game_mode === 7);
+        const filteredMatches = allMatches.filter(match => match.game_mode === 7);
 
-        console.log(`Game mode 7 matches for player ${playerId}:`, gameMode7Matches.length);
+        console.log(`Game mode 7 matches for player ${playerId}:`, filteredMatches.length);
 
         // Calculate win percentage
-        const winCount = gameMode7Matches.filter(match => match.player_won === playerId).length;
-        const lossCount = gameMode7Matches.length - winCount;
-        const winPercentage = (winCount / gameMode7Matches.length) * 100;
+        const winCount = filteredMatches.filter(match => match.player_won === playerId).length;
+        const lossCount = filteredMatches.length - winCount;
+        const winPercentage = (winCount / filteredMatches.length) * 100;
 
         console.log(`Wins: ${winCount}`);
         console.log(`Losses: ${lossCount}`);
@@ -238,7 +238,7 @@ async function fetchMatchesByPlayerId(playerId) {
         return {
             totalWins,
             totalLosses,
-            gameMode7Matches,
+            filteredMatches,
             winCount,
             lossCount,
             winPercentage
@@ -249,6 +249,10 @@ async function fetchMatchesByPlayerId(playerId) {
     }
 }
 
+async function getPlayerMatchStats(playerId) {
+
+    // call fetchMatchesByPlayerId
+}
 
 
 
