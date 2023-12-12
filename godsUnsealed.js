@@ -252,9 +252,6 @@ async function getPlayerMatchStats(playerId) {
     };
 }
 
-
-
-
 // Function to display match information
 async function displayMatchList(matches) {
     const matchInfoDiv = document.getElementById('match-list');
