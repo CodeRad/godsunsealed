@@ -1,0 +1,287 @@
+
+
+// Declare matches variable in a scope accessible to all functions
+let matchesData;
+
+const godThemes = {
+    war: {
+        gradient: 'linear-gradient(0deg, rgba(75,5,5,1) 0%, rgba(75,5,5,1) 10%, rgba(75,5,5,0) 20%, rgba(0,0,0,0) 50%, rgba(75,5,5,1) 90%, rgba(75,5,5,1) 100%)',
+        image: 'images/gods/war.png',
+        name: 'Auros'
+    },
+    death: {
+        gradient: 'linear-gradient(0deg, rgba(50,50,50,1) 0%, rgba(50,50,50,1) 10%, rgba(0,50,50,0) 20%, rgba(0,0,0,0) 50%, rgba(50,50,50,1) 90%, rgba(50,50,50,1) 100%)',
+        image: 'images/gods/death.png',
+        name: 'Malissus'
+    },
+    deception: {
+        gradient: 'linear-gradient(0deg, rgba(100,15,255,1) 0%, rgba(100,15,255,1) 10%, rgba(100,15,255,0) 20%, rgba(0,0,0,0) 50%, rgba(100,15,255,1) 90%, rgba(100,15,255,1) 100%)',
+        image: 'images/gods/deception.png',
+        name: 'Ludia'
+    },
+    nature: {
+        gradient: 'linear-gradient(0deg, rgba(5,75,30,1) 0%, rgba(5,75,30,1) 10%, rgba(5,75,30,0) 20%, rgba(0,0,0,0) 50%, rgba(5,75,30,1) 90%, rgba(5,75,30,1) 100%)',
+        image: 'images/gods/nature.png',
+        name: 'Aeona'
+    },
+    magic: {
+        gradient: 'linear-gradient(0deg, rgba(20,175,255,1) 0%, rgba(20,175,255,1) 10%, rgba(20,175,255,0) 20%, rgba(0,0,0,0) 50%, rgba(20,175,255,1) 90%, rgba(20,175,255,1) 100%)',
+        image: 'images/gods/magic.png',
+        name: 'Elyrian'
+    },
+    light: {
+        gradient: 'linear-gradient(0deg, rgba(100,150,15,1) 0%, rgba(100,150,15,1) 10%, rgba(100,150,15,0) 20%, rgba(0,0,0,0) 50%, rgba(100,150,15,1) 90%, rgba(100,150,15,1) 100%)',
+        image: 'images/gods/light.png',
+        name: 'Lysander'
+    }
+};
+const godPowerNames = {
+    100106: 'Soul Burn',
+    102405: 'Create',
+    100111: 'Fourish',
+    100115: 'Summon Acolyte',
+    100113: 'Enrage',
+    100121: 'Animal Bond',
+    100119: 'Flip',
+    100127: 'Mage Bolt',
+    102402: 'Fracture',
+    100117: 'Heal',
+    100125: 'Theivery',
+    101307: 'Raid',
+    100126: 'Clear Mind',
+    102406: 'Ignite',
+    102401: 'Radiance',
+    101308: 'Stealth',
+    101309: 'Sacrifice'
+};
+
+// Function to display card list
+async function displayCardList(cardIds, containerId) {
+    const cardListDiv = document.getElementById(containerId);
+
+    // Clear previous content
+    cardListDiv.innerHTML = '';
+
+    // Fetch card information for all cards
+    const cardInfoArray = await Promise.all(cardIds.map(fetchCardInfo));
+
+    // Sort cards by mana cost
+    cardInfoArray.sort((a, b) => a.mana - b.mana);
+
+    // Create and append card elements
+    for (const cardInfo of cardInfoArray) {
+        const cardElement = document.createElement('img');
+        cardElement.src = `https://images.godsunchained.com/art2/250/${cardInfo.id}.webp`;
+        cardElement.title = `(${cardInfo.mana}) ${cardInfo.name}`;
+        cardElement.className = 'card-icon';
+
+        cardListDiv.appendChild(cardElement);
+    }
+}
+
+// Function to fetch card data
+async function fetchCardInfo(cardId) {
+    try {
+        const response = await fetch(`https://api.godsunchained.com/v0/proto/${cardId}`);
+        const cardInfo = await response.json();
+
+        // console.log(`Card Name: ${cardInfo.name}, Mana: ${cardInfo.mana}`);
+
+        return cardInfo;
+    } catch (error) {
+        console.error('Error fetching card info:', error);
+        return null;
+    }
+}
+
+// Function to fetch match data
+async function fetchMatchData() {
+    try {
+        const itemsPerPage = 100; // Specify the desired items per page
+        const endTime = Math.floor(Date.now() / 1000);
+        const startTime = endTime - 60 * 30;
+
+        // Fetch the first page to get total records
+        const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}`);
+        const firstPageData = await firstPageResponse.json();
+
+        const totalRecords = firstPageData.total;
+        console.log('Total records:', totalRecords);
+
+        // Calculate the number of pages needed
+        const totalPages = Math.ceil(totalRecords / itemsPerPage);
+
+        // Fetch data for each page and concatenate the results
+        let allMatches = [];
+        for (let page = 1; page <= totalPages; page++) {
+            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=${page}`);
+            const pageData = await pageResponse.json();
+            allMatches = allMatches.concat(pageData.records);
+        }
+
+        // Filter and sort the matches
+        const filteredMatches = allMatches.filter(match => match.game_mode === 7);
+        filteredMatches.sort((a, b) => b.end_time - a.end_time);
+
+        console.log('Filtered Game Mode 7 Matches:', filteredMatches.length); // Add this line
+
+
+        matchesData = filteredMatches;
+
+        displayMatchList(matchesData);
+    } catch (error) {
+        console.error('Error fetching match data:', error);
+    }
+}
+
+// Function to fetch user info
+async function fetchUserInfo(userId) {
+    try {
+        const userInfoResponse = await fetch(`https://api.godsunchained.com/v0/properties?user_id=${userId}`);
+        const userInfo = await userInfoResponse.json();
+        return userInfo.records[0];
+    } catch (error) {
+        console.error('Error fetching user info:', error);
+        return null;
+    }
+}
+
+// Function to fetch user rank
+async function fetchUserRank(userId) {
+    try {
+        const userRankResponse = await fetch(`https://api.godsunchained.com/v0/rank?user_id=${userId}`);
+        const userRank = await userRankResponse.json();
+        return userRank.records[0];
+    } catch (error) {
+        console.error('Error fetching user rank:', error);
+        return null;
+    }
+}
+
+// Function to create a user ID icon
+function createUserIdIcon(userId) {
+    const userIdDigits = userId.toString().split('').map(Number);
+
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'user-id-icon';
+
+    for (const digit of userIdDigits) {
+        const digitDiv = document.createElement('div');
+        digitDiv.className = 'user-id-digit';
+        digitDiv.textContent = digit;
+        iconContainer.appendChild(digitDiv);
+    }
+
+    return iconContainer;
+}
+
+// Function to fetch user past matches
+
+// Function to display match information
+async function displayMatchList(matches) {
+    const matchInfoDiv = document.getElementById('match-list');
+
+    for (const match of matches) {
+        const playerWonInfo = await fetchUserInfo(match.player_won);
+        const playerLostInfo = await fetchUserInfo(match.player_lost);
+        const playerWonRank = await fetchUserRank(match.player_won);
+        const playerLostRank = await fetchUserRank(match.player_lost);
+
+        const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        // console.log(match.game_id);
+
+        matchInfoDiv.innerHTML += `
+            <div class='match-banner'>
+                <p>Winner: ${playerWonInfo.username} (Rank: ${playerWonRank.rank_level})
+                Loser: ${playerLostInfo.username} (Rank: ${playerLostRank.rank_level})<br>
+                ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
+                End Time: ${matchEndTime}</p>
+            </div>
+        `;
+    }
+}
+
+// Function to handle match click event and populate panels
+async function handleMatchClick(match) {
+
+
+    const winnerPanel = document.getElementById('winner-card');
+    const loserPanel = document.getElementById('loser-card');
+
+
+
+    const playerWonInfo = await fetchUserInfo(match.player_won);
+    const playerLostInfo = await fetchUserInfo(match.player_lost);
+    const playerWonRank = await fetchUserRank(match.player_won);
+    const playerLostRank = await fetchUserRank(match.player_lost);
+
+    // Winner Panel
+    winnerPanel.innerHTML = `
+<div class="player-card" style="background: ${godThemes[match.player_info[0].god].gradient};">
+    <div class="outcome winner">WINNER</div><br>
+    <div class="player-overview">
+        <div style="display: flex; align-items: flex-start;">
+            <div style="margin-right: 20px; text-align: center;">
+                <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp" style="align: top;"><br>
+                <p class="player-info-field">${godPowerNames[match.player_info[0].god_power]}</p>
+            </div>
+            <div>
+                <p class="player-info-field">${match.player_won}</p>
+                <p class="player-info-field">${playerWonInfo.username}</p>
+                <p class="player-info-field">Contructed Rank: ${playerWonRank.rank_level}</p>
+                <p class="player-info-field">Status: Foo Wins, Bar Losses. (Incomplete)</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-list winner-card-list" id="winner-card-list"></div>
+
+
+    <img src="${godThemes[match.player_info[0].god].image}" alt="${match.player_info[0].god}" position: absolute; style="margin-top: auto;">
+</div>
+`;
+
+    displayCardList(match.player_info[0].cards, 'winner-card-list');
+
+    // Loser Panel
+    loserPanel.innerHTML = `
+<div class="player-card" style="background: ${godThemes[match.player_info[1].god].gradient};">
+<div class="outcome loser">LOSER</div><br>
+<div class="player-overview">
+    <div style="display: flex; align-items: flex-start;">
+        <div style="margin-right: 20px; text-align: center;">
+            <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp" style="align: top;"><br>
+            <p class="player-info-field">${godPowerNames[match.player_info[1].god_power]}</p>
+        </div>
+        <div>
+            <p class="player-info-field">${match.player_info[1].user_id}</p>
+            <p class="player-info-field">${playerLostInfo.username}</p>
+            <p class="player-info-field">Constructed Rank: ${playerLostRank.rank_level}</p>
+            <p class="player-info-field">Status: Foo Wins, Bar Losses. (Incomplete)</p>
+        </div>
+    </div>
+</div>
+<div class="card-list loser-card-list" id="loser-card-list"></div>
+<img src="${godThemes[match.player_info[1].god].image}" alt="${match.player_info[1].god}" style="margin-top: auto;">
+</div>
+`;
+    displayCardList(match.player_info[1].cards, 'loser-card-list');
+
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    // Attach click event to the parent container
+    const matchListDiv = document.getElementById('match-list');
+    matchListDiv.addEventListener('click', (event) => {
+        const targetMatchBanner = event.target.closest('.match-banner');
+        if (targetMatchBanner) {
+            const index = Array.from(targetMatchBanner.parentNode.children).indexOf(targetMatchBanner);
+            handleMatchClick(matchesData[index]);
+        }
+    });
+
+    // Fetch and display match data on page load
+    fetchMatchData();
+});
