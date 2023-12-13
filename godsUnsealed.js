@@ -258,24 +258,24 @@ async function getPlayerMatchStats(playerId) {
         return changePercentage >= 50; // You can adjust the threshold as needed
     };
 
-// Find the index of the first game in the set
-let firstGameIndex = recentMatches.length - 1;
-for (let i = recentMatches.length - 2; i >= 0; i--) {
-    const playerIndex = recentMatches[i].player_won === playerId ? 0 : 1;
-    const currentDeck = recentMatches[i].player_info[playerIndex].cards;
-    const previousDeck = recentMatches[i + 1].player_info[playerIndex].cards;
+    // Find the index of the first game in the set
+    let firstGameIndex = recentMatches.length - 1;
+    for (let i = recentMatches.length - 2; i >= 0; i--) {
+        const playerIndex = recentMatches[i].player_won === playerId ? 0 : 1;
+        const currentDeck = recentMatches[i].player_info[playerIndex].cards;
+        const previousDeck = recentMatches[i + 1].player_info[playerIndex].cards;
 
-    if (hasSignificantDeckChange(currentDeck, previousDeck)) {
-        // Found the first game with significant deck change
-        firstGameIndex = i;
-    } else {
-        // No significant deck change, stop searching
-        console.log(`No significant deck change detected between game ${i + 1} and game ${i}`);
-        console.log(`Current Deck (Player ${playerIndex + 1}):`, currentDeck);
-        console.log(`Previous Deck (Player ${playerIndex + 1}):`, previousDeck);
-        break;
+        if (hasSignificantDeckChange(currentDeck, previousDeck)) {
+            // Found the first game with significant deck change
+            firstGameIndex = i;
+        } else {
+            // No significant deck change, stop searching
+            console.log(`No significant deck change detected between game ${i + 1} and game ${i}`);
+            console.log(`Current Deck (Player ${playerIndex + 1}):`, currentDeck);
+            console.log(`Previous Deck (Player ${playerIndex + 1}):`, previousDeck);
+            break;
+        }
     }
-}
 
     // Count wins and losses in the sealed set
     const winCountInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_won === playerId).length;
@@ -304,7 +304,7 @@ async function displayMatchList(matches) {
         const playerLostRank = await fetchUserRank(match.player_lost);
         const playerWonMatchInfo = await getPlayerMatchStats(match.player_won); //4637372 waldo
         const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost); //205626 majic
-        
+
 
 
         // const playerLostWinLoss = await fetchWinLossRecord(match.player_lost);        
@@ -312,57 +312,66 @@ async function displayMatchList(matches) {
         const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
+        // Generate HTML for loss point elements based on the number of loss points
+        const playerWonLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
+            const isVisible = index < playerWonMatchInfo.lossCountInSet;
+            return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}">/</div>`;
+        }).join('');
+        const playerLostLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
+            const isVisible = index < playerLostMatchInfo.lossCountInSet;
+            return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}">/</div>`;
+        }).join('');
+
         // console.log(match.game_id);
         matchInfoDiv.innerHTML += `
         <div class="match-banner">
         <div class="match-banner-element banner-left">
-            <div class="godpower-list">12</div>
+            <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)"></div>
             <div class="bar-container">
                 <div class="list-bar" id="bar-top">
-                    <div class="user-list-text">Scarflax (3486789234)</div>
+                    <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
                 </div>
                 <div class="list-bar" id="bar-bottom">
-                    <div class="lost-match" id="lost-match-1-left">/</div>
-                    <div class="lost-match" id="lost-match-2-left">/</div>
-                    <div class="lost-match" id="lost-match-3-left">/</div>
-                    <div class="won-matches">7</div>
-                    <div class="winrate">75.11%</div>
+                <div class="rank rank-left">${playerWonRank.rank_level}</div>
+                ${playerWonLossPointsHTML}
+                    <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
+                    <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
                 </div>
             </div>
         </div>
         <div class="match-banner-element banner-right">
-            <div class="godpower-list">12</div>
+            <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)"></div>
             <div class="bar-container">
                 <div class="list-bar bar-right" id="bar-top">
-                    <div class="user-list-text text-right">Scarflax (3486789234)</div>
+                    <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
                 </div>
                 <div class="list-bar bar-right" id="bar-bottom">
-                    <div class="lost-match" id="lost-match-1-right">/</div>
-                    <div class="lost-match" id="lost-match-2-right">/</div>
-                    <div class="lost-match" id="lost-match-3-right">/</div>
-                    <div class="won-matches">7</div>
-                    <div class="winrate winrate-right">75.11%</div>
+                    <div class="rank rank-right">${playerLostRank.rank_level}</div>
+                    ${playerLostLossPointsHTML}
+                    <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
+                    <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
                 </div>
             </div>
         </div>
     </div>
     `;
-    
 
-    //     matchInfoDiv.innerHTML += `
-    //     <div class='match-banner'>
-    //         <p>
-    //             Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
-    //             (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L in set)
-    //             <br>
-    //             Loser: ${playerLostInfo.user_id} (Rank: ${playerLostRank.rank_level}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
-    //             (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L in set)
-    //             <br>
-    //             ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
-    //             End Time: ${matchEndTime}
-    //         </p>
-    //     </div>
-    // `;
+
+
+        //     matchInfoDiv.innerHTML += `
+        //     <div class='match-banner'>
+        //         <p>
+        //             Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
+        //             (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L in set)
+        //             <br>
+        //             Loser: ${playerLostInfo.user_id} (Rank: ${playerLostRank.rank_level}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
+        //             (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L in set)
+        //             <br>
+        //             ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
+        //             End Time: ${matchEndTime}
+        //         </p>
+        //     </div>
+        // `;
     }
 }
 
