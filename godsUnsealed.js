@@ -313,21 +313,56 @@ async function displayMatchList(matches) {
         const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
         // console.log(match.game_id);
-
         matchInfoDiv.innerHTML += `
-        <div class='match-banner'>
-            <p>
-                Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
-                (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L in set)
-                <br>
-                Loser: ${playerLostInfo.user_id} (Rank: ${playerLostRank.rank_level}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
-                (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L in set)
-                <br>
-                ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
-                End Time: ${matchEndTime}
-            </p>
+        <div class="match-banner">
+        <div class="match-banner-element banner-left">
+            <div class="godpower-list">12</div>
+            <div class="bar-container">
+                <div class="list-bar" id="bar-top">
+                    <div class="user-list-text">Scarflax (3486789234)</div>
+                </div>
+                <div class="list-bar" id="bar-bottom">
+                    <div class="lost-match" id="lost-match-1-left">/</div>
+                    <div class="lost-match" id="lost-match-2-left">/</div>
+                    <div class="lost-match" id="lost-match-3-left">/</div>
+                    <div class="won-matches">7</div>
+                    <div class="winrate">75.11%</div>
+                </div>
+            </div>
         </div>
+        <div class="match-banner-element banner-right">
+            <div class="godpower-list">12</div>
+            <div class="bar-container">
+                <div class="list-bar bar-right" id="bar-top">
+                    <div class="user-list-text text-right">Scarflax (3486789234)</div>
+                </div>
+                <div class="list-bar bar-right" id="bar-bottom">
+                    <div class="lost-match" id="lost-match-1-right">/</div>
+                    <div class="lost-match" id="lost-match-2-right">/</div>
+                    <div class="lost-match" id="lost-match-3-right">/</div>
+                    <div class="won-matches">7</div>
+                    <div class="winrate winrate-right">75.11%</div>
+                </div>
+            </div>
+        </div>
+    </div>
     `;
+    
+
+    //     matchInfoDiv.innerHTML += `
+    //     <div class='match-banner'>
+    //         <p>
+    //             Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
+    //             (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L in set)
+    //             <br>
+    //             Loser: ${playerLostInfo.user_id} (Rank: ${playerLostRank.rank_level}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
+    //             (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L in set)
+    //             <br>
+    //             ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
+    //             End Time: ${matchEndTime}
+    //         </p>
+    //     </div>
+    // `;
     }
 }
 

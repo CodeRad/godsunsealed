@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
+</head>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* * { outline: 1px solid rgb(97, 97, 97) }      */
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            background-image: url('images/background.jpg');
+            background-size: cover;
+            background-position-x: center;
+            background-position-y: 80%;
+            background-repeat: no-repeat;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+
+            color: #FFFFFF;
+            padding: 20px;
+        }
+
+        .match-banner-container {
+            display: flex;
+            gap: 5px;
+        }
+
+        .match-banner {
+            position: relative;
+            /* width: 300px; */
+            height: 80px;
+            display: flex;
+
+        }
+
+        .banner-right {
+            flex-direction: row-reverse;
+        }
+
+        .godpower-list {
+            background-image: url(https://images.godsunchained.com/art2/250/100113.webp);
+            background-size: cover;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 3.5em;
+            z-index: 1;
+            font-family: 'Lilita One', sans-serif;
+        }
+
+
+        .list-bar {
+            background-color: black;
+            width: 235px;
+            height: 20px;
+            margin-top: 5px;
+            margin-right: 0px;
+            margin-left: -15px;
+            justify-content: flex-end;
+            display: flex;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .bar-right {
+            justify-content: flex-end;
+            margin-left: 0px;
+            margin-right: -15px;
+            flex-direction: row-reverse;
+        }
+
+        .user-list-text {
+            color: white;
+            font-size: 1.1em;
+            text-align: right;
+        }
+
+        .text-right {
+            text-align: left;
+        }
+
+        .lost-match,
+        .won-matches,
+        .winrate {
+            display: flex;
+            height: 20px;
+            width: 20px;
+            margin: 2px;
+            margin-top: 10px;
+            border-radius: 50%;
+            font-family: 'Lilita One', sans-serif;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .winrate-right {
+            flex-direction: row-reverse;
+        }
+        
+
+        .lost-match {
+            background-color: rgba(200, 0, 0);
+            color: black;
+            font-size: 1.3em;
+        }
+
+        .won-matches {
+            background-color: white;
+            background: linear-gradient(0deg, rgba(100, 150, 15, 1) 0%, rgba(100, 150, 15, 1) 10%, rgb(151, 224, 23) 40%, rgba(100, 150, 15, 1) 100%);
+            color: white;
+            font-size: 1.5em;
+
+
+        }
+
+        .winrate {
+            background-color: rgb(236, 204, 162);
+            width: 80px;
+            color: black;
+            border-radius: 5px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+
+<body>
+    <center>
+        <div class="match-banner-container">
+            <div class="match-banner banner-left">
+                <div class="godpower-list">12</div>
+                <div class="bar-container">
+                    <div class="list-bar" id="bar-top">
+                        <div class="user-list-text">Scarflax (3486789234)</div>
+                    </div>
+                    <div class="list-bar" id="bar-bottom">
+                        <div class="lost-match" id="lost-match-1-left">/</div>
+                        <div class="lost-match" id="lost-match-2-left">/</div>
+                        <div class="lost-match" id="lost-match-3-left">/</div>
+                        <div class="won-matches">7</div>
+                        <div class="winrate">75.11%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="match-banner banner-right">
+                <div class="godpower-list">12</div>
+                <div class="bar-container">
+                    <div class="list-bar bar-right" id="bar-top">
+                        <div class="user-list-text text-right">Scarflax (3486789234)</div>
+                    </div>
+                    <div class="list-bar bar-right" id="bar-bottom">
+                        <div class="lost-match" id="lost-match-1-right">/</div>
+                        <div class="lost-match" id="lost-match-2-right">/</div>
+                        <div class="lost-match" id="lost-match-3-right">/</div>
+                        <div class="won-matches">7</div>
+                        <div class="winrate winrate-right">75.11%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+    </center>
+</body>
+
+</html>

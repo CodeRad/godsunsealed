@@ -7,7 +7,14 @@
         "request": "launch",
         "url": "${workspaceFolder}/index.html",
         "webRoot": "${workspaceFolder}"
-      }
+      },
+      {
+        "name": "Launch elementtest.html",
+        "type": "chrome",
+        "request": "launch",
+        "url": "${workspaceFolder}/elementtest.html",
+        "webRoot": "${workspaceFolder}"
+      }     
     ]
   }
   
