@@ -161,6 +161,22 @@
 
   /* new match list */
 
+  @keyframes dropIn {
+    from {
+      transform: translateX(15px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+  
+  .match-banner {
+    animation: dropIn 1.3s ease-out; /* Adjust the duration and timing function as needed */
+  }
+  
+
   .match-banner {
       display: flex;
       gap: 5px;
@@ -172,6 +188,7 @@
   .match-banner-element {
       position: relative;
       display: flex;
+
   }
 
   .banner-right {

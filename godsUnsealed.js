@@ -2,6 +2,7 @@
 
 // Declare matches variable in a scope accessible to all functions
 let matchesData;
+let bannerCounter = 0;
 
 const godThemes = {
     war: {
@@ -278,8 +279,11 @@ async function getPlayerMatchStats(playerId) {
     }
 
     // Count wins and losses in the sealed set
-    const winCountInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_won === playerId).length;
-    const lossCountInSet = recentMatches.slice(firstGameIndex).length - winCountInSet;
+    const winsInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_won === playerId);
+    const lossesInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_lost === playerId);
+    const winCountInSet = winsInSet.length;
+    const lossCountInSet = lossesInSet.length;
+
 
     console.log(`${playerId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
 
@@ -306,6 +310,13 @@ async function displayMatchList(matches) {
         const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost); //205626 majic
 
 
+        // Increment the banner counter
+        bannerCounter++;
+
+        // Determine the animation delay class based on the counter
+        const animationDelayClass = (bannerCounter % 2 === 0) ? 'even' : 'odd';
+
+
 
         // const playerLostWinLoss = await fetchWinLossRecord(match.player_lost);        
 
@@ -324,8 +335,8 @@ async function displayMatchList(matches) {
 
         // console.log(match.game_id);
         matchInfoDiv.innerHTML += `
-        <div class="match-banner">
-        <div class="match-banner-element banner-left">
+          <div class='match-banner dropIn ${animationDelayClass} style='animation-delay: ${bannerCounter * 0.1}s;'>
+        <div class="match-banner-element banner-left dropIn">
             <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)"></div>
             <div class="bar-container">
                 <div class="list-bar" id="bar-top">
@@ -339,7 +350,7 @@ async function displayMatchList(matches) {
                 </div>
             </div>
         </div>
-        <div class="match-banner-element banner-right">
+        <div class="match-banner-element banner-right dropIn">
             <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)"></div>
             <div class="bar-container">
                 <div class="list-bar bar-right" id="bar-top">
