@@ -4,6 +4,8 @@
 let matchesData;
 let bannerCounter = 0;
 
+const DEBUG = false;
+
 const godThemes = {
     war: {
         gradient: 'linear-gradient(0deg, rgba(75,5,5,1) 0%, rgba(75,5,5,1) 10%, rgba(75,5,5,0) 20%, rgba(0,0,0,0) 50%, rgba(75,5,5,1) 90%, rgba(75,5,5,1) 100%)',
@@ -248,7 +250,6 @@ async function getPlayerMatchStats(playerId) {
     console.log(`${playerId} Overall Wins: ${winCountOverall} Losses: ${lossCountOverall} Win Percentage: ${winPercentageOverall.toFixed(2)}%`);
 
     // Get Sealed Set information
-
     // Trim data to last 10 matches before we search for Game 1
     const recentMatches = matches.slice(0, 10);
 
@@ -309,19 +310,42 @@ async function displayMatchList(matches) {
         const playerWonMatchInfo = await getPlayerMatchStats(match.player_won); //4637372 waldo
         const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost); //205626 majic
 
-
-        // Increment the banner counter
-        bannerCounter++;
-
-        // Determine the animation delay class based on the counter
-        const animationDelayClass = (bannerCounter % 2 === 0) ? 'even' : 'odd';
-
-
-
-        // const playerLostWinLoss = await fetchWinLossRecord(match.player_lost);        
-
         const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const matchLength = ((match.end_time - match.start_time) / 60).toFixed(2); // in minutes
+        const matchTimeAgo = getTimeAgo(match.end_time);
+
+        function getTimeAgo(timestamp) {
+            const currentTime = Math.floor(Date.now() / 1000);
+            const secondsAgo = currentTime - timestamp;
+          
+            if (secondsAgo < 60) {
+              return `${secondsAgo} second${secondsAgo !== 1 ? 's' : ''} ago`;
+            }
+          
+            const minutesAgo = Math.floor(secondsAgo / 60);
+            if (minutesAgo < 60) {
+              const remainingSeconds = secondsAgo % 60;
+              return `${minutesAgo} minute${minutesAgo !== 1 ? 's' : ''} ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''} ago`;
+            }
+          
+            const hoursAgo = Math.floor(minutesAgo / 60);
+            if (hoursAgo < 24) {
+              const remainingMinutes = minutesAgo % 60;
+              return `${hoursAgo} hour${hoursAgo !== 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''} ago`;
+            }
+          
+            const daysAgo = Math.floor(hoursAgo / 24);
+            if (daysAgo < 30) {
+              const remainingHours = hoursAgo % 24;
+              return `${daysAgo} day${daysAgo !== 1 ? 's' : ''} ${remainingHours} hour${remainingHours !== 1 ? 's' : ''} ago`;
+            }
+          
+            const monthsAgo = Math.floor(daysAgo / 30);
+            return `${monthsAgo} month${monthsAgo !== 1 ? 's' : ''} ago`;
+          }
+          
+
 
         // Generate HTML for loss point elements based on the number of loss points
         const playerWonLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
@@ -334,55 +358,67 @@ async function displayMatchList(matches) {
         }).join('');
 
         // console.log(match.game_id);
+        if (!DEBUG) {
+            
         matchInfoDiv.innerHTML += `
-          <div class='match-banner dropIn ${animationDelayClass} style='animation-delay: ${bannerCounter * 0.1}s;'>
-        <div class="match-banner-element banner-left dropIn">
-            <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)"></div>
-            <div class="bar-container">
-                <div class="list-bar" id="bar-top">
-                    <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
+
+        <div class="match-banner">
+        <div class="banner-top" id="overlay">
+            <div class="match-info">
+           ${match.total_rounds} rounds, ${matchLength} minutes. Posted ${matchTimeAgo}.
+            </div>
+        </div>
+
+        <div class="panel-container">
+            <div class="match-banner-panel banner-left">
+                <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)"></div>
+                <div class="bar-container">
+                    <div class="list-bar" id="bar-top">
+                        <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
+                    </div>
+                    <div class="list-bar" id="bar-bottom">
+                    <div class="rank rank-left">${playerWonRank.rank_level}</div>
+                    ${playerWonLossPointsHTML}
+                        <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
+                        <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                    </div>
                 </div>
-                <div class="list-bar" id="bar-bottom">
-                <div class="rank rank-left">${playerWonRank.rank_level}</div>
-                ${playerWonLossPointsHTML}
-                    <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
-                    <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+            </div>
+            <div class="match-banner-panel banner-right">
+                <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)"></div>
+                <div class="bar-container">
+                    <div class="list-bar bar-right" id="bar-top">
+                        <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
+                    </div>
+                    <div class="list-bar bar-right" id="bar-bottom">
+                        <div class="rank rank-right">${playerLostRank.rank_level}</div>
+                        ${playerLostLossPointsHTML}
+                        <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
+                        <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="match-banner-element banner-right dropIn">
-            <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)"></div>
-            <div class="bar-container">
-                <div class="list-bar bar-right" id="bar-top">
-                    <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
-                </div>
-                <div class="list-bar bar-right" id="bar-bottom">
-                    <div class="rank rank-right">${playerLostRank.rank_level}</div>
-                    ${playerLostLossPointsHTML}
-                    <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
-                    <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
-                </div>
-            </div>
         </div>
-    </div>
-    `;
 
+            
+        
+        `;
 
+        } else { //display DEBUG mode match list
 
-        //     matchInfoDiv.innerHTML += `
-        //     <div class='match-banner'>
-        //         <p>
-        //             Winner: ${playerWonInfo.user_id} (Rank: ${playerWonRank.rank_level}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
-        //             (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L in set)
-        //             <br>
-        //             Loser: ${playerLostInfo.user_id} (Rank: ${playerLostRank.rank_level}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
-        //             (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L in set)
-        //             <br>
-        //             ${match.player_info[0].god} (${match.player_info[0].god_power}) vs ${match.player_info[1].god} (${match.player_info[1].god_power})
-        //             End Time: ${matchEndTime}
-        //         </p>
-        //     </div>
-        // `;
+            matchInfoDiv.innerHTML += `
+            <div class='debug-panel'>
+                <p class='debug-text'>
+                    player_won: ${playerWonInfo.user_id} (${playerWonRank.rank_level}) ${match.player_info[0].god} (${godPowerNames[match.player_info[0].god_power]}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
+                    (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L)<BR>
+                    player_lost: ${playerLostInfo.user_id} (${playerLostRank.rank_level}) ${match.player_info[1].god} (${godPowerNames[match.player_info[1].god_power]}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
+                    (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L)<BR>
+                    start: ${matchStartTime}|end: ${matchEndTime}|l: ${matchLength}m|${matchTimeAgo}
+                </p>
+            </div>
+        `;
+        }
     }
 }
 
