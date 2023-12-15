@@ -98,7 +98,7 @@ async function fetchCardInfo(cardId) {
 }
 
 // Function to fetch match data
-async function fetchMatchData() {
+async function fetchRecentMatches() {
     try {
         const itemsPerPage = 100; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
@@ -129,9 +129,7 @@ async function fetchMatchData() {
         console.log('Filtered Game Mode 7 Matches:', filteredMatches.length);
 
 
-        matchesData = filteredMatches;
-
-        displayMatchList(matchesData);
+        return filteredMatches;
 
     } catch (error) {
         console.error('Error fetching match data:', error);
@@ -299,11 +297,24 @@ async function getPlayerMatchStats(userId) {
 
 
 // Function to display match information
-async function displayMatchList(matches) {
+async function displayMatchList(userId) {
     const matchInfoDiv = document.getElementById('match-list');
     matchInfoDiv.innerHTML = '';
-
-
+    
+        let matches; // Declare matches variable outside the try blocks
+        
+        try {
+            if (userId) {
+                // Fetch match data by user ID
+                matches = await fetchMatchesByUserId(userId);
+            } else {
+                // Fetch recent match data
+                matches = await fetchRecentMatches();
+            }
+    
+        } catch (error) {
+            console.error('Error displaying match list and fetching data:', error);
+        }
 
     for (const match of matches) {
         const playerWonInfo = await fetchUserInfo(match.player_won);
@@ -479,5 +490,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Fetch and display match data on page load
-    fetchMatchData();
+    displayMatchList(4637372);
 });
