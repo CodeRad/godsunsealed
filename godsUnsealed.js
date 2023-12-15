@@ -126,7 +126,7 @@ async function fetchMatchData() {
         const filteredMatches = allMatches.filter(match => match.game_mode === 7);
         filteredMatches.sort((a, b) => b.end_time - a.end_time);
 
-        console.log('Filtered Game Mode 7 Matches:', filteredMatches.length); // Add this line
+        console.log('Filtered Game Mode 7 Matches:', filteredMatches.length);
 
 
         matchesData = filteredMatches;
@@ -180,25 +180,25 @@ function createUserIdIcon(userId) {
 }
 
 // Function to fetch matches by player ID
-async function fetchMatchesByPlayerId(playerId) {
+async function fetchMatchesByUserId(userId) {
     try {
         const itemsPerPage = 100;
         const endTime = Math.floor(Date.now() / 1000);
         const startTime = endTime - 60 * 60 * 24 * 3;
 
         // Fetch the first page to get total records for wins
-        const winsResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${playerId}`);
+        const winsResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}`);
         const winsData = await winsResponse.json();
 
         // Fetch the first page to get total records for losses
-        const lossesResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${playerId}`);
+        const lossesResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}`);
         const lossesData = await lossesResponse.json();
 
         const totalWins = winsData.total;
         const totalLosses = lossesData.total;
 
-        console.log(`Total wins for player ${playerId}:`, totalWins);
-        console.log(`Total losses for player ${playerId}:`, totalLosses);
+        console.log(`Total wins for player ${userId}:`, totalWins);
+        console.log(`Total losses for player ${userId}:`, totalLosses);
 
         // Calculate the number of pages needed for wins
         const totalPagesWins = Math.ceil(totalWins / itemsPerPage);
@@ -206,7 +206,7 @@ async function fetchMatchesByPlayerId(playerId) {
         // Fetch data for each page and concatenate the results for wins
         let allWins = [];
         for (let page = 1; page <= totalPagesWins; page++) {
-            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${playerId}&page=${page}`);
+            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=${page}`);
             const pageData = await pageResponse.json();
             allWins = allWins.concat(pageData.records);
         }
@@ -217,7 +217,7 @@ async function fetchMatchesByPlayerId(playerId) {
         // Fetch data for each page and concatenate the results for losses
         let allLosses = [];
         for (let page = 1; page <= totalPagesLosses; page++) {
-            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${playerId}&page=${page}`);
+            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=${page}`);
             const pageData = await pageResponse.json();
             allLosses = allLosses.concat(pageData.records);
         }
@@ -229,7 +229,7 @@ async function fetchMatchesByPlayerId(playerId) {
         const filteredMatches = allMatches.filter(match => match.game_mode === 7);
         filteredMatches.sort((a, b) => b.end_time - a.end_time);
 
-        console.log(`Game mode 7 matches for player ${playerId}:`, filteredMatches.length);
+        console.log(`Game mode 7 matches for player ${userId}:`, filteredMatches.length);
 
         return filteredMatches;
 
@@ -239,15 +239,15 @@ async function fetchMatchesByPlayerId(playerId) {
     }
 }
 
-async function getPlayerMatchStats(playerId) {
-    const matches = await fetchMatchesByPlayerId(playerId);
+async function getPlayerMatchStats(userId) {
+    const matches = await fetchMatchesByUserId(userId);
 
     // Get overall Sealed mode W/L
-    const winCountOverall = matches.filter(match => match.player_won === playerId).length;
+    const winCountOverall = matches.filter(match => match.player_won === userId).length;
     const lossCountOverall = matches.length - winCountOverall;
     const winPercentageOverall = (winCountOverall / matches.length) * 100;
 
-    console.log(`${playerId} Overall Wins: ${winCountOverall} Losses: ${lossCountOverall} Win Percentage: ${winPercentageOverall.toFixed(2)}%`);
+    console.log(`${userId} Overall Wins: ${winCountOverall} Losses: ${lossCountOverall} Win Percentage: ${winPercentageOverall.toFixed(2)}%`);
 
     // Get Sealed Set information
     // Trim data to last 10 matches before we search for Game 1
@@ -263,7 +263,7 @@ async function getPlayerMatchStats(playerId) {
     // Find the index of the first game in the set
     let firstGameIndex = recentMatches.length - 1;
     for (let i = recentMatches.length - 2; i >= 0; i--) {
-        const playerIndex = recentMatches[i].player_won === playerId ? 0 : 1;
+        const playerIndex = recentMatches[i].player_won === userId ? 0 : 1;
         const currentDeck = recentMatches[i].player_info[playerIndex].cards;
         const previousDeck = recentMatches[i + 1].player_info[playerIndex].cards;
 
@@ -280,13 +280,13 @@ async function getPlayerMatchStats(playerId) {
     }
 
     // Count wins and losses in the sealed set
-    const winsInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_won === playerId);
-    const lossesInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_lost === playerId);
+    const winsInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_won === userId);
+    const lossesInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_lost === userId);
     const winCountInSet = winsInSet.length;
     const lossCountInSet = lossesInSet.length;
 
 
-    console.log(`${playerId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
+    console.log(`${userId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
 
     return {
         winCountOverall,
@@ -301,8 +301,9 @@ async function getPlayerMatchStats(playerId) {
 // Function to display match information
 async function displayMatchList(matches) {
     const matchInfoDiv = document.getElementById('match-list');
-
     matchInfoDiv.innerHTML = '';
+
+
 
     for (const match of matches) {
         const playerWonInfo = await fetchUserInfo(match.player_won);
