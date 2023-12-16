@@ -153,12 +153,23 @@ async function fetchUserRank(userId) {
     try {
         const userRankResponse = await fetch(`https://api.godsunchained.com/v0/rank?user_id=${userId}`);
         const userRank = await userRankResponse.json();
-        return userRank.records[0];
+
+        // Find the rank of the playerr in constructed
+        const userRecord = userRank.records.find(record => record.game_mode === 13);
+
+        if (userRecord) {
+            // Return the rank_level if the record is found
+            return userRecord.rank_level;
+        } else {
+            console.error(`No record found for user ${userId} and game mode ${gameMode}`);
+            return null;
+        }
     } catch (error) {
         console.error('Error fetching user rank:', error);
         return null;
     }
 }
+
 
 // Function to create a user ID icon
 function createUserIdIcon(userId) {
@@ -391,7 +402,7 @@ async function displayMatchList(userId) {
                         <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
                     </div>
                     <div class="list-bar" id="bar-bottom">
-                    <div class="rank rank-left">${playerWonRank.rank_level}</div>
+                    <div class="rank rank-left">${playerWonRank}</div>
                     ${playerWonLossPointsHTML}
                         <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
                         <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
@@ -405,7 +416,7 @@ async function displayMatchList(userId) {
                         <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
                     </div>
                     <div class="list-bar bar-right" id="bar-bottom">
-                        <div class="rank rank-right">${playerLostRank.rank_level}</div>
+                        <div class="rank rank-right">${playerLostRank}</div>
                         ${playerLostLossPointsHTML}
                         <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
                         <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
@@ -490,5 +501,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Fetch and display match data on page load
-    displayMatchList(4637372);
+    displayMatchList(); //4637372 waldo
 });
