@@ -490,7 +490,6 @@ async function handleMatchClick(matchIndex) {
     const match = matches[matchIndex];
     console.log(match);
 
-    // Rest of your code...
     displayPlayerPanel('winner-card', match.player_info[0], true);
     displayPlayerPanel('loser-card', match.player_info[1], false);
 }

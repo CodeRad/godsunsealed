@@ -215,11 +215,16 @@ align-items: center;  }
       margin-bottom: 20px;
       justify-content: center;
       align-items: center;
+      margin-left: 15px;
+  }
+
+  .match-banner:hover {
+    scale: 105%;
   }
  
-  .match-banner:hover .user-list-text{
+  /* .match-banner:hover .user-list-text{
     color: chartreuse;
-  } 
+  }  */
 
 
   .match-banner-panel {
