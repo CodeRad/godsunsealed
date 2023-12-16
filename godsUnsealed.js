@@ -1,8 +1,7 @@
 
 
 // Declare matches variable in a scope accessible to all functions
-let matchesData;
-let bannerCounter = 0;
+let matches;
 
 const DEBUG = false;
 
@@ -161,7 +160,7 @@ async function fetchUserRank(userId) {
             // Return the rank_level if the record is found
             return userRecord.rank_level;
         } else {
-            console.error(`No record found for user ${userId} and game mode ${gameMode}`);
+            console.error(`No record found for user ${userId}`);
             return null;
         }
     } catch (error) {
@@ -256,7 +255,7 @@ async function getPlayerMatchStats(userId) {
     const lossCountOverall = matches.length - winCountOverall;
     const winPercentageOverall = (winCountOverall / matches.length) * 100;
 
-    console.log(`${userId} Overall Wins: ${winCountOverall} Losses: ${lossCountOverall} Win Percentage: ${winPercentageOverall.toFixed(2)}%`);
+    //console.log(`${userId} Overall Wins: ${winCountOverall} Losses: ${lossCountOverall} Win Percentage: ${winPercentageOverall.toFixed(2)}%`);
 
     // Get Sealed Set information
     // Trim data to last 10 matches before we search for Game 1
@@ -282,8 +281,8 @@ async function getPlayerMatchStats(userId) {
         } else {
             // No significant deck change, stop searching
             console.log(`No significant deck change detected between game ${i + 1} and game ${i}`);
-            console.log(`Current Deck (Player ${playerIndex + 1}):`, currentDeck);
-            console.log(`Previous Deck (Player ${playerIndex + 1}):`, previousDeck);
+            //console.log(`Current Deck (Player ${playerIndex + 1}):`, currentDeck);
+            //console.log(`Previous Deck (Player ${playerIndex + 1}):`, previousDeck);
             break;
         }
     }
@@ -311,29 +310,31 @@ async function getPlayerMatchStats(userId) {
 async function displayMatchList(userId) {
     const matchInfoDiv = document.getElementById('match-list');
     matchInfoDiv.innerHTML = '';
-    
-        let matches; // Declare matches variable outside the try blocks
-        
-        try {
-            if (userId) {
-                // Fetch match data by user ID
-                matches = await fetchMatchesByUserId(userId);
-            } else {
-                // Fetch recent match data
-                matches = await fetchRecentMatches();
-            }
-    
-        } catch (error) {
-            console.error('Error displaying match list and fetching data:', error);
+
+    //let matches; // Declare matches variable outside the try blocks
+
+    try {
+        if (userId) {
+            // Fetch match data by user ID
+            matches = await fetchMatchesByUserId(userId);
+        } else {
+            // Fetch recent match data
+            matches = await fetchRecentMatches();
         }
 
-    for (const match of matches) {
+    } catch (error) {
+        console.error('Error displaying match list and fetching data:', error);
+    }
+////////////
+
+    for (let i = 0; i < matches.length; i++) {
+        const match = matches[i];
         const playerWonInfo = await fetchUserInfo(match.player_won);
         const playerLostInfo = await fetchUserInfo(match.player_lost);
         const playerWonRank = await fetchUserRank(match.player_won);
         const playerLostRank = await fetchUserRank(match.player_lost);
-        const playerWonMatchInfo = await getPlayerMatchStats(match.player_won); //4637372 waldo
-        const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost); //205626 majic
+        const playerWonMatchInfo = await getPlayerMatchStats(match.player_won);
+        const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost);
 
         const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -343,34 +344,32 @@ async function displayMatchList(userId) {
         function getTimeAgo(timestamp) {
             const currentTime = Math.floor(Date.now() / 1000);
             const secondsAgo = currentTime - timestamp;
-          
+
             if (secondsAgo < 60) {
-              return `${secondsAgo} second${secondsAgo !== 1 ? 's' : ''} ago`;
+                return `${secondsAgo} second${secondsAgo !== 1 ? 's' : ''} ago`;
             }
-          
+
             const minutesAgo = Math.floor(secondsAgo / 60);
             if (minutesAgo < 60) {
-              const remainingSeconds = secondsAgo % 60;
-              return `${minutesAgo} minute${minutesAgo !== 1 ? 's' : ''} ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''} ago`;
+                const remainingSeconds = secondsAgo % 60;
+                return `${minutesAgo} minute${minutesAgo !== 1 ? 's' : ''} ${remainingSeconds} second${remainingSeconds !== 1 ? 's' : ''} ago`;
             }
-          
+
             const hoursAgo = Math.floor(minutesAgo / 60);
             if (hoursAgo < 24) {
-              const remainingMinutes = minutesAgo % 60;
-              return `${hoursAgo} hour${hoursAgo !== 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''} ago`;
+                const remainingMinutes = minutesAgo % 60;
+                return `${hoursAgo} hour${hoursAgo !== 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''} ago`;
             }
-          
+
             const daysAgo = Math.floor(hoursAgo / 24);
             if (daysAgo < 30) {
-              const remainingHours = hoursAgo % 24;
-              return `${daysAgo} day${daysAgo !== 1 ? 's' : ''} ${remainingHours} hour${remainingHours !== 1 ? 's' : ''} ago`;
+                const remainingHours = hoursAgo % 24;
+                return `${daysAgo} day${daysAgo !== 1 ? 's' : ''} ${remainingHours} hour${remainingHours !== 1 ? 's' : ''} ago`;
             }
-          
+
             const monthsAgo = Math.floor(daysAgo / 30);
             return `${monthsAgo} month${monthsAgo !== 1 ? 's' : ''} ago`;
-          }
-          
-
+        }
 
         // Generate HTML for loss point elements based on the number of loss points
         const playerWonLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
@@ -382,66 +381,78 @@ async function displayMatchList(userId) {
             return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}">/</div>`;
         }).join('');
 
-        // console.log(match.game_id);
+        console.log(match);
         if (!DEBUG) {
-            
-        matchInfoDiv.innerHTML += `
 
-        <div class="match-banner">
-        <div class="banner-top" id="overlay">
-            <div class="match-info">
-           ${match.total_rounds} rounds, ${matchLength} minutes. Posted ${matchTimeAgo}.
+            matchInfoDiv.innerHTML += `
+
+            <div class="match-banner" id="match-banner-${i}" onclick="handleMatchClick(${i})">
+            <div class="banner-top" id="overlay">
+                <div class="match-info">
+            ${match.total_rounds} rounds, ${matchLength} minutes. Posted ${matchTimeAgo}.
+                </div>
             </div>
-        </div>
 
-        <div class="panel-container">
-            <div class="match-banner-panel banner-left">
-                <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)"></div>
-                <div class="bar-container">
-                    <div class="list-bar" id="bar-top">
-                        <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
+            <div class="panel-container">
+                <div class="match-banner-panel banner-left">
+                    <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)"></div>
+                    <div class="bar-container">
+                        <div class="list-bar" id="bar-top">
+                            <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
+                        </div>
+                        <div class="list-bar" id="bar-bottom">
+                        <div class="rank rank-left">${playerWonRank}</div>
+                        ${playerWonLossPointsHTML}
+                            <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
+                            <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                        </div>
                     </div>
-                    <div class="list-bar" id="bar-bottom">
-                    <div class="rank rank-left">${playerWonRank}</div>
-                    ${playerWonLossPointsHTML}
-                        <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
-                        <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                </div>
+                <div class="match-banner-panel banner-right">
+                    <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)"></div>
+                    <div class="bar-container">
+                        <div class="list-bar bar-right" id="bar-top">
+                            <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
+                        </div>
+                        <div class="list-bar bar-right" id="bar-bottom">
+                            <div class="rank rank-right">${playerLostRank}</div>
+                            ${playerLostLossPointsHTML}
+                            <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
+                            <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="match-banner-panel banner-right">
-                <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)"></div>
-                <div class="bar-container">
-                    <div class="list-bar bar-right" id="bar-top">
-                        <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
-                    </div>
-                    <div class="list-bar bar-right" id="bar-bottom">
-                        <div class="rank rank-right">${playerLostRank}</div>
-                        ${playerLostLossPointsHTML}
-                        <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
-                        <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        `;
+            `;
 
         } else { //display DEBUG mode match list
 
             matchInfoDiv.innerHTML += `
-            <div class='debug-panel'>
-                <p class='debug-text'>
-                    player_won: ${playerWonInfo.user_id} (${playerWonRank.rank_level}) ${match.player_info[0].god} (${godPowerNames[match.player_info[0].god_power]}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
-                    (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L)<BR>
-                    player_lost: ${playerLostInfo.user_id} (${playerLostRank.rank_level}) ${match.player_info[1].god} (${godPowerNames[match.player_info[1].god_power]}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
-                    (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L)<BR>
-                    start: ${matchStartTime}|end: ${matchEndTime}|l: ${matchLength}m|${matchTimeAgo}
-                </p>
-            </div>
-        `;
+                <div class='debug-panel'>
+                    <p class='debug-text'>
+                        player_won: ${playerWonInfo.user_id} (${playerWonRank}) ${match.player_info[0].god} (${godPowerNames[match.player_info[0].god_power]}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
+                        (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L)<BR>
+                        player_lost: ${playerLostInfo.user_id} (${playerLostRank}) ${match.player_info[1].god} (${godPowerNames[match.player_info[1].god_power]}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
+                        (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L)<BR>
+                        start: ${matchStartTime}|end: ${matchEndTime}|l: ${matchLength}m|${matchTimeAgo}
+                    </p>
+                </div>
+            `;
         }
+
+        // // Attach click event to each match banner
+        // matchInfoDiv.addEventListener('click', (event) => {
+        //     const matchBanner = event.target.closest('.match-banner');
+        //     if (matchBanner) {
+        //         const matchIndex = matchBanner.dataset.matchIndex;
+        //         handleMatchClick(matches[matchIndex]);
+        //     }
+        // });
     }
 }
+
+
+
 
 // Function to display player information and card list
 async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
@@ -466,7 +477,7 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
                     <div>
                         <p class="player-info-field">${playerInfo.user_id}</p>
                         <p class="player-info-field">${playerInfo.username}</p>
-                        <p class="player-info-field">Constructed Rank: ${playerRank.rank_level}</p>
+                        <p class="player-info-field">Constructed Rank: ${playerRank}</p>
                         <p class="player-info-field">Status: Foo Wins, Bar Losses.</p>
                     </div>
                 </div>
@@ -481,25 +492,17 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
 
 
 // Function to handle match click event and populate panels
-async function handleMatchClick(match) {
+async function handleMatchClick(matchIndex) {
+    const match = matches[matchIndex];
+    console.log(match);
 
+    // Rest of your code...
     displayPlayerPanel('winner-card', match.player_info[0], true);
     displayPlayerPanel('loser-card', match.player_info[1], false);
-
-
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Attach click event to the parent container
-    const matchListDiv = document.getElementById('match-list');
-    matchListDiv.addEventListener('click', (event) => {
-        const targetMatchBanner = event.target.closest('.match-banner');
-        if (targetMatchBanner) {
-            const index = Array.from(targetMatchBanner.parentNode.children).indexOf(targetMatchBanner);
-            handleMatchClick(matchesData[index]);
-        }
-    });
 
+document.addEventListener('DOMContentLoaded', () => {
     // Fetch and display match data on page load
-    displayMatchList(); //4637372 waldo
+    displayMatchList(1979626);
 });
