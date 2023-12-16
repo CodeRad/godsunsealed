@@ -309,9 +309,7 @@ async function getPlayerMatchStats(userId) {
 // Function to display match information
 async function displayMatchList(userId) {
     const matchInfoDiv = document.getElementById('match-list');
-    matchInfoDiv.innerHTML = '';
-
-    //let matches; // Declare matches variable outside the try blocks
+    matchInfoDiv.innerHTML = ''; 
 
     try {
         if (userId) {
@@ -325,7 +323,6 @@ async function displayMatchList(userId) {
     } catch (error) {
         console.error('Error displaying match list and fetching data:', error);
     }
-////////////
 
     for (let i = 0; i < matches.length; i++) {
         const match = matches[i];
@@ -383,49 +380,55 @@ async function displayMatchList(userId) {
 
         console.log(match);
         if (!DEBUG) {
+            // Create a new match banner element
+            const matchBanner = document.createElement('div');
+            matchBanner.className = 'match-banner dropIn';
+            matchBanner.id = `match-banner-${i}`;
+            matchBanner.onclick = () => handleMatchClick(i);
 
-            matchInfoDiv.innerHTML += `
-
-            <div class="match-banner" id="match-banner-${i}" onclick="handleMatchClick(${i})">
-            <div class="banner-top" id="overlay">
-                <div class="match-info">
-            ${match.total_rounds} rounds, ${matchLength} minutes. Posted ${matchTimeAgo}.
-                </div>
-            </div>
-
-            <div class="panel-container">
-                <div class="match-banner-panel banner-left">
-                    <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)"></div>
-                    <div class="bar-container">
-                        <div class="list-bar" id="bar-top">
-                            <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
-                        </div>
-                        <div class="list-bar" id="bar-bottom">
-                        <div class="rank rank-left">${playerWonRank}</div>
-                        ${playerWonLossPointsHTML}
-                            <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
-                            <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
-                        </div>
+            // Your match banner content
+            matchBanner.innerHTML = `
+                <div class="banner-top" id="overlay">
+                    <div class="match-info">
+                        ${match.total_rounds} rounds, ${matchLength} minutes. Posted ${matchTimeAgo}.
                     </div>
                 </div>
-                <div class="match-banner-panel banner-right">
-                    <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)"></div>
-                    <div class="bar-container">
-                        <div class="list-bar bar-right" id="bar-top">
-                            <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
-                        </div>
-                        <div class="list-bar bar-right" id="bar-bottom">
-                            <div class="rank rank-right">${playerLostRank}</div>
-                            ${playerLostLossPointsHTML}
-                            <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
-                            <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+
+                <div class="panel-container">
+                    <div class="match-banner-panel banner-left">
+                        <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)"></div>
+                        <div class="bar-container">
+                            <div class="list-bar" id="bar-top">
+                                <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
+                            </div>
+                            <div class="list-bar" id="bar-bottom">
+                            <div class="rank rank-left">${playerWonRank}</div>
+                            ${playerWonLossPointsHTML}
+                                <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
+                                <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            `;
+                    <div class="match-banner-panel banner-right">
+                        <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)"></div>
+                        <div class="bar-container">
+                            <div class="list-bar bar-right" id="bar-top">
+                                <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
+                            </div>
+                            <div class="list-bar bar-right" id="bar-bottom">
+                                <div class="rank rank-right">${playerLostRank}</div>
+                                ${playerLostLossPointsHTML}
+                                <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
+                                <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                
 
-        } else { //display DEBUG mode match list
+                // Append the match banner to the DOM
+                matchInfoDiv.appendChild(matchBanner);
+        } else {
 
             matchInfoDiv.innerHTML += `
                 <div class='debug-panel'>
@@ -439,15 +442,6 @@ async function displayMatchList(userId) {
                 </div>
             `;
         }
-
-        // // Attach click event to each match banner
-        // matchInfoDiv.addEventListener('click', (event) => {
-        //     const matchBanner = event.target.closest('.match-banner');
-        //     if (matchBanner) {
-        //         const matchIndex = matchBanner.dataset.matchIndex;
-        //         handleMatchClick(matches[matchIndex]);
-        //     }
-        // });
     }
 }
 
@@ -504,5 +498,5 @@ async function handleMatchClick(matchIndex) {
 
 document.addEventListener('DOMContentLoaded', () => {
     // Fetch and display match data on page load
-    displayMatchList(1979626);
+    displayMatchList();//(1979626);
 });
