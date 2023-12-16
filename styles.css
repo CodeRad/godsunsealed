@@ -1,5 +1,8 @@
   /* * { outline: 1px solid rgb(97, 97, 97) }      */
-
+/* 
+  *, *::before, *::after {
+    box-sizing: border-box;
+} */
 
   body {
       margin: 0;
@@ -13,7 +16,7 @@
       /* font-family: Verdana, Geneva, Tahoma, sans-serif; */
       font-family: 'Lilita One', sans-serif;
       color: #FFFFFF;
-      padding: 20px;
+      /* padding: 20px; */
   }
 
   .container {
@@ -187,11 +190,13 @@ justify-content: center;
 align-items: center;  }
 
 #match-list {
-    margin-bottom: 30px;
-    /* overflow: hidden; */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* margin-bottom: 45px; */
     overflow-y: auto;
     overflow-x: hidden;
-    justify-content: center;
 }
 
   @keyframes dropIn {
@@ -212,20 +217,36 @@ align-items: center;  }
   
 
   .match-banner {
-      margin-bottom: 20px;
+      margin-bottom: 10px;
+      padding-bottom: 15px;
+      border-radius: 10px;
       justify-content: center;
       align-items: center;
       margin-left: 15px;
   }
 
   .match-banner:hover {
+    background-color: rgba(165, 42, 42, 0.267);
+    background-size: 110%;
     scale: 105%;
+    outline: 2px solid rgba(255, 255, 0, 0.171);
+    outline-style: ridge;
+    outline-offset: 5px;
+  }
+
+  .match-banner.active {
+    /* background-color: blue; */
+    outline: 2px solid rgba(255, 255, 0, 0.171);
+    outline-style: ridge;
+    outline-offset: 5px;
   }
  
-  /* .match-banner:hover .user-list-text{
+  .match-banner:hover .user-list-text{
     color: chartreuse;
-  }  */
-
+  } 
+  .match-banner:active .user-list-text{
+    color: black;
+  } 
 
   .match-banner-panel {
       /* position: relative; */

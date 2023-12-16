@@ -378,7 +378,7 @@ async function displayMatchList(userId) {
             return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}">/</div>`;
         }).join('');
 
-        console.log(match);
+        //console.log(match);
         if (!DEBUG) {
             // Create a new match banner element
             const matchBanner = document.createElement('div');
@@ -488,11 +488,27 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
 // Function to handle match click event and populate panels
 async function handleMatchClick(matchIndex) {
     const match = matches[matchIndex];
-    console.log(match);
 
-    displayPlayerPanel('winner-card', match.player_info[0], true);
-    displayPlayerPanel('loser-card', match.player_info[1], false);
+    // Remove 'active' class from all match banners
+    const allMatchBanners = document.querySelectorAll('.match-banner');
+    allMatchBanners.forEach(banner => {
+        banner.classList.remove('active');
+        banner.style.opacity = 0.5; // Set opacity for non-active banners
+    });
+
+    // Add 'active' class to the selected match banner
+    const matchBanner = document.getElementById(`match-banner-${matchIndex}`);
+    if (matchBanner) {
+        matchBanner.classList.add('active');
+        matchBanner.style.opacity = 1; // Set full opacity for the selected banner
+        // console.log(match);
+        displayPlayerPanel('winner-card', match.player_info[0], true);
+        displayPlayerPanel('loser-card', match.player_info[1], false);
+    } else {
+        console.error(`Match banner with ID match-banner-${matchIndex} not found.`);
+    }
 }
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
