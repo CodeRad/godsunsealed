@@ -469,10 +469,10 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
                         <p class="player-info-field">${godPowerNames[playerMatchInfo.god_power]}</p>
                     </div>
                     <div>
-                        <p class="player-info-field">${playerInfo.user_id}</p>
+                        <p class="player-info-field">${playerInfo.user_id}</p> <button class="button" id="showMatchesButton">Match List</button>
                         <p class="player-info-field">${playerInfo.username}</p>
                         <p class="player-info-field">Constructed Rank: ${playerRank}</p>
-                        <p class="player-info-field">Status: Foo Wins, Bar Losses.</p>
+                        <p class="player-info-field">Player Level: ${playerInfo.xp_level}</p>
                     </div>
                 </div>
             </div>
@@ -482,6 +482,11 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
     `;
 
     displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
+
+    const showMatchesButton = panel.querySelector('#showMatchesButton');
+    showMatchesButton.addEventListener('click', async () => {
+        await displayMatchList(playerMatchInfo.user_id);
+    });
 }
 
 

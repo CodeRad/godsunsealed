@@ -1,9 +1,7 @@
-  /* * { outline: 1px solid rgb(97, 97, 97) }      */
-/* 
-  *, *::before, *::after {
-    box-sizing: border-box;
-} */
+/* uncomment the next line to add outlines on everything for testing */
+/* * { outline: 1px solid rgb(97, 97, 97) }      */
 
+/* #region main template */
   body {
       margin: 0;
       overflow: hidden;
@@ -45,6 +43,19 @@
       width: 30%;
   }
 
+  .footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    /* background-color: #333; */
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+  }
+/* #endregion */
+
+/* #region player card */
   .player-card {
       background-position: bottom left;
       background-repeat: no-repeat;
@@ -110,8 +121,11 @@
       border-radius: 50%;
       /* border: 3px solid black; */
       overflow: hidden;
+      
   }
+/* #endregion */ 
 
+/* #region card list */
   .card-list-container {
       display: flex;
       justify-content: center;
@@ -149,17 +163,14 @@
       color: #fff;
       z-index: 2;
   }
+/* #endregion */
 
-
+/* #region center top */
   .center-top {
       background-color: #dcdcdc00;
       text-align: center;
       height: 30%;
   }
-/* 
-  .logo-container {
-    position: relative;
-  } */
 
   .logo-top {
       color: rgba(170, 207, 255, 0.685);
@@ -180,14 +191,16 @@
     color: white;
     text-shadow: 4px 4px 4px #000;
   }
+/* #endregion */
 
+/* #region match list */
 
-
-  /* new match list */
 
   .center-bottom{
 justify-content: center;
 align-items: center;  }
+
+
 
 #match-list {
     display: flex;
@@ -409,16 +422,32 @@ align-items: center;  }
       font-size: 1em;
   }
 
-  .footer {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      /* background-color: #333; */
-      color: #fff;
-      padding: 10px;
-      text-align: center;
-  }
+/* #endregion */
+
+/* #region general elements */ 
+
+  .material-button {
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+.button {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+}
+
+.button:hover {
+    background-color: #45a049;
+}
 
   .debug-panel {
     font-family: 'Courier New', Courier, monospace;
@@ -431,7 +460,9 @@ align-items: center;  }
 
   }
 
-/* scrollbar? */
+/* #endregion */
+
+/* #region scrollbar */
 /* For Webkit Browsers (Chrome, Safari) */
 #match-list::-webkit-scrollbar {
     width: 5px;
@@ -449,3 +480,4 @@ align-items: center;  }
   #match-list::-webkit-scrollbar-thumb:hover {
     background-color: #6f45a069; /* Change color on hover */
   }
+/* #endregion */
