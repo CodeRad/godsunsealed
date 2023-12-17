@@ -9,32 +9,38 @@ const godThemes = {
     war: {
         gradient: 'linear-gradient(0deg, rgba(75,5,5,1) 0%, rgba(75,5,5,1) 10%, rgba(75,5,5,0) 20%, rgba(0,0,0,0) 50%, rgba(75,5,5,1) 90%, rgba(75,5,5,1) 100%)',
         image: 'images/gods/war.png',
-        name: 'Auros'
+        name: 'Auros',
+        color: 'rgba(255,5,5,1)'
     },
     death: {
         gradient: 'linear-gradient(0deg, rgba(50,50,50,1) 0%, rgba(50,50,50,1) 10%, rgba(0,50,50,0) 20%, rgba(0,0,0,0) 50%, rgba(50,50,50,1) 90%, rgba(50,50,50,1) 100%)',
         image: 'images/gods/death.png',
-        name: 'Malissus'
+        name: 'Malissus',
+        color: 'rgba(50,50,50,1)'
     },
     deception: {
         gradient: 'linear-gradient(0deg, rgba(100,15,255,1) 0%, rgba(100,15,255,1) 10%, rgba(100,15,255,0) 20%, rgba(0,0,0,0) 50%, rgba(100,15,255,1) 90%, rgba(100,15,255,1) 100%)',
         image: 'images/gods/deception.png',
-        name: 'Ludia'
+        name: 'Ludia',
+        color: 'rgba(100,15,255,1)'
     },
     nature: {
         gradient: 'linear-gradient(0deg, rgba(5,75,30,1) 0%, rgba(5,75,30,1) 10%, rgba(5,75,30,0) 20%, rgba(0,0,0,0) 50%, rgba(5,75,30,1) 90%, rgba(5,75,30,1) 100%)',
         image: 'images/gods/nature.png',
-        name: 'Aeona'
+        name: 'Aeona',
+        color: 'rgba(5,175,30,1)'
     },
     magic: {
         gradient: 'linear-gradient(0deg, rgba(20,175,255,1) 0%, rgba(20,175,255,1) 10%, rgba(20,175,255,0) 20%, rgba(0,0,0,0) 50%, rgba(20,175,255,1) 90%, rgba(20,175,255,1) 100%)',
         image: 'images/gods/magic.png',
-        name: 'Elyrian'
+        name: 'Elyrian',
+        color: 'rgba(20,175,255,1)'
     },
     light: {
         gradient: 'linear-gradient(0deg, rgba(100,150,15,1) 0%, rgba(100,150,15,1) 10%, rgba(100,150,15,0) 20%, rgba(0,0,0,0) 50%, rgba(100,150,15,1) 90%, rgba(100,150,15,1) 100%)',
         image: 'images/gods/light.png',
-        name: 'Lysander'
+        name: 'Lysander',
+        color: 'rgb(255, 255, 124)'
     }
 };
 const godPowerNames = {
@@ -255,6 +261,39 @@ async function getPlayerMatchStats(userId) {
     const lossCountOverall = matches.length - winCountOverall;
     const winPercentageOverall = (winCountOverall / matches.length) * 100;
 
+        // Get the main god for the player
+        const mainGod = matches[0].player_info.find(player => player.user_id === userId).god;
+
+        // Find the other two gods by fetching card data
+        const otherGods = new Set();
+    
+        for (const match of matches) {
+            const playerDeck = match.player_info.find(player => player.user_id === userId).cards;
+    
+            // Fetch card information for each card in the player's deck
+            for (const cardId of playerDeck) {
+                const cardInfo = await fetchCardInfo(cardId);
+    
+                if (cardInfo && cardInfo.god !== mainGod && cardInfo.god !== 'neutral') {
+                    otherGods.add(cardInfo.god);
+    
+                    // Break if we have found cards from two different gods
+                    if (otherGods.size === 2) {
+                        break;
+                    }
+                }
+            }
+    
+            // Break if we have found cards from two different gods
+            if (otherGods.size === 2) {
+                break;
+            }
+        }
+    
+        const godNames = [mainGod, ...Array.from(otherGods)];
+        console.log(`${userId} used gods: ${godNames.join(', ')}`);
+    
+
     //console.log(`${userId} Overall Wins: ${winCountOverall} Losses: ${lossCountOverall} Win Percentage: ${winPercentageOverall.toFixed(2)}%`);
 
     // Get Sealed Set information
@@ -301,7 +340,8 @@ async function getPlayerMatchStats(userId) {
         lossCountOverall,
         winPercentageOverall,
         winCountInSet,
-        lossCountInSet
+        lossCountInSet,
+        godNames
     };
 }
 
@@ -378,7 +418,7 @@ async function displayMatchList(userId) {
             return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}">/</div>`;
         }).join('');
 
-        //console.log(match);
+        console.log('--------------------------------------------------------------------------------');
         if (!DEBUG) {
             // Create a new match banner element
             const matchBanner = document.createElement('div');
@@ -396,7 +436,11 @@ async function displayMatchList(userId) {
 
                 <div class="panel-container">
                     <div class="match-banner-panel banner-left">
-                        <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)"></div>
+                        <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)">
+                            <div class="god-tag" id="god-tag-1" style="background-color: ${godThemes[playerWonMatchInfo.godNames[2]].color}"></div>
+                            <div class="god-tag" id="god-tag-2" style="background-color: ${godThemes[playerWonMatchInfo.godNames[1]].color}"></div>
+                            <div class="god-tag" id="god-tag-3" style="background-color: ${godThemes[playerWonMatchInfo.godNames[0]].color}"></div>
+                        </div>
                         <div class="bar-container">
                             <div class="list-bar" id="bar-top">
                                 <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
@@ -410,7 +454,11 @@ async function displayMatchList(userId) {
                         </div>
                     </div>
                     <div class="match-banner-panel banner-right">
-                        <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)"></div>
+                        <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)">
+                            <div class="god-tag" id="god-tag-1-right" style="background-color: ${godThemes[playerLostMatchInfo.godNames[2]].color}"></div>
+                            <div class="god-tag" id="god-tag-2-right" style="background-color: ${godThemes[playerLostMatchInfo.godNames[1]].color}"></div>
+                            <div class="god-tag" id="god-tag-3-right" style="background-color: ${godThemes[playerLostMatchInfo.godNames[0]].color}"></div>
+                        </div>
                         <div class="bar-container">
                             <div class="list-bar bar-right" id="bar-top">
                                 <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
@@ -451,6 +499,8 @@ async function displayMatchList(userId) {
 // Function to display player information and card list
 async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
     const panel = document.getElementById(panelId);
+
+    const playerMatchHistory = await getPlayerMatchStats(playerMatchInfo.user_id);
     const godTheme = godThemes[playerMatchInfo.god];
     const outcomeClass = isWinner ? 'winner' : 'loser';
     const outcomeText = isWinner ? 'WINNER' : 'LOSER';
@@ -477,7 +527,11 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
                 </div>
             </div>
             <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
-            <img src="${godTheme.image}" alt="${playerMatchInfo.god}" style="margin-top: auto;">
+            <!---<div class="portrait-container"> ---!>
+            <!--- <img class="portrait-left" src="${godThemes[playerMatchHistory.godNames[1]].image}"> ---!>
+            <!--- <img class="portrait-right" src="${godThemes[playerMatchHistory.godNames[2]].image}"> ---!>
+            <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
+            <!---</div> ---!>
         </div>
     `;
 

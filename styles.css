@@ -113,6 +113,7 @@
   .player-info-field {
       background-color: #00000044;
       width: 100%;
+      font-family: 'Courier New', Courier, monospace;
   }
 
   .godpower-card {
@@ -123,7 +124,32 @@
       overflow: hidden;
       
   }
-/* #endregion */ 
+/* #endregion */
+
+/* #region player card portraits */
+  .portrait-containter {
+    display: flex;
+    /* position: relative; */
+    /* margin-bottom: 0; */
+    margin-top: auto;
+    /* width: auto; */
+  }
+
+.portrait {
+  /* position: absolute; */
+  /* bottom: 0; */
+}
+.portrait-left {
+  /* position: absolute; */
+    /* bottom: 0; */
+    /* left: 0; */
+}
+.portrait-right {
+  /* position: absolute; */
+  /* bottom: 0; */
+  /* right: 0; */
+}
+
 
 /* #region card list */
   .card-list-container {
@@ -236,29 +262,32 @@ align-items: center;  }
       justify-content: center;
       align-items: center;
       margin-left: 15px;
+      position: relative;
   }
 
   .match-banner:hover {
-    background-color: rgba(165, 42, 42, 0.267);
-    background-size: 110%;
+    /* background-color: rgba(165, 42, 42, 0.267); */
+    /* background-size: 110%; */
     scale: 105%;
-    outline: 2px solid rgba(255, 255, 0, 0.171);
-    outline-style: ridge;
-    outline-offset: 5px;
+    /* outline: 2px solid rgba(255, 255, 0, 0.171); */
+    /* outline-style: ridge; */
+    /* outline-offset: 5px; */
   }
 
   .match-banner.active {
     /* background-color: blue; */
-    outline: 2px solid rgba(255, 255, 0, 0.171);
-    outline-style: ridge;
-    outline-offset: 5px;
+    /* outline: 2px solid rgba(255, 255, 0, 0.171); */
+    /* outline-style: ridge; */
+    /* outline-offset: 5px; */
+    color: chartreuse;
+    scale: 105%;
   }
  
   .match-banner:hover .user-list-text{
     color: chartreuse;
   } 
   .match-banner:active .user-list-text{
-    color: black;
+    color: yellow;
   } 
 
   .match-banner-panel {
@@ -309,6 +338,50 @@ align-items: center;  }
       font-size: 2em;
       z-index: 1;
       font-family: 'Lilita One', sans-serif;
+      flex-direction: column;
+  }
+
+
+  
+ 
+
+  .god-tag {
+    width: 13px;
+    height: 20px;
+    position: absolute;
+
+    outline: 1px solid black;
+    border-radius: 3px;
+  }
+
+  #god-tag-1 {
+    top: 47px;
+    left: 1px;
+  }
+
+  #god-tag-2 {
+    top: 48px;
+    left: 9px;
+  }
+
+  #god-tag-3 {
+    top: 48px;
+    left: 19px;
+  }
+
+  #god-tag-1-right {
+    top: 47px;
+    right: 1px;
+  }
+
+  #god-tag-2-right {
+    top: 48px;
+    right: 9px;
+  }
+
+  #god-tag-3-right {
+    top: 48px;
+    right: 19px;
   }
 
   .list-bar {
@@ -424,29 +497,25 @@ align-items: center;  }
 
 /* #endregion */
 
-/* #region general elements */ 
+/* #region general elements */
 
-  .material-button {
-    background-color: #4CAF50;
-    color: #fff;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s;
-}
 .button {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font-family: 'Courier New', Courier, monospace;
   color: #fff;
   padding: 10px 20px;
   border-radius: 8px;
+  margin: 20px;
+
+
 }
 
 .button:hover {
-    background-color: #45a049;
+    background-color: rgba(255, 255, 255, 0.4);
+    scale: 110%;
 }
 
   .debug-panel {
