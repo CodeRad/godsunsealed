@@ -194,10 +194,10 @@ function createUserIdIcon(userId) {
 }
 
 // Function to fetch matches by player ID
-async function fetchMatchesByUserId(userId) {
+async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 1000)) {
     try {
         const itemsPerPage = 100;
-        const endTime = Math.floor(Date.now() / 1000);
+        // const endTime = Math.floor(Date.now() / 1000);
         const startTime = endTime - 60 * 60 * 24 * 3;
 
         // Fetch the first page to get total records for wins
@@ -253,8 +253,8 @@ async function fetchMatchesByUserId(userId) {
     }
 }
 
-async function getPlayerMatchStats(userId) {
-    const matches = await fetchMatchesByUserId(userId);
+async function getPlayerMatchStats(userId, endTime) {
+    const matches = await fetchMatchesByUserId(userId, endTime);
 
     // Get overall Sealed mode W/L
     const winCountOverall = matches.filter(match => match.player_won === userId).length;
@@ -370,8 +370,8 @@ async function displayMatchList(userId) {
         const playerLostInfo = await fetchUserInfo(match.player_lost);
         const playerWonRank = await fetchUserRank(match.player_won);
         const playerLostRank = await fetchUserRank(match.player_lost);
-        const playerWonMatchInfo = await getPlayerMatchStats(match.player_won);
-        const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost);
+        const playerWonMatchInfo = await getPlayerMatchStats(match.player_won, match.end_time);
+        const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost, match.end_time);
 
         const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -500,7 +500,7 @@ async function displayMatchList(userId) {
 async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
     const panel = document.getElementById(panelId);
 
-    const playerMatchHistory = await getPlayerMatchStats(playerMatchInfo.user_id);
+    // const playerMatchHistory = await getPlayerMatchStats(playerMatchInfo.user_id);
     const godTheme = godThemes[playerMatchInfo.god];
     const outcomeClass = isWinner ? 'winner' : 'loser';
     const outcomeText = isWinner ? 'WINNER' : 'LOSER';
@@ -528,13 +528,19 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
             </div>
             <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
             <!---<div class="portrait-container"> ---!>
-            <!--- <img class="portrait-left" src="${godThemes[playerMatchHistory.godNames[1]].image}"> ---!>
-            <!--- <img class="portrait-right" src="${godThemes[playerMatchHistory.godNames[2]].image}"> ---!>
+
+
+
+
+
+
+
             <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
             <!---</div> ---!>
         </div>
     `;
-
+//             <!--- <img class="portrait-left" src="${godThemes[playerMatchHistory.godNames[1]].image}"> ---!>
+// <!--- <img class="portrait-right" src="${godThemes[playerMatchHistory.godNames[2]].image}"> ---!></img>
     displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
 
     const showMatchesButton = panel.querySelector('#showMatchesButton');
