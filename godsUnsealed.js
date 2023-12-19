@@ -87,6 +87,7 @@ async function displayCardList(cardIds, containerId) {
     }
 }
 
+
 // Function to fetch card data
 async function fetchCardInfo(cardId) {
     try {
