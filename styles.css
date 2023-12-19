@@ -233,7 +233,6 @@ align-items: center;  }
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    /* margin-bottom: 45px; */
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -266,19 +265,10 @@ align-items: center;  }
   }
 
   .match-banner:hover {
-    /* background-color: rgba(165, 42, 42, 0.267); */
-    /* background-size: 110%; */
     scale: 105%;
-    /* outline: 2px solid rgba(255, 255, 0, 0.171); */
-    /* outline-style: ridge; */
-    /* outline-offset: 5px; */
   }
 
   .match-banner.active {
-    /* background-color: blue; */
-    /* outline: 2px solid rgba(255, 255, 0, 0.171); */
-    /* outline-style: ridge; */
-    /* outline-offset: 5px; */
     color: chartreuse;
     scale: 105%;
   }
@@ -291,7 +281,6 @@ align-items: center;  }
   } 
 
   .match-banner-panel {
-      /* position: relative; */
       display: flex;
 
   }
@@ -314,7 +303,6 @@ align-items: center;  }
   }
   
   .match-info {
-    /* background-color: rgba(0, 0, 0, 0.5); */
     border-radius: 5px;
     width: fit-content;
     color: chartreuse;
@@ -332,18 +320,31 @@ align-items: center;  }
       height: 50px;
       border-radius: 50%;
       display: flex;
-      justify-content: center;
-      align-items: center;
-      color: rgba(0, 0, 0, 0.6);
-      font-size: 2em;
       z-index: 1;
-      font-family: 'Lilita One', sans-serif;
-      flex-direction: column;
   }
 
 
-  
- 
+  .rank {
+    color: white;
+    font-size: 1.3em;
+    font-family: 'Lilita One', sans-serif;
+    text-shadow:
+        -2px -2px 0 black,
+        0 -2px 0 black,
+        2px -2px 0 black,
+        2px 0 0 black,
+        2px 2px 0 black,
+        0 2px 0 black,
+        -2px 2px 0 black,
+        -2px 0 0 black;
+    z-index: 1;
+    margin-top: -2px;
+}
+
+.rank-right {
+    margin-left: auto;
+    margin-right: 0px;
+}
 
   .god-tag {
     width: 13px;
@@ -355,32 +356,32 @@ align-items: center;  }
   }
 
   #god-tag-1 {
-    top: 47px;
+    top: 49px;
     left: 1px;
   }
 
   #god-tag-2 {
-    top: 48px;
+    top: 50px;
     left: 9px;
   }
 
   #god-tag-3 {
-    top: 48px;
+    top: 50px;
     left: 19px;
   }
 
   #god-tag-1-right {
-    top: 47px;
+    top: 49px;
     right: 1px;
   }
 
   #god-tag-2-right {
-    top: 48px;
+    top: 50px;
     right: 9px;
   }
 
   #god-tag-3-right {
-    top: 48px;
+    top: 50px;
     right: 19px;
   }
 
@@ -414,7 +415,7 @@ align-items: center;  }
       text-align: left;
   }
 
-  .rank,
+
   .lost-match,
   .won-matches,
   .winrate {
@@ -433,8 +434,6 @@ align-items: center;  }
       flex-direction: row-reverse;
   }
 
-
-
   .lost-match {
       background-color: rgb(158, 39, 39);
       color: black;
@@ -443,50 +442,20 @@ align-items: center;  }
 
 
   .won-matches {
-      background-color: white;
-      background: linear-gradient(0deg, rgba(100, 150, 15, 1) 0%, rgba(100, 150, 15, 1) 10%, rgb(151, 224, 23) 40%, rgba(100, 150, 15, 1) 100%);
-      color: white;
+      color: gold;
       font-size: 1.4em;
       text-shadow:
-          -2px -2px 0 grey,
-          0 -2px 0 grey,
-          2px -2px 0 grey,
-          2px 0 0 grey,
-          2px 2px 0 grey,
-          0 2px 0 grey,
-          -2px 2px 0 grey,
-          -2px 0 0 grey;
-
+          -2px -2px 0 black,
+          0 -2px 0 black,
+          2px -2px 0 black,
+          2px 0 0 black,
+          2px 2px 0 black,
+          0 2px 0 black,
+          -2px 2px 0 black,
+          -2px 0 0 black;
       margin-left: 5px;
       margin-right: 5px;
   }
-
-  .rank {
-      color: black;
-      font-size: 1.4em;
-      text-shadow:
-          -2px -2px 0 grey,
-          0 -2px 0 grey,
-          2px -2px 0 grey,
-          2px 0 0 grey,
-          2px 2px 0 grey,
-          0 2px 0 grey,
-          -2px 2px 0 grey,
-          -2px 0 0 grey;
-      z-index: 1;
-
-  }
-
-  .rank-left {
-      margin-left: -10px;
-      margin-right: auto;
-  }
-
-  .rank-right {
-      margin-left: auto;
-      margin-right: -10px;
-  }
-
   .winrate {
       background-color: rgb(236, 204, 162);
       width: 80px;

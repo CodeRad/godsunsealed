@@ -440,13 +440,14 @@ async function displayMatchList(userId) {
                             <div class="god-tag" id="god-tag-1" style="background-color: ${godThemes[playerWonMatchInfo.godNames[2]].color}"></div>
                             <div class="god-tag" id="god-tag-2" style="background-color: ${godThemes[playerWonMatchInfo.godNames[1]].color}"></div>
                             <div class="god-tag" id="god-tag-3" style="background-color: ${godThemes[playerWonMatchInfo.godNames[0]].color}"></div>
+                            <div class="rank rank-left">${playerWonRank}</div>
                         </div>
                         <div class="bar-container">
                             <div class="list-bar" id="bar-top">
                                 <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
                             </div>
                             <div class="list-bar" id="bar-bottom">
-                            <div class="rank rank-left">${playerWonRank}</div>
+                            
                             ${playerWonLossPointsHTML}
                                 <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
                                 <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
@@ -458,13 +459,14 @@ async function displayMatchList(userId) {
                             <div class="god-tag" id="god-tag-1-right" style="background-color: ${godThemes[playerLostMatchInfo.godNames[2]].color}"></div>
                             <div class="god-tag" id="god-tag-2-right" style="background-color: ${godThemes[playerLostMatchInfo.godNames[1]].color}"></div>
                             <div class="god-tag" id="god-tag-3-right" style="background-color: ${godThemes[playerLostMatchInfo.godNames[0]].color}"></div>
+                            <div class="rank rank-right">${playerLostRank}</div>
                         </div>
                         <div class="bar-container">
                             <div class="list-bar bar-right" id="bar-top">
                                 <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
                             </div>
                             <div class="list-bar bar-right" id="bar-bottom">
-                                <div class="rank rank-right">${playerLostRank}</div>
+
                                 ${playerLostLossPointsHTML}
                                 <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
                                 <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
