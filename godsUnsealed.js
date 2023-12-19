@@ -105,14 +105,15 @@ async function fetchCardInfo(cardId) {
 // Function to fetch match data
 async function fetchRecentMatches() {
     try {
-        const itemsPerPage = 100; // Specify the desired items per page
+        const itemsPerPage = 1000; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
-        const startTime = endTime - 60 * 5; //5 minutes
+        const startTime = endTime - 60 * 10; // 10 minutes
 
-        // Fetch the first page to get total records
-        const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}`);
+        // Fetch only the first page without fetching the total count
+        const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=1`);
         const firstPageData = await firstPageResponse.json();
 
+        // Get the total records from the first page data
         const totalRecords = firstPageData.total;
         console.log('Total records:', totalRecords);
 
@@ -120,8 +121,8 @@ async function fetchRecentMatches() {
         const totalPages = Math.ceil(totalRecords / itemsPerPage);
 
         // Fetch data for each page and concatenate the results
-        let allMatches = [];
-        for (let page = 1; page <= totalPages; page++) {
+        let allMatches = firstPageData.records; // Use records from the first page
+        for (let page = 2; page <= totalPages; page++) {
             const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=${page}`);
             const pageData = await pageResponse.json();
             allMatches = allMatches.concat(pageData.records);
@@ -133,13 +134,13 @@ async function fetchRecentMatches() {
 
         console.log('Filtered Game Mode 7 Matches:', filteredMatches.length);
 
-
         return filteredMatches;
 
     } catch (error) {
         console.error('Error fetching match data:', error);
     }
 }
+
 
 // Function to fetch user info
 async function fetchUserInfo(userId) {
@@ -159,7 +160,7 @@ async function fetchUserRank(userId) {
         const userRankResponse = await fetch(`https://api.godsunchained.com/v0/rank?user_id=${userId}`);
         const userRank = await userRankResponse.json();
 
-        // Find the rank of the playerr in constructed
+        // Find the rank of the player in constructed
         const userRecord = userRank.records.find(record => record.game_mode === 13);
 
         if (userRecord) {
@@ -167,11 +168,11 @@ async function fetchUserRank(userId) {
             return userRecord.rank_level;
         } else {
             console.error(`No record found for user ${userId}`);
-            return null;
+            return '1';
         }
     } catch (error) {
         console.error('Error fetching user rank:', error);
-        return null;
+        return '1';
     }
 }
 
@@ -194,22 +195,22 @@ function createUserIdIcon(userId) {
 }
 
 // Function to fetch matches by player ID
+// Function to fetch matches by player ID with pagination and null checks
 async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 1000)) {
     try {
-        const itemsPerPage = 100;
-        // const endTime = Math.floor(Date.now() / 1000);
-        const startTime = endTime - 60 * 60 * 24 * 3;
+        const itemsPerPage = 1000;
+        const startTime = endTime - 60 * 60 * 24 * 3; //3 days, which is the max timeframe unfortunately
 
         // Fetch the first page to get total records for wins
-        const winsResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}`);
-        const winsData = await winsResponse.json();
+        const winsFirstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=1`);
+        const winsFirstPageData = await winsFirstPageResponse.json();
 
         // Fetch the first page to get total records for losses
-        const lossesResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}`);
-        const lossesData = await lossesResponse.json();
+        const lossesFirstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=1`);
+        const lossesFirstPageData = await lossesFirstPageResponse.json();
 
-        const totalWins = winsData.total;
-        const totalLosses = lossesData.total;
+        const totalWins = winsFirstPageData.total;
+        const totalLosses = lossesFirstPageData.total;
 
         console.log(`Total wins for player ${userId}:`, totalWins);
         console.log(`Total losses for player ${userId}:`, totalLosses);
@@ -218,22 +219,22 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         const totalPagesWins = Math.ceil(totalWins / itemsPerPage);
 
         // Fetch data for each page and concatenate the results for wins
-        let allWins = [];
-        for (let page = 1; page <= totalPagesWins; page++) {
+        let allWins = winsFirstPageData.records || [];
+        for (let page = 2; page <= totalPagesWins; page++) {
             const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=${page}`);
             const pageData = await pageResponse.json();
-            allWins = allWins.concat(pageData.records);
+            allWins = allWins.concat(pageData.records || []);
         }
 
         // Calculate the number of pages needed for losses
         const totalPagesLosses = Math.ceil(totalLosses / itemsPerPage);
 
         // Fetch data for each page and concatenate the results for losses
-        let allLosses = [];
-        for (let page = 1; page <= totalPagesLosses; page++) {
+        let allLosses = lossesFirstPageData.records || [];
+        for (let page = 2; page <= totalPagesLosses; page++) {
             const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=${page}`);
             const pageData = await pageResponse.json();
-            allLosses = allLosses.concat(pageData.records);
+            allLosses = allLosses.concat(pageData.records || []);
         }
 
         // Combine wins and losses
@@ -252,6 +253,7 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         return null;
     }
 }
+
 
 async function getPlayerMatchStats(userId, endTime) {
     const matches = await fetchMatchesByUserId(userId, endTime);
@@ -290,8 +292,8 @@ async function getPlayerMatchStats(userId, endTime) {
             }
         }
     
-        const godNames = [mainGod, ...Array.from(otherGods)];
-        console.log(`${userId} used gods: ${godNames.join(', ')}`);
+        const godsUsed = [mainGod, ...Array.from(otherGods)];
+        console.log(`${userId} used gods: ${godsUsed.join(', ')}`);
     
 
     //console.log(`${userId} Overall Wins: ${winCountOverall} Losses: ${lossCountOverall} Win Percentage: ${winPercentageOverall.toFixed(2)}%`);
@@ -341,7 +343,7 @@ async function getPlayerMatchStats(userId, endTime) {
         winPercentageOverall,
         winCountInSet,
         lossCountInSet,
-        godNames
+        godsUsed
     };
 }
 
@@ -437,9 +439,9 @@ async function displayMatchList(userId) {
                 <div class="panel-container">
                     <div class="match-banner-panel banner-left">
                         <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[0].god_power}.webp)">
-                            <div class="god-tag" id="god-tag-1" style="background-color: ${godThemes[playerWonMatchInfo.godNames[2]].color}"></div>
-                            <div class="god-tag" id="god-tag-2" style="background-color: ${godThemes[playerWonMatchInfo.godNames[1]].color}"></div>
-                            <div class="god-tag" id="god-tag-3" style="background-color: ${godThemes[playerWonMatchInfo.godNames[0]].color}"></div>
+                            <div class="god-tag" id="god-tag-1" style="background-color: ${godThemes[playerWonMatchInfo.godsUsed[2]].color}"></div>
+                            <div class="god-tag" id="god-tag-2" style="background-color: ${godThemes[playerWonMatchInfo.godsUsed[1]].color}"></div>
+                            <div class="god-tag" id="god-tag-3" style="background-color: ${godThemes[playerWonMatchInfo.godsUsed[0]].color}"></div>
                             <div class="rank rank-left">${playerWonRank}</div>
                         </div>
                         <div class="bar-container">
@@ -456,9 +458,9 @@ async function displayMatchList(userId) {
                     </div>
                     <div class="match-banner-panel banner-right">
                         <div class="godpower-list" style="background-image: url(https://images.godsunchained.com/art2/250/${match.player_info[1].god_power}.webp)">
-                            <div class="god-tag" id="god-tag-1-right" style="background-color: ${godThemes[playerLostMatchInfo.godNames[2]].color}"></div>
-                            <div class="god-tag" id="god-tag-2-right" style="background-color: ${godThemes[playerLostMatchInfo.godNames[1]].color}"></div>
-                            <div class="god-tag" id="god-tag-3-right" style="background-color: ${godThemes[playerLostMatchInfo.godNames[0]].color}"></div>
+                            <div class="god-tag" id="god-tag-1-right" style="background-color: ${godThemes[playerLostMatchInfo.godsUsed[2]].color}"></div>
+                            <div class="god-tag" id="god-tag-2-right" style="background-color: ${godThemes[playerLostMatchInfo.godsUsed[1]].color}"></div>
+                            <div class="god-tag" id="god-tag-3-right" style="background-color: ${godThemes[playerLostMatchInfo.godsUsed[0]].color}"></div>
                             <div class="rank rank-right">${playerLostRank}</div>
                         </div>
                         <div class="bar-container">
@@ -521,10 +523,11 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
                         <p class="player-info-field">${godPowerNames[playerMatchInfo.god_power]}</p>
                     </div>
                     <div>
-                        <p class="player-info-field">${playerInfo.user_id}</p> <button class="button" id="showMatchesButton">Match List</button>
+                        <p class="player-info-field">${playerInfo.user_id}</p>
                         <p class="player-info-field">${playerInfo.username}</p>
                         <p class="player-info-field">Constructed Rank: ${playerRank}</p>
                         <p class="player-info-field">Player Level: ${playerInfo.xp_level}</p>
+                        <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
                     </div>
                 </div>
             </div>
@@ -541,8 +544,8 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
             <!---</div> ---!>
         </div>
     `;
-//             <!--- <img class="portrait-left" src="${godThemes[playerMatchHistory.godNames[1]].image}"> ---!>
-// <!--- <img class="portrait-right" src="${godThemes[playerMatchHistory.godNames[2]].image}"> ---!></img>
+//             <!--- <img class="portrait-left" src="${godThemes[playerMatchHistory.godsUsed[1]].image}"> ---!>
+// <!--- <img class="portrait-right" src="${godThemes[playerMatchHistory.godsUsed[2]].image}"> ---!></img>
     displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
 
     const showMatchesButton = panel.querySelector('#showMatchesButton');
