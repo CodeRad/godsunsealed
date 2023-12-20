@@ -263,43 +263,43 @@ async function getPlayerMatchStats(userId, endTime) {
         return changePercentage >= 50; // You can adjust the threshold as needed
     };
 
-// Find the index of the first game in the set
-let firstGameIndex = 0;
-let winCountInSet = 0;
-let lossCountInSet = 0;
+    // Find the index of the first game in the set
+    let firstGameIndex = 0;
+    let winCountInSet = 0;
+    let lossCountInSet = 0;
 
-for (let i = 0; i < recentMatches.length - 1; i++) {
-    const playerIndex = recentMatches[i].player_won === userId ? 0 : 1;
-    const currentDeck = recentMatches[i].player_info[playerIndex].cards;
-    
-    // Use the playerIndex of the next match (i+1) to get the correct player's deck
-    const nextPlayerIndex = recentMatches[i + 1].player_won === userId ? 0 : 1;
-    const nextDeck = recentMatches[i + 1].player_info[nextPlayerIndex].cards;
+    for (let i = 0; i < recentMatches.length - 1; i++) {
+        const playerIndex = recentMatches[i].player_won === userId ? 0 : 1;
+        const currentDeck = recentMatches[i].player_info[playerIndex].cards;
 
-    if (hasSignificantDeckChange(currentDeck, nextDeck)) {
-        // Next deck is different. So this is the first game of a set.
-        console.log(`Game ${i} is the first game of the set`);
-        // Increment win or loss counters for the current game
-        if (recentMatches[i].player_won === userId) {
-            winCountInSet++;
-        } else if (recentMatches[i].player_lost === userId) {
-            lossCountInSet++;
-        }
+        // Use the playerIndex of the next match (i+1) to get the correct player's deck
+        const nextPlayerIndex = recentMatches[i + 1].player_won === userId ? 0 : 1;
+        const nextDeck = recentMatches[i + 1].player_info[nextPlayerIndex].cards;
 
-        break;
-    } else {
-        // No significant deck change, mark it as part of the same set
-        console.log(`Game ${i} is part of the same set`);
-        // Increment win or loss counters for the current game
-        if (recentMatches[i].player_won === userId) {
-            winCountInSet++;
-        } else if (recentMatches[i].player_lost === userId) {
-            lossCountInSet++;
+        if (hasSignificantDeckChange(currentDeck, nextDeck)) {
+            // Next deck is different. So this is the first game of a set.
+            console.log(`Game ${i} is the first game of the set`);
+            // Increment win or loss counters for the current game
+            if (recentMatches[i].player_won === userId) {
+                winCountInSet++;
+            } else if (recentMatches[i].player_lost === userId) {
+                lossCountInSet++;
+            }
+
+            break;
+        } else {
+            // No significant deck change, mark it as part of the same set
+            console.log(`Game ${i} is part of the same set`);
+            // Increment win or loss counters for the current game
+            if (recentMatches[i].player_won === userId) {
+                winCountInSet++;
+            } else if (recentMatches[i].player_lost === userId) {
+                lossCountInSet++;
+            }
         }
     }
-}
 
-console.log(`${userId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
+    console.log(`${userId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
 
 
 
@@ -424,8 +424,21 @@ async function displayMatchList(userId) {
                 // Append the match banner to the DOM
                 matchInfoDiv.appendChild(matchBanner);
             } else {
-                // ... (rest of your existing debug code)
+
+                matchInfoDiv.innerHTML += `
+            <div class='debug-panel'>
+                <p class='debug-text'>
+                    player_won: ${playerWonInfo.user_id} (${playerWonRank}) ${match.player_info[0].god} (${godPowerNames[match.player_info[0].god_power]}) WL ${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%
+                    (${playerWonMatchInfo.winCountInSet}W ${playerWonMatchInfo.lossCountInSet}L)<BR>
+                    player_lost: ${playerLostInfo.user_id} (${playerLostRank}) ${match.player_info[1].god} (${godPowerNames[match.player_info[1].god_power]}) WL ${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%
+                    (${playerLostMatchInfo.winCountInSet}W ${playerLostMatchInfo.lossCountInSet}L)<BR>
+                    start: ${matchStartTime}|end: ${matchEndTime}|l: ${matchLength}m|${matchTimeAgo}
+                </p>
+            </div>
+        `;
             }
+
+
         }
 
     } catch (error) {
@@ -480,8 +493,8 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
             <!---</div> ---!>
         </div>
     `;
-//             <!--- <img class="portrait-left" src="${godThemes[playerMatchHistory.godsUsed[1]].image}"> ---!>
-// <!--- <img class="portrait-right" src="${godThemes[playerMatchHistory.godsUsed[2]].image}"> ---!></img>
+    //             <!--- <img class="portrait-left" src="${godThemes[playerMatchHistory.godsUsed[1]].image}"> ---!>
+    // <!--- <img class="portrait-right" src="${godThemes[playerMatchHistory.godsUsed[2]].image}"> ---!></img>
     displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
 
     const showMatchesButton = panel.querySelector('#showMatchesButton');
