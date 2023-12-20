@@ -11,10 +11,8 @@ body {
   background-position-x: center;
   background-position-y: 80%;
   background-repeat: no-repeat;
-  /* font-family: Verdana, Geneva, Tahoma, sans-serif; */
   font-family: 'Lilita One', sans-serif;
   color: #FFFFFF;
-  /* padding: 20px; */
 }
 
 .container {
@@ -33,10 +31,8 @@ body {
 
 .panel-center {
   display: flex;
-  /* width: 100%; */
   flex-direction: column;
   margin-bottom: 40px;
-  /* align-content: center; */
 }
 
 .panel-right {
@@ -48,16 +44,13 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
-  /* background-color: #333; */
   color: #fff;
   padding: 10px;
   text-align: center;
 }
-
 /* #endregion */
 
 /* #region general elements */
-
 .button {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
@@ -68,8 +61,6 @@ body {
   padding: 10px 20px;
   border-radius: 8px;
   margin: 20px;
-
-
 }
 
 .button:hover {
@@ -84,13 +75,8 @@ body {
   padding: auto;
   text-justify: left;
   font-size: 0.8em;
-  ;
-
-
 }
-
 /* #endregion */
-
 
 /* #region player card */
 .player-card {
@@ -164,7 +150,6 @@ body {
 .player-matchlist-button {
   margin: 0;
 }
-
 /* #endregion */
 
 /* #region player card portraits */
@@ -192,7 +177,6 @@ body {
   /* bottom: 0; */
   /* right: 0; */
 }
-
 /* #endregion */
 
 /* #region card list */
@@ -233,7 +217,6 @@ body {
   color: #fff;
   z-index: 2;
 }
-
 /* #endregion */
 
 /* #region center top */
@@ -262,20 +245,15 @@ body {
   color: white;
   text-shadow: 4px 4px 4px #000;
 }
-
 /* #endregion */
 
 /* #region match list */
-
-
 .center-bottom {
   justify-content: center;
   /* align-items: center;   */
   margin-bottom: 35px;
   margin-top: 20px;
 }
-
-
 
 #match-list {
   display: flex;
@@ -284,24 +262,31 @@ body {
   align-items: center;
   overflow-y: scroll;
   overflow-x: hidden;
+}
 
   @keyframes dropIn {
-    from {
-      transform: translateY(125px);
-      /* scale: 90%; */
+    0% {
+      transform: translateY(-125px);
+      scale: 90%;
       opacity: 0;
     }
 
-    to {
+    75% {
+      transform: translateY(25px);
+      scale: 90%;
+      opacity: 1;
+    }
+
+    100% {
       transform: translateY(0);
       opacity: 1;
+      scale: 100%;
     }
   }
 
   .match-banner {
-    animation: dropIn 0.2s ease-out;
+    animation: dropIn 0.3s ease-in-out;
   }
-
 
   .match-banner {
     margin-bottom: 10px;
@@ -350,7 +335,6 @@ body {
 
     display: flex;
     gap: 5px;
-
   }
 
   .match-info {
@@ -373,7 +357,6 @@ body {
     display: flex;
     z-index: 1;
   }
-
 
   .rank {
     color: white;
@@ -466,7 +449,6 @@ body {
     text-align: left;
   }
 
-
   .lost-match,
   .won-matches,
   .winrate {
@@ -491,7 +473,6 @@ body {
     font-size: 1.3em;
   }
 
-
   .won-matches {
     color: gold;
     font-size: 1.4em;
@@ -515,7 +496,6 @@ body {
     border-radius: 5px;
     font-size: 1em;
   }
-
   /* #endregion */
 
   /* #region scrollbar */
@@ -539,5 +519,4 @@ body {
     background-color: #6f45a069;
     /* Change color on hover */
   }
-
   /* #endregion */
