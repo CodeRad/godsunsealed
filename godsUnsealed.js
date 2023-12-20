@@ -108,10 +108,10 @@ async function fetchRecentMatches() {
     try {
         const itemsPerPage = 1000; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
-        const startTime = endTime - 60 * 10; // 10 minutes
+        const startTime = endTime - 60 * 5; // 10 minutes
 
         // Fetch only the first page without fetching the total count
-        const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=1`);
+        const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=1&game_mode=7&order=desc`);
         const firstPageData = await firstPageResponse.json();
 
         // Get the total records from the first page data
@@ -124,18 +124,18 @@ async function fetchRecentMatches() {
         // Fetch data for each page and concatenate the results
         let allMatches = firstPageData.records; // Use records from the first page
         for (let page = 2; page <= totalPages; page++) {
-            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=${page}`);
+            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=${page}&game_mode=7&order=desc`);
             const pageData = await pageResponse.json();
             allMatches = allMatches.concat(pageData.records);
         }
 
         // Filter by Sealed only and Sort by most recent
-        const filteredMatches = allMatches.filter(match => match.game_mode === 7);
-        filteredMatches.sort((a, b) => b.end_time - a.end_time);
+        // const filteredMatches = allMatches.filter(match => match.game_mode === 7);
+        allMatches.sort((a, b) => b.end_time - a.end_time);
 
-        console.log('Filtered Game Mode 7 Matches:', filteredMatches.length);
+        console.log('Filtered Game Mode 7 Matches:', allMatches.length);
 
-        return filteredMatches;
+        return allMatches;
 
     } catch (error) {
         console.error('Error fetching match data:', error);
@@ -213,8 +213,8 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         const totalWins = winsFirstPageData.total;
         const totalLosses = lossesFirstPageData.total;
 
-        console.log(`Total wins for player ${userId}:`, totalWins);
-        console.log(`Total losses for player ${userId}:`, totalLosses);
+        //console.log(`Total wins for player ${userId}:`, totalWins);
+        //console.log(`Total losses for player ${userId}:`, totalLosses);
 
         // Calculate the number of pages needed for wins
         const totalPagesWins = Math.ceil(totalWins / itemsPerPage);
@@ -222,7 +222,7 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         // Fetch data for each page and concatenate the results for wins
         let allWins = winsFirstPageData.records || [];
         for (let page = 2; page <= totalPagesWins; page++) {
-            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=${page}`);
+            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=${page}&game_mode=7&order=desc`);
             const pageData = await pageResponse.json();
             allWins = allWins.concat(pageData.records || []);
         }
@@ -233,7 +233,7 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         // Fetch data for each page and concatenate the results for losses
         let allLosses = lossesFirstPageData.records || [];
         for (let page = 2; page <= totalPagesLosses; page++) {
-            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=${page}`);
+            const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=${page}&game_mode=7&order=desc`);
             const pageData = await pageResponse.json();
             allLosses = allLosses.concat(pageData.records || []);
         }
@@ -242,20 +242,18 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         const allMatches = allWins.concat(allLosses);
 
         // Filter by Sealed only and Sort by most recent
-        const filteredMatches = allMatches.filter(match => match.game_mode === 7);
-        filteredMatches.sort((a, b) => b.end_time - a.end_time);
+        // const filteredMatches = allMatches.filter(match => match.game_mode === 7); 
+        allMatches.sort((a, b) => b.end_time - a.end_time); //still need this to re-order matches because of concat
 
-        console.log(`Game mode 7 matches for player ${userId}:`, filteredMatches.length);
+        console.log(`Game mode 7 matches for player ${userId}:`, allMatches.length);
 
-        return filteredMatches;
+        return allMatches;
 
     } catch (error) {
         console.error('Error fetching match data:', error);
         return null;
     }
 }
-
-
 async function getPlayerMatchStats(userId, endTime) {
     const matches = await fetchMatchesByUserId(userId, endTime);
 
@@ -264,40 +262,37 @@ async function getPlayerMatchStats(userId, endTime) {
     const lossCountOverall = matches.length - winCountOverall;
     const winPercentageOverall = (winCountOverall / matches.length) * 100;
 
-        // Get the main god for the player
-        const mainGod = matches[0].player_info.find(player => player.user_id === userId).god;
+    // Get the main god for the player
+    const mainGod = matches[0].player_info.find(player => player.user_id === userId).god;
 
-        // Find the other two gods by fetching card data
-        const otherGods = new Set();
-    
-        for (const match of matches) {
-            const playerDeck = match.player_info.find(player => player.user_id === userId).cards;
-    
-            // Fetch card information for each card in the player's deck
-            for (const cardId of playerDeck) {
-                const cardInfo = await fetchCardInfo(cardId);
-    
-                if (cardInfo && cardInfo.god !== mainGod && cardInfo.god !== 'neutral') {
-                    otherGods.add(cardInfo.god);
-    
-                    // Break if we have found cards from two different gods
-                    if (otherGods.size === 2) {
-                        break;
-                    }
+    // Find the other two gods by fetching card data
+    const otherGods = new Set();
+
+    for (const match of matches) {
+        const playerDeck = match.player_info.find(player => player.user_id === userId).cards;
+
+        // Fetch card information for each card in the player's deck
+        for (const cardId of playerDeck) {
+            const cardInfo = await fetchCardInfo(cardId);
+
+            if (cardInfo && cardInfo.god !== mainGod && cardInfo.god !== 'neutral') {
+                otherGods.add(cardInfo.god);
+
+                // Break if we have found cards from two different gods
+                if (otherGods.size === 2) {
+                    break;
                 }
             }
-    
-            // Break if we have found cards from two different gods
-            if (otherGods.size === 2) {
-                break;
-            }
         }
-    
-        const godsUsed = [mainGod, ...Array.from(otherGods)];
-        console.log(`${userId} used gods: ${godsUsed.join(', ')}`);
-    
 
-    //console.log(`${userId} Overall Wins: ${winCountOverall} Losses: ${lossCountOverall} Win Percentage: ${winPercentageOverall.toFixed(2)}%`);
+        // Break if we have found cards from two different gods
+        if (otherGods.size === 2) {
+            break;
+        }
+    }
+
+    const godsUsed = [mainGod, ...Array.from(otherGods)];
+    console.log(`${userId} used gods: ${godsUsed.join(', ')}`);
 
     // Get Sealed Set information
     // Trim data to last 10 matches before we search for Game 1
@@ -307,36 +302,52 @@ async function getPlayerMatchStats(userId, endTime) {
     const hasSignificantDeckChange = (deck1, deck2) => {
         const changedCardCount = deck1.filter(card => !deck2.includes(card)).length;
         const changePercentage = (changedCardCount / deck1.length) * 100;
+        //console.log(` Changed card count: ${deck1.filter(card => !deck2.includes(card)).length}, Change percentage: ${(deck1.filter(card => !deck2.includes(card)).length / deck1.length) * 100}%`);
+
         return changePercentage >= 50; // You can adjust the threshold as needed
     };
 
-    // Find the index of the first game in the set
-    let firstGameIndex = recentMatches.length - 1;
-    for (let i = recentMatches.length - 2; i >= 0; i--) {
-        const playerIndex = recentMatches[i].player_won === userId ? 0 : 1;
-        const currentDeck = recentMatches[i].player_info[playerIndex].cards;
-        const previousDeck = recentMatches[i + 1].player_info[playerIndex].cards;
+// Find the index of the first game in the set
+let firstGameIndex = 0;
+let winCountInSet = 0;
+let lossCountInSet = 0;
 
-        if (hasSignificantDeckChange(currentDeck, previousDeck)) {
-            // Found the first game with significant deck change
-            firstGameIndex = i;
-        } else {
-            // No significant deck change, stop searching
-            console.log(`No significant deck change detected between game ${i + 1} and game ${i}`);
-            //console.log(`Current Deck (Player ${playerIndex + 1}):`, currentDeck);
-            //console.log(`Previous Deck (Player ${playerIndex + 1}):`, previousDeck);
-            break;
+for (let i = 0; i < recentMatches.length - 1; i++) {
+    const playerIndex = recentMatches[i].player_won === userId ? 0 : 1;
+    const currentDeck = recentMatches[i].player_info[playerIndex].cards;
+    
+    // Use the playerIndex of the next match (i+1) to get the correct player's deck
+    const nextPlayerIndex = recentMatches[i + 1].player_won === userId ? 0 : 1;
+    const nextDeck = recentMatches[i + 1].player_info[nextPlayerIndex].cards;
+
+    if (hasSignificantDeckChange(currentDeck, nextDeck)) {
+        // Next deck is different. So this is the first game of a set.
+        console.log(`Game ${i} is the first game of the set`);
+        // Increment win or loss counters for the current game
+        if (recentMatches[i].player_won === userId) {
+            winCountInSet++;
+        } else if (recentMatches[i].player_lost === userId) {
+            lossCountInSet++;
+        }
+
+        break;
+    } else {
+        // No significant deck change, mark it as part of the same set
+        console.log(`Game ${i} is part of the same set`);
+        // Increment win or loss counters for the current game
+        if (recentMatches[i].player_won === userId) {
+            winCountInSet++;
+        } else if (recentMatches[i].player_lost === userId) {
+            lossCountInSet++;
         }
     }
+}
 
-    // Count wins and losses in the sealed set
-    const winsInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_won === userId);
-    const lossesInSet = recentMatches.slice(firstGameIndex).filter(match => match.player_lost === userId);
-    const winCountInSet = winsInSet.length;
-    const lossCountInSet = lossesInSet.length;
+console.log(`${userId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
 
 
-    console.log(`${userId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
+
+
 
     return {
         winCountOverall,
@@ -347,6 +358,9 @@ async function getPlayerMatchStats(userId, endTime) {
         godsUsed
     };
 }
+
+
+
 
 
 // Function to display match information
