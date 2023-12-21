@@ -311,14 +311,14 @@ async function displayMatchList(userId) {
     const matchInfoDiv = document.getElementById('match-list');
     matchInfoDiv.innerHTML = '';
 
-    // Check if a match list is currently being loaded
-    if (isMatchListLoading) {
-        console.log('Aborting previous match list loading.');
-        return;
-    }
+    // // Check if a match list is currently being loaded
+    // if (isMatchListLoading) {
+    //     console.log('Aborting previous match list loading.');
+    //     return;
+    // }
 
     // Set the flag to indicate that a match list is now being loaded
-    isMatchListLoading = true;
+    // isMatchListLoading = true;
 
     try {
         //let matches;
@@ -436,7 +436,7 @@ async function displayMatchList(userId) {
         console.error('Error displaying match list and fetching data:', error);
     } finally {
         // Reset the flag when the loading process is complete or encountered an error
-        isMatchListLoading = false;
+        // isMatchListLoading = false;
     }
 }
 
