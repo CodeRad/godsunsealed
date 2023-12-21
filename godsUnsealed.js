@@ -1,5 +1,7 @@
+// import cardDatabase from './cardDatabase.json';
+
 let matches;
-let isMatchListLoading = false;
+// let isMatchListLoading = false;
 
 const DEBUG = false;
 
@@ -105,26 +107,23 @@ async function fetchRecentMatches() {
 async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 1000)) {
     try {
         const itemsPerPage = 1000;
-        const startTime = endTime - 60 * 60 * 24 * 3; //3 days, which is the max timeframe unfortunately
+        const startTime = endTime - 60 * 60 * 24 * 3; // 3 days, which is the max timeframe unfortunately
 
-        // Fetch the first page to get total records for wins
-        const winsFirstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=1`);
+        // Fetch data for the first page of wins
+        const winsFirstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=1&game_mode=7&order=desc`);
         const winsFirstPageData = await winsFirstPageResponse.json();
-
-        // Fetch the first page to get total records for losses
-        const lossesFirstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=1`);
-        const lossesFirstPageData = await lossesFirstPageResponse.json();
-
         const totalWins = winsFirstPageData.total;
+
+        // Fetch data for the first page of losses
+        const lossesFirstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=1&game_mode=7&order=desc`);
+        const lossesFirstPageData = await lossesFirstPageResponse.json();
         const totalLosses = lossesFirstPageData.total;
 
-        //console.log(`Total wins for player ${userId}:`, totalWins);
-        //console.log(`Total losses for player ${userId}:`, totalLosses);
-
-        // Calculate the number of pages needed for wins
+        // Calculate the number of pages needed for wins and losses
         const totalPagesWins = Math.ceil(totalWins / itemsPerPage);
+        const totalPagesLosses = Math.ceil(totalLosses / itemsPerPage);
 
-        // Fetch data for each page and concatenate the results for wins
+        // Fetch and concatenate data for all pages of wins
         let allWins = winsFirstPageData.records || [];
         for (let page = 2; page <= totalPagesWins; page++) {
             const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=${page}&game_mode=7&order=desc`);
@@ -132,10 +131,7 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
             allWins = allWins.concat(pageData.records || []);
         }
 
-        // Calculate the number of pages needed for losses
-        const totalPagesLosses = Math.ceil(totalLosses / itemsPerPage);
-
-        // Fetch data for each page and concatenate the results for losses
+        // Fetch and concatenate data for all pages of losses
         let allLosses = lossesFirstPageData.records || [];
         for (let page = 2; page <= totalPagesLosses; page++) {
             const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=${page}&game_mode=7&order=desc`);
@@ -147,8 +143,7 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         const allMatches = allWins.concat(allLosses);
 
         // Filter by Sealed only and Sort by most recent
-        // const filteredMatches = allMatches.filter(match => match.game_mode === 7); 
-        allMatches.sort((a, b) => b.end_time - a.end_time); //still need this to re-order matches because of concat
+        allMatches.sort((a, b) => b.end_time - a.end_time);
 
         console.log(`Game mode 7 matches for player ${userId}:`, allMatches.length);
 
@@ -159,6 +154,7 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         return null;
     }
 }
+
 
 // Fetch user properties
 async function fetchUserInfo(userId) {
@@ -197,17 +193,28 @@ async function fetchUserRank(userId) {
 // Fetch card data
 async function fetchCardInfo(cardId) {
     try {
-        const response = await fetch(`https://api.godsunchained.com/v0/proto/${cardId}`);
-        const cardInfo = await response.json();
+        // Fetch the card database JSON file
+        const response = await fetch('https://coderad.github.io/godsunsealed/cardDatabase.json');
+        const cardDatabase = await response.json();
 
-        // console.log(`Card Name: ${cardInfo.name}, Mana: ${cardInfo.mana}`);
+        // Find the card with the specified cardId locally
+        const cardInfoLocal = cardDatabase.records.find(card => card.id === cardId);
 
-        return cardInfo;
+        if (cardInfoLocal) {
+            // If the card is found locally, return it
+            return cardInfoLocal;
+        } else {
+            // If the card is not found locally, fetch it from the API
+            const apiResponse = await fetch(`https://api.godsunchained.com/v0/proto/${cardId}`);
+            const cardInfoApi = await apiResponse.json();            
+            return cardInfoApi;
+        }
     } catch (error) {
-        console.error('Error fetching card info:', error);
+        console.error('Error fetching or parsing card data:', error);
         return null;
     }
 }
+
 
 // Get info about sealed matchs sets and win loss records
 async function getPlayerMatchStats(userId, endTime) {
