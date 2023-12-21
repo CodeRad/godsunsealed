@@ -281,7 +281,7 @@ body {
   }
 
   .match-banner {
-    animation: dropIn 1s ease-in;
+    animation: dropIn 0.5s ease-in;
   }
 
   .match-banner {
