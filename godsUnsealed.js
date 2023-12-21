@@ -185,7 +185,7 @@ async function fetchUserRank(userId) {
             // Return the rank_level if the record is found
             return userRecord.rank_level;
         } else {
-            console.error(`No record found for user ${userId}`);
+            console.error(`No constructed rank record found for user ${userId}`);
             return '1';
         }
     } catch (error) {
@@ -218,39 +218,37 @@ async function getPlayerMatchStats(userId, endTime) {
     const lossCountOverall = matches.length - winCountOverall;
     const winPercentageOverall = (winCountOverall / matches.length) * 100;
 
+    // Figure out which gods are being used //
     // Get the main god for the player
     const mainGod = matches[0].player_info.find(player => player.user_id === userId).god;
 
     // Find the other two gods by fetching card data
     const otherGods = new Set();
+    const playerDeck = matches[0].player_info.find(player => player.user_id === userId).cards;
 
-    for (const match of matches) {
-        const playerDeck = match.player_info.find(player => player.user_id === userId).cards;
+    // Fetch card information for each card in the player's deck until gods #2 and #3 are found
+    for (const cardId of playerDeck) {
+        const cardInfo = await fetchCardInfo(cardId);
 
-        // Fetch card information for each card in the player's deck
-        for (const cardId of playerDeck) {
-            const cardInfo = await fetchCardInfo(cardId);
+        if (cardInfo && cardInfo.god !== mainGod && cardInfo.god !== 'neutral') {
+            otherGods.add(cardInfo.god);
 
-            if (cardInfo && cardInfo.god !== mainGod && cardInfo.god !== 'neutral') {
-                otherGods.add(cardInfo.god);
-
-                // Break if we have found cards from two different gods
-                if (otherGods.size === 2) {
-                    break;
-                }
+            // Break if we have found cards from two different gods
+            if (otherGods.size === 2) {
+                break;
             }
-        }
-
-        // Break if we have found cards from two different gods
-        if (otherGods.size === 2) {
-            break;
         }
     }
 
     const godsUsed = [mainGod, ...Array.from(otherGods)];
+
+    while (godsUsed.length < 3) {
+        godsUsed.push(godsUsed[0]);
+    }
+
     console.log(`${userId} used gods: ${godsUsed.join(', ')}`);
 
-    // Get Sealed Set information
+    // Get Sealed Set information //
     // Trim data to last 10 matches before we search for Game 1
     const recentMatches = matches.slice(0, 10);
 
@@ -258,13 +256,10 @@ async function getPlayerMatchStats(userId, endTime) {
     const hasSignificantDeckChange = (deck1, deck2) => {
         const changedCardCount = deck1.filter(card => !deck2.includes(card)).length;
         const changePercentage = (changedCardCount / deck1.length) * 100;
-        //console.log(` Changed card count: ${deck1.filter(card => !deck2.includes(card)).length}, Change percentage: ${(deck1.filter(card => !deck2.includes(card)).length / deck1.length) * 100}%`);
-
-        return changePercentage >= 50; // You can adjust the threshold as needed
+        return changePercentage >= 50;
     };
 
-    // Find the index of the first game in the set
-    let firstGameIndex = 0;
+    // Compare decks between matches until game 1 is found and track wins and losses 
     let winCountInSet = 0;
     let lossCountInSet = 0;
 
@@ -300,10 +295,6 @@ async function getPlayerMatchStats(userId, endTime) {
     }
 
     console.log(`${userId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
-
-
-
-
 
     return {
         winCountOverall,
@@ -557,6 +548,7 @@ function getTimeAgo(timestamp) {
     const monthsAgo = Math.floor(daysAgo / 30);
     return `${monthsAgo} month${monthsAgo !== 1 ? 's' : ''} ago`;
 }
+
 
 // Handle matchlist click event and populate panels
 async function handleMatchClick(matchIndex) {
