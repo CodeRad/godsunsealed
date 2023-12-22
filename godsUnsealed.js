@@ -459,10 +459,8 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
     const playerInfo = await fetchUserInfo(playerMatchInfo.user_id);
     const playerRank = await fetchUserRank(playerMatchInfo.user_id);
 
-    panel.innerHTML = `
+     panel.innerHTML = `
         <div class="player-card" style="background: ${godTheme.gradient};">
-
-            <div class="outcome ${outcomeClass}">${outcomeText}</div><br>
             <div class="player-overview">
                 <div style="display: flex; align-items: flex-start;">
                     <div style="margin-right: 20px; text-align: center;">
@@ -479,26 +477,54 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
                 </div>
             </div>
             <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
-            <!---<div class="portrait-container"> ---!>
+           <div class="portrait-container">
 
 
+           <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
 
 
-
-
-
-            <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
-            <!---</div> ---!>
+           </div>
         </div>
     `;
-    //             <!--- <img class="portrait-left" src="${godThemes[playerMatchHistory.godsUsed[1]].image}"> ---!>
-    // <!--- <img class="portrait-right" src="${godThemes[playerMatchHistory.godsUsed[2]].image}"> ---!></img>
     displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
 
     const showMatchesButton = panel.querySelector('#showMatchesButton');
     showMatchesButton.addEventListener('click', async () => {
         await displayMatchList(playerMatchInfo.user_id);
     });
+
+  /*  panel.innerHTML = `
+    <div class="player-card" style="background: ${godTheme.gradient};">
+
+        <div class="outcome ${outcomeClass}">${outcomeText}</div><br>
+        <div class="player-overview">
+            <div style="display: flex; align-items: flex-start;">
+                <div style="margin-right: 20px; text-align: center;">
+                    <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp" style="align: top;"><br>
+                    <p class="player-info-field">${godPowerNames[playerMatchInfo.god_power]}</p>
+                </div>
+                <div>
+                    <p class="player-info-field">${playerInfo.user_id}</p>
+                    <p class="player-info-field">${playerInfo.username}</p>
+                    <p class="player-info-field">Constructed Rank: ${playerRank}</p>
+                    <p class="player-info-field">Player Level: ${playerInfo.xp_level}</p>
+                    <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
+                </div>
+            </div>
+        </div>
+        <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
+        <!---<div class="portrait-container"> ---!>
+
+
+
+
+
+
+
+        <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
+        <!---</div> ---!>
+    </div>
+`;*/
 }
 
 // Display card list on player panel
@@ -574,8 +600,8 @@ async function handleMatchClick(matchIndex) {
         matchBanner.classList.add('active');
         matchBanner.style.opacity = 1; // Set full opacity for the selected banner
         // console.log(match);
-        displayPlayerPanel('winner-card', match.player_info[0], true);
-        displayPlayerPanel('loser-card', match.player_info[1], false);
+        displayPlayerPanel('panel-left', match.player_info[0], true);
+        displayPlayerPanel('panel-right', match.player_info[1], false);
     } else {
         console.error(`Match banner with ID match-banner-${matchIndex} not found.`);
     }

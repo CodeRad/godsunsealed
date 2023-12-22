@@ -14,30 +14,31 @@ body {
   font-family: 'Lilita One', sans-serif;
   color: #FFFFFF;
 }
-
+ 
 .container {
   display: flex;
   height: 100vh;
+  width: 100hw;
 }
 
 .panel {
   flex: 1;
-  box-sizing: border-box;
 }
 
-.panel-left {
-  width: 30%;
+#panel-left {
+  max-width: 31%;
 }
 
-.panel-center {
+#panel-center {
   display: flex;
   flex-direction: column;
   margin-bottom: 40px;
+  max-width: 38%;
 }
 
-.panel-right {
-  width: 30%;
-}
+#panel-right {
+  max-width: 31%;
+} 
 
 .footer {
   position: fixed;
@@ -86,9 +87,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  /* padding: 20px; */
   border-radius: 20px;
-  margin: 20px;
+  margin: 40px;
   position: relative;
 }
 
@@ -130,6 +130,7 @@ body {
 
   padding-left: 30px;
   padding-bottom: 20px;
+  margin: 40px;
 
 }
 
@@ -150,32 +151,17 @@ body {
 .player-matchlist-button {
   margin: 0;
 }
-/* #endregion */
 
-/* #region player card portraits */
-.portrait-containter {
+.portrait-container {
   display: flex;
-  /* position: relative; */
-  /* margin-bottom: 0; */
   margin-top: auto;
-  /* width: auto; */
+  overflow: hidden;
 }
 
 .portrait {
-  /* position: absolute; */
-  /* bottom: 0; */
-}
-
-.portrait-left {
-  /* position: absolute; */
-  /* bottom: 0; */
-  /* left: 0; */
-}
-
-.portrait-right {
-  /* position: absolute; */
-  /* bottom: 0; */
-  /* right: 0; */
+  position: absolute;
+  bottom: 0;
+  width: 100%;
 }
 /* #endregion */
 
