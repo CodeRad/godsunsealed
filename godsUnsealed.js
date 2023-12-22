@@ -206,7 +206,7 @@ async function fetchCardInfo(cardId) {
         } else {
             // If the card is not found locally, fetch it from the API
             const apiResponse = await fetch(`https://api.godsunchained.com/v0/proto/${cardId}`);
-            const cardInfoApi = await apiResponse.json();            
+            const cardInfoApi = await apiResponse.json();
             return cardInfoApi;
         }
     } catch (error) {
@@ -269,37 +269,38 @@ async function getPlayerMatchStats(userId, endTime) {
     // Compare decks between matches until game 1 is found and track wins and losses 
     let winCountInSet = 0;
     let lossCountInSet = 0;
+    let changeDetected = false;
 
     for (let i = 0; i < recentMatches.length - 1; i++) {
+
+        if (recentMatches[i].player_won === userId) {
+            winCountInSet++;
+        } else if (recentMatches[i].player_lost === userId) {
+            lossCountInSet++;
+        }
+
         const playerIndex = recentMatches[i].player_won === userId ? 0 : 1;
         const currentDeck = recentMatches[i].player_info[playerIndex].cards;
 
-        // Use the playerIndex of the next match (i+1) to get the correct player's deck
         const nextPlayerIndex = recentMatches[i + 1].player_won === userId ? 0 : 1;
         const nextDeck = recentMatches[i + 1].player_info[nextPlayerIndex].cards;
 
-        if (hasSignificantDeckChange(currentDeck, nextDeck)) {
-            // Next deck is different. So this is the first game of a set.
-            console.log(`Game ${i} is the first game of the set`);
-            // Increment win or loss counters for the current game
-            if (recentMatches[i].player_won === userId) {
-                winCountInSet++;
-            } else if (recentMatches[i].player_lost === userId) {
-                lossCountInSet++;
-            }
-
+        if (hasSignificantDeckChange(currentDeck, nextDeck) || !nextDeck) {
+            changeDetected = true;
             break;
-        } else {
-            // No significant deck change, mark it as part of the same set
-            console.log(`Game ${i} is part of the same set`);
-            // Increment win or loss counters for the current game
-            if (recentMatches[i].player_won === userId) {
-                winCountInSet++;
-            } else if (recentMatches[i].player_lost === userId) {
-                lossCountInSet++;
-            }
         }
     }
+
+    // Handle the last game in the series only if no change has been detected
+    if (!changeDetected && recentMatches.length > 0) {
+        const lastMatch = recentMatches[recentMatches.length - 1];
+        if (lastMatch.player_won === userId) {
+            winCountInSet++;
+        } else if (lastMatch.player_lost === userId) {
+            lossCountInSet++;
+        }
+    }
+
 
     console.log(`${userId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
 
@@ -459,7 +460,7 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
     const playerInfo = await fetchUserInfo(playerMatchInfo.user_id);
     const playerRank = await fetchUserRank(playerMatchInfo.user_id);
 
-     panel.innerHTML = `
+    panel.innerHTML = `
         <div class="player-card" style="background: ${godTheme.gradient};">
             <div class="player-overview">
                 <div style="display: flex; align-items: flex-start;">
@@ -493,38 +494,38 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
         await displayMatchList(playerMatchInfo.user_id);
     });
 
-  /*  panel.innerHTML = `
-    <div class="player-card" style="background: ${godTheme.gradient};">
-
-        <div class="outcome ${outcomeClass}">${outcomeText}</div><br>
-        <div class="player-overview">
-            <div style="display: flex; align-items: flex-start;">
-                <div style="margin-right: 20px; text-align: center;">
-                    <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp" style="align: top;"><br>
-                    <p class="player-info-field">${godPowerNames[playerMatchInfo.god_power]}</p>
-                </div>
-                <div>
-                    <p class="player-info-field">${playerInfo.user_id}</p>
-                    <p class="player-info-field">${playerInfo.username}</p>
-                    <p class="player-info-field">Constructed Rank: ${playerRank}</p>
-                    <p class="player-info-field">Player Level: ${playerInfo.xp_level}</p>
-                    <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
-                </div>
-            </div>
-        </div>
-        <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
-        <!---<div class="portrait-container"> ---!>
-
-
-
-
-
-
-
-        <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
-        <!---</div> ---!>
-    </div>
-`;*/
+    /*  panel.innerHTML = `
+      <div class="player-card" style="background: ${godTheme.gradient};">
+  
+          <div class="outcome ${outcomeClass}">${outcomeText}</div><br>
+          <div class="player-overview">
+              <div style="display: flex; align-items: flex-start;">
+                  <div style="margin-right: 20px; text-align: center;">
+                      <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp" style="align: top;"><br>
+                      <p class="player-info-field">${godPowerNames[playerMatchInfo.god_power]}</p>
+                  </div>
+                  <div>
+                      <p class="player-info-field">${playerInfo.user_id}</p>
+                      <p class="player-info-field">${playerInfo.username}</p>
+                      <p class="player-info-field">Constructed Rank: ${playerRank}</p>
+                      <p class="player-info-field">Player Level: ${playerInfo.xp_level}</p>
+                      <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
+                  </div>
+              </div>
+          </div>
+          <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
+          <!---<div class="portrait-container"> ---!>
+  
+  
+  
+  
+  
+  
+  
+          <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
+          <!---</div> ---!>
+      </div>
+  `;*/
 }
 
 // Display card list on player panel
