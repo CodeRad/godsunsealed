@@ -10,19 +10,19 @@ const godThemes = {
         gradient: 'linear-gradient(0deg, rgba(75,5,5,1) 0%, rgba(75,5,5,1) 10%, rgba(75,5,5,0) 20%, rgba(0,0,0,0) 50%, rgba(75,5,5,1) 90%, rgba(75,5,5,1) 100%)',
         image: 'images/gods/war.png',
         name: 'Auros',
-        color: 'rgba(255,5,5,1)'
+        color: 'rgba(235,5,5,1)'
     },
     death: {
         gradient: 'linear-gradient(0deg, rgba(50,50,50,1) 0%, rgba(50,50,50,1) 10%, rgba(0,50,50,0) 20%, rgba(0,0,0,0) 50%, rgba(50,50,50,1) 90%, rgba(50,50,50,1) 100%)',
         image: 'images/gods/death.png',
         name: 'Malissus',
-        color: 'rgba(50,50,50,1)'
+        color: 'rgba(80,80,80,1)'
     },
     deception: {
         gradient: 'linear-gradient(0deg, rgba(100,15,255,1) 0%, rgba(100,15,255,1) 10%, rgba(100,15,255,0) 20%, rgba(0,0,0,0) 50%, rgba(100,15,255,1) 90%, rgba(100,15,255,1) 100%)',
         image: 'images/gods/deception.png',
         name: 'Ludia',
-        color: 'rgba(100,15,255,1)'
+        color: 'rgb(153, 105, 241);'
     },
     nature: {
         gradient: 'linear-gradient(0deg, rgba(5,75,30,1) 0%, rgba(5,75,30,1) 10%, rgba(5,75,30,0) 20%, rgba(0,0,0,0) 50%, rgba(5,75,30,1) 90%, rgba(5,75,30,1) 100%)',
@@ -34,7 +34,7 @@ const godThemes = {
         gradient: 'linear-gradient(0deg, rgba(20,175,255,1) 0%, rgba(20,175,255,1) 10%, rgba(20,175,255,0) 20%, rgba(0,0,0,0) 50%, rgba(20,175,255,1) 90%, rgba(20,175,255,1) 100%)',
         image: 'images/gods/magic.png',
         name: 'Elyrian',
-        color: 'rgba(20,175,255,1)'
+        color: 'rgb(71, 222, 255)'
     },
     light: {
         gradient: 'linear-gradient(0deg, rgba(100,150,15,1) 0%, rgba(100,150,15,1) 10%, rgba(100,150,15,0) 20%, rgba(0,0,0,0) 50%, rgba(100,150,15,1) 90%, rgba(100,150,15,1) 100%)',
@@ -460,75 +460,111 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
     const playerInfo = await fetchUserInfo(playerMatchInfo.user_id);
     const playerRank = await fetchUserRank(playerMatchInfo.user_id);
 
-    panel.innerHTML = `
-        <div class="player-card" style="background: ${godTheme.gradient};">
-            <div class="player-overview">
-                <div style="display: flex; align-items: flex-start;">
-                    <div style="margin-right: 20px; text-align: center;">
-                        <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp" style="align: top;"><br>
-                        <p class="player-info-field">${godPowerNames[playerMatchInfo.god_power]}</p>
-                    </div>
-                    <div>
-                        <p class="player-info-field">${playerInfo.user_id}</p>
-                        <p class="player-info-field">${playerInfo.username}</p>
-                        <p class="player-info-field">Constructed Rank: ${playerRank}</p>
-                        <p class="player-info-field">Player Level: ${playerInfo.xp_level}</p>
-                        <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
-                    </div>
-                </div>
-            </div>
-            <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
-           <div class="portrait-container">
-
-
-           <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
-
-
-           </div>
-        </div>
-    `;
-    displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
-
-    const showMatchesButton = panel.querySelector('#showMatchesButton');
-    showMatchesButton.addEventListener('click', async () => {
-        await displayMatchList(playerMatchInfo.user_id);
+    // Fetch card information for all cards
+    const cardInfoArray = await Promise.all(playerMatchInfo.cards.map(fetchCardInfo));
+    // Calculate mana curve data
+    const manaCurveData = Array.from({ length: 10 }, (_, mana) => {
+        if (mana === 0 || mana === 1) {
+            // Count cards with mana values of 0 or 1 as 1-mana cards
+            return cardInfoArray.filter(card => card.mana === 0 || card.mana === 1).length;
+        } else if (mana >= 9) {
+            // Count cards with mana values of 9 and above as 9-mana cards
+            return cardInfoArray.filter(card => card.mana >= 9).length;
+        } else {
+            // Count cards with the specific mana value
+            return cardInfoArray.filter(card => card.mana === mana).length;
+        }
     });
 
-    /*  panel.innerHTML = `
-      <div class="player-card" style="background: ${godTheme.gradient};">
-  
-          <div class="outcome ${outcomeClass}">${outcomeText}</div><br>
-          <div class="player-overview">
-              <div style="display: flex; align-items: flex-start;">
-                  <div style="margin-right: 20px; text-align: center;">
-                      <img class="godpower-card" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp" style="align: top;"><br>
-                      <p class="player-info-field">${godPowerNames[playerMatchInfo.god_power]}</p>
-                  </div>
-                  <div>
-                      <p class="player-info-field">${playerInfo.user_id}</p>
-                      <p class="player-info-field">${playerInfo.username}</p>
-                      <p class="player-info-field">Constructed Rank: ${playerRank}</p>
-                      <p class="player-info-field">Player Level: ${playerInfo.xp_level}</p>
-                      <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
-                  </div>
-              </div>
-          </div>
-          <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
-          <!---<div class="portrait-container"> ---!>
-  
-  
-  
-  
-  
-  
-  
-          <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
-          <!---</div> ---!>
-      </div>
-  `;*/
+    // Calculate the maximum count for scaling the bar graph
+    const maxCount = Math.max(...manaCurveData);
+
+    // Dynamically generate bar graph HTML
+    const barGraphHTML = manaCurveData.map((count, mana) => `
+    <div class="bar" style="background-color: ${godTheme.color}; height: ${count / maxCount * 100}%;"></div>
+`).join('');
+
+panel.innerHTML = `
+<div class="player-card" style="background: ${godTheme.gradient};">
+<div class="player-overview">
+    <div class="bar-graph">
+        ${barGraphHTML}
+    </div>
+    <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp">
+    <div class="player-overview-name" style="color: ${godTheme.color};">${playerInfo.username}</div>
+    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerInfo.user_id})</div>
+    <div class="player-overview-rank" style="color: ${godTheme.color};">${playerRank}</div>
+    <div class="player-overview-level">Lv. ${playerInfo.xp_level}</div>
+
+    <div class="circle-container">
+        <div class="circle" style="background: ${godThemes['war'].gradient};">
+            <img src="images/gods/war.png" alt="War" class="zoomed-image">
+        </div>
+        <div class="circle" style="background: ${godThemes['light'].gradient};">
+            <img src="images/gods/light.png" alt="Light" class="zoomed-image">
+        </div>
+        <div class="circle" style="background: ${godThemes['nature'].gradient};">
+            <img src="images/gods/nature.png" alt="Nature" class="zoomed-image">
+        </div>
+    </div>
+</div>
+
+    <!-- Tabbed section -->
+    <div class="tabs">
+        <button class="button tab-button active" id="statsTab">Stats</button>
+        <button class="button tab-button" id="viewCardsTab">Deck</button>
+        <button class="button tab-button" id="setDetailsTab">Set Details</button>
+        <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
+    </div>
+    
+    <div class="tab-content" id="statsTabContent">
+        Content for Stats tab goes here 
+    </div>
+    
+    <div class="tab-content" id="viewCardsTabContent">
+        <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
+    </div>
+    
+    <div class="portrait-container">
+        <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
+    </div>
+</div>
+`;
+
+// Display card list for "View Cards" tab
+displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
+
+// Set up tab functionality
+const statsTabButton = panel.querySelector('#statsTab');
+const viewCardsTabButton = panel.querySelector('#viewCardsTab');
+const statsTabContent = panel.querySelector('#statsTabContent');
+const viewCardsTabContent = panel.querySelector('#viewCardsTabContent');
+
+statsTabButton.addEventListener('click', () => {
+statsTabButton.classList.add('active');
+viewCardsTabButton.classList.remove('active');
+statsTabContent.style.display = 'block';
+viewCardsTabContent.style.display = 'none';
+});
+
+viewCardsTabButton.addEventListener('click', () => {
+statsTabButton.classList.remove('active');
+viewCardsTabButton.classList.add('active');
+statsTabContent.style.display = 'none';
+viewCardsTabContent.style.display = 'block';
+});
+
+// Initial state
+statsTabButton.classList.add('active');
+statsTabContent.style.display = 'block';
+viewCardsTabContent.style.display = 'none';
+
+const showMatchesButton = panel.querySelector('#showMatchesButton');
+showMatchesButton.addEventListener('click', async () => {
+await displayMatchList(playerMatchInfo.user_id);
+});
 }
 
-// Display card list on player panel
 async function displayCardList(cardIds, containerId) {
     const cardListDiv = document.getElementById(containerId);
 
@@ -548,9 +584,72 @@ async function displayCardList(cardIds, containerId) {
         cardElement.title = `(${cardInfo.mana}) ${cardInfo.name}`;
         cardElement.className = 'card-icon';
 
+        // Attach click event listener to each card
+        cardElement.addEventListener('click', () => {
+            openCardModal(cardInfo);
+        });
+
         cardListDiv.appendChild(cardElement);
     }
 }
+let currentModal = null;
+
+function openCardModal(cardInfo) {
+    // Close the existing modal, if any
+    if (currentModal) {
+        closeExistingModal();
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'card-modal';
+    modal.innerHTML = `
+    <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <img src="https://card.godsunchained.com/?id=${cardInfo.id}&q=4" class="card-image">
+    <div class="buy-links">
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: red;" target="_blank"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: blue;" target="_blank"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: gold;" target="_blank"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: diamond;" target="_blank"></a>
+    </div>
+</div>
+    `;
+
+    const closeModal = () => {
+        document.body.removeChild(modal);
+        currentModal = null;
+    };
+
+    const closeButton = modal.querySelector('.close-modal');
+    closeButton.addEventListener('click', closeModal);
+
+    // Close modal on Escape key press
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    // Close modal when clicking outside the modal content
+    modal.addEventListener('click', (event) => {
+        const modalContent = modal.querySelector('.modal-content');
+        if (!modalContent.contains(event.target)) {
+            closeModal();
+        }
+    });
+
+    document.body.appendChild(modal);
+    currentModal = modal;
+}
+
+function closeExistingModal() {
+    if (currentModal) {
+        document.body.removeChild(currentModal);
+        currentModal = null;
+    }
+}
+
+
 
 // Build string for Time Ago
 function getTimeAgo(timestamp) {

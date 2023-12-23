@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    .bar-graph {
+        
+      width: 300px;
+      /* height: 200px; */
+      border: 1px solid #ccc;
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      /* flex-direction: column-reverse; */
+    }
+
+    .bar {
+      flex: 1;
+      background-color: #3498db; /* Blue color for bars */
+      margin: 0 2px;
+      transition: height 0.5s ease; /* Add transition effect */
+    }
+
+    /* Adjust the height of each bar based on the data (multiplied by 20) */
+    .bar:nth-child(1) { height: calc(6 * 20px); }
+    .bar:nth-child(2) { height: calc(8 * 20px); }
+    .bar:nth-child(3) { height: calc(4 * 20px); }
+    .bar:nth-child(4) { height: calc(4 * 20px); }
+    .bar:nth-child(5) { height: calc(4 * 20px); }
+    .bar:nth-child(6) { height: calc(2 * 20px); }
+    .bar:nth-child(7) { height: calc(2 * 20px); }
+    .bar:nth-child(8) { height: calc(0 * 20px); }
+    .bar:nth-child(9) { height: calc(0 * 20px); }
+  </style>
+</head>
+<body>
+
+<div class="bar-graph">
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+  <div class="bar"></div>
+</div>
+
+</body>
+</html>

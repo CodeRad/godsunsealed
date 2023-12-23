@@ -4,7 +4,7 @@
 /* #region main template */
 body {
   margin: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
   background-color: #000;
   background-image: url('images/background.jpg');
   background-size: cover;
@@ -61,7 +61,7 @@ body {
   color: #fff;
   padding: 10px 20px;
   border-radius: 8px;
-  margin: 20px;
+  margin: 20px 5px;
 }
 
 .button:hover {
@@ -90,7 +90,12 @@ body {
   border-radius: 20px;
   margin: 40px;
   position: relative;
+  outline: rgba(255, 255, 255, 0.2) solid 4px;
+  outline-offset: -15px;
 }
+
+
+
 
 .outcome {
 
@@ -128,28 +133,116 @@ body {
 
 .player-overview {
 
-  padding-left: 30px;
-  padding-bottom: 20px;
+  display: flex;
+  position: relative;
+  /* width: 100%; */
+  height: 175px;
+  /* box-sizing: content-box; */
+  text-shadow: 4px 4px 4px rgba(0, 0, 0, 0.8);
   margin: 40px;
+}
+
+.player-overview-name {
+
+  position: absolute;
+top: 0;
+left: 0;
+
+  font-size: 30pt;
+}
+.player-overview-userid {
+
+  position: absolute;
+  top: 40px;
+  left: 10px;
+
+  font-size: x-large;
 
 }
 
-.player-info-field {
-  background-color: #00000044;
-  width: 100%;
-  font-family: 'Courier New', Courier, monospace;
+.player-overview-rank {
+
+  position: absolute;
+right: 0;
+bottom: -20px;
+  font-size: 60pt;
+
 }
 
-.godpower-card {
-  height: 120px;
-  width: 120px;
+.player-overview-level {
+
+  position: absolute;
+left: 20px;
+top: 60px;
+
+  font-size: xx-large;
+
+}
+
+.player-overview-gp {
+  position: absolute;
+  top: 0;
+  right: 0;
   border-radius: 50%;
-  /* border: 3px solid black; */
+  width: 40%;
+  height: auto;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.8);
+
+}
+
+.bar-graph {
+  width: 300px;
+  height: 150px;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.bar {
+  flex: 1;
+  margin: 0 2px;
+  opacity: 0.3;
+  transition: height 1.5s ease;
+}
+
+.circle-container {
+  position: absolute;
+  bottom: -40px;
+  left: 0;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+
+.circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
   overflow: hidden;
+  margin-right: -4px;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.8);
+}
+
+.zoomed-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 4.5s ease;
+  scale: 1.1;
+  /* transform: scale(1.1) translateY(20%); */
+}
+
+.circle:hover .zoomed-image {
+  transform: scale(1.2);
 }
 
 .player-matchlist-button {
-  margin: 0;
+  /* top: 20px; */
+  /* padding: 2px; */
+}
+
+.player-matchlist-button:hover {
+  scale: 101%;
 }
 
 .portrait-container {
@@ -203,6 +296,59 @@ body {
   color: #fff;
   z-index: 2;
 }
+
+
+.card-modal {
+  position: fixed;
+  top: 50%; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+  width: 30%;
+  height: auto; 
+  /* max-width: 400px; */
+  padding: 20px; 
+  background-color: rgba(0, 0, 0, 0.5);
+border-radius: 20px;
+  z-index: 1000;
+}
+
+
+.modal-content {
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  font-size: 50px;
+  cursor: pointer;
+  color: white;
+}
+
+.close-modal:hover {
+  color: red; /* Change color on hover if desired */
+}
+
+.card-image {
+  /* Add styles for the card image if needed */
+  max-width: 100%; /* Ensure the image doesn't overflow its container */
+}
+
+.buy-links {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.buy-link {
+  width: 100px;
+  height: 100px;
+  background-image: url('images/icon-tokentrove.png');
+  background-size: cover;
+  display: inline-block;
+}
+
 /* #endregion */
 
 /* #region center top */
