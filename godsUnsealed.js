@@ -486,21 +486,34 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
 
 panel.innerHTML = `
 <div class="player-card" style="background: ${godTheme.gradient};">
-    <div class="player-overview">
-        <div class="bar-graph">
-            ${barGraphHTML}
-        </div>
-        <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp">
-        <div class="player-overview-name" style="color: ${godTheme.color};">${playerInfo.username}</div>
-        <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerInfo.user_id})</div>
-        <div class="player-overview-rank" style="color: ${godTheme.color};">${playerRank}</div>
-        <div class="player-overview-level">Lv. ${playerInfo.xp_level}</div>
+<div class="player-overview">
+    <div class="bar-graph">
+        ${barGraphHTML}
     </div>
+    <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp">
+    <div class="player-overview-name" style="color: ${godTheme.color};">${playerInfo.username}</div>
+    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerInfo.user_id})</div>
+    <div class="player-overview-rank" style="color: ${godTheme.color};">${playerRank}</div>
+    <div class="player-overview-level">Lv. ${playerInfo.xp_level}</div>
+
+    <div class="circle-container">
+        <div class="circle" style="background: ${godThemes['war'].gradient};">
+            <img src="images/gods/war.png" alt="War" class="zoomed-image">
+        </div>
+        <div class="circle" style="background: ${godThemes['light'].gradient};">
+            <img src="images/gods/light.png" alt="Light" class="zoomed-image">
+        </div>
+        <div class="circle" style="background: ${godThemes['nature'].gradient};">
+            <img src="images/gods/nature.png" alt="Nature" class="zoomed-image">
+        </div>
+    </div>
+</div>
 
     <!-- Tabbed section -->
     <div class="tabs">
         <button class="button tab-button active" id="statsTab">Stats</button>
-        <button class="button tab-button" id="viewCardsTab">View Cards</button>
+        <button class="button tab-button" id="viewCardsTab">Deck</button>
+        <button class="button tab-button" id="setDetailsTab">Set Details</button>
         <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
     </div>
     
