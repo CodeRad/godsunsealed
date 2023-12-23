@@ -27,7 +27,15 @@
                 </div>
                 <button class="button" id="recents" onclick="displayMatchList()">Recent Matches</button>
 
-                <input class="button" type="text" id="userId" name="userId" onkeypress="if (event.key === 'Enter') displayMatchList(this.value)" placeholder="Search by ID" style="width: 100px;">
+                <input 
+                    class="button" 
+                    type="text" 
+                    id="userId" 
+                    name="userId" 
+                    onkeypress="if (event.key === 'Enter') displayMatchList(this.value)" 
+                    placeholder="Search by ID" 
+                    style="width: 100px;"
+                    autocomplete="on">
 
                 <button class="button" id="threats">Threat Analysis</button>
             </div>
