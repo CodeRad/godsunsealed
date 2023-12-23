@@ -307,7 +307,7 @@ top: 60px;
   height: auto; 
   /* max-width: 400px; */
   padding: 20px; 
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.8);
 border-radius: 20px;
   z-index: 1000;
 }
@@ -342,9 +342,9 @@ border-radius: 20px;
 }
 
 .buy-link {
-  width: 100px;
-  height: 100px;
-  background-image: url('images/icon-tokentrove.png');
+  width: 80px;
+  height: 80px;
+
   background-size: cover;
   display: inline-block;
 }
