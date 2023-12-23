@@ -484,40 +484,74 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
     <div class="bar" style="background-color: ${godTheme.color}; height: ${count / maxCount * 100}%;"></div>
 `).join('');
 
-
-    panel.innerHTML = `
-    <div class="player-card" style="background: ${godTheme.gradient};">
-        <div class="player-overview">
-
-            <div class="bar-graph">
-                ${barGraphHTML}
-            </div>
-
-            <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp">
-            <div class="player-overview-name" style="color: ${godTheme.color};">${playerInfo.username}</div>
-            <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerInfo.user_id})</div>
-            <div class="player-overview-rank" style="color: ${godTheme.color};">${playerRank}</div>
-            <div class="player-overview-level">Lv. ${playerInfo.xp_level}</div>
-
+panel.innerHTML = `
+<div class="player-card" style="background: ${godTheme.gradient};">
+    <div class="player-overview">
+        <div class="bar-graph">
+            ${barGraphHTML}
         </div>
-        <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
-        <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
-
-        <div class="portrait-container">
-            <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
-        </div>
+        <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp">
+        <div class="player-overview-name" style="color: ${godTheme.color};">${playerInfo.username}</div>
+        <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerInfo.user_id})</div>
+        <div class="player-overview-rank" style="color: ${godTheme.color};">${playerRank}</div>
+        <div class="player-overview-level">Lv. ${playerInfo.xp_level}</div>
     </div>
+
+    <!-- Tabbed section -->
+    <div class="tabs">
+        <button class="button tab-button active" id="statsTab">Stats</button>
+        <button class="button tab-button" id="viewCardsTab">View Cards</button>
+        <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
+    </div>
+    
+    <div class="tab-content" id="statsTabContent">
+        Content for Stats tab goes here 
+    </div>
+    
+    <div class="tab-content" id="viewCardsTabContent">
+        <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
+    </div>
+    
+    <div class="portrait-container">
+        <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
+    </div>
+</div>
 `;
 
-    displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
+// Display card list for "View Cards" tab
+displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
 
-    const showMatchesButton = panel.querySelector('#showMatchesButton');
-    showMatchesButton.addEventListener('click', async () => {
-        await displayMatchList(playerMatchInfo.user_id);
-    });
+// Set up tab functionality
+const statsTabButton = panel.querySelector('#statsTab');
+const viewCardsTabButton = panel.querySelector('#viewCardsTab');
+const statsTabContent = panel.querySelector('#statsTabContent');
+const viewCardsTabContent = panel.querySelector('#viewCardsTabContent');
+
+statsTabButton.addEventListener('click', () => {
+statsTabButton.classList.add('active');
+viewCardsTabButton.classList.remove('active');
+statsTabContent.style.display = 'block';
+viewCardsTabContent.style.display = 'none';
+});
+
+viewCardsTabButton.addEventListener('click', () => {
+statsTabButton.classList.remove('active');
+viewCardsTabButton.classList.add('active');
+statsTabContent.style.display = 'none';
+viewCardsTabContent.style.display = 'block';
+});
+
+// Initial state
+statsTabButton.classList.add('active');
+statsTabContent.style.display = 'block';
+viewCardsTabContent.style.display = 'none';
+
+const showMatchesButton = panel.querySelector('#showMatchesButton');
+showMatchesButton.addEventListener('click', async () => {
+await displayMatchList(playerMatchInfo.user_id);
+});
 }
 
-// Display card list on player panel
 async function displayCardList(cardIds, containerId) {
     const cardListDiv = document.getElementById(containerId);
 
@@ -537,9 +571,72 @@ async function displayCardList(cardIds, containerId) {
         cardElement.title = `(${cardInfo.mana}) ${cardInfo.name}`;
         cardElement.className = 'card-icon';
 
+        // Attach click event listener to each card
+        cardElement.addEventListener('click', () => {
+            openCardModal(cardInfo);
+        });
+
         cardListDiv.appendChild(cardElement);
     }
 }
+let currentModal = null;
+
+function openCardModal(cardInfo) {
+    // Close the existing modal, if any
+    if (currentModal) {
+        closeExistingModal();
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'card-modal';
+    modal.innerHTML = `
+    <div class="modal-content">
+    <span class="close-modal">&times;</span>
+    <img src="https://card.godsunchained.com/?id=${cardInfo.id}&q=4" class="card-image">
+    <div class="buy-links">
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: red;" target="_blank"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: blue;" target="_blank"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: gold;" target="_blank"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: diamond;" target="_blank"></a>
+    </div>
+</div>
+    `;
+
+    const closeModal = () => {
+        document.body.removeChild(modal);
+        currentModal = null;
+    };
+
+    const closeButton = modal.querySelector('.close-modal');
+    closeButton.addEventListener('click', closeModal);
+
+    // Close modal on Escape key press
+    window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    // Close modal when clicking outside the modal content
+    modal.addEventListener('click', (event) => {
+        const modalContent = modal.querySelector('.modal-content');
+        if (!modalContent.contains(event.target)) {
+            closeModal();
+        }
+    });
+
+    document.body.appendChild(modal);
+    currentModal = modal;
+}
+
+function closeExistingModal() {
+    if (currentModal) {
+        document.body.removeChild(currentModal);
+        currentModal = null;
+    }
+}
+
+
 
 // Build string for Time Ago
 function getTimeAgo(timestamp) {
