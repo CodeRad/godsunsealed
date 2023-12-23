@@ -342,9 +342,9 @@ border-radius: 20px;
 }
 
 .buy-link {
-  width: 80px;
-  height: 80px;
-
+  width: 70px;
+  height: 70px;
+top: 20px;
   background-size: cover;
   display: inline-block;
 }

@@ -369,7 +369,7 @@ async function displayMatchList(userId) {
                 const matchBanner = document.createElement('div');
                 matchBanner.className = 'match-banner dropIn';
                 matchBanner.id = `match-banner-${i}`;
-                matchBanner.onclick = () => handleMatchClick(i);
+                matchBanner.onclick = () => handleMatchClick(i, playerWonMatchInfo, playerLostMatchInfo);
 
                 // Your match banner content
                 matchBanner.innerHTML = `
@@ -449,19 +449,17 @@ async function displayMatchList(userId) {
 }
 
 // Display player panel
-async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
+async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     const panel = document.getElementById(panelId);
 
-    // const playerMatchHistory = await getPlayerMatchStats(playerMatchInfo.user_id);
-    const godTheme = godThemes[playerMatchInfo.god];
-    const outcomeClass = isWinner ? 'winner' : 'loser';
-    const outcomeText = isWinner ? 'WINNER' : 'LOSER';
+    // const playerMatchHistory = await getPlayerMatchStats(playerInfo.user_id);
+    const godTheme = godThemes[playerInfo.god];
 
-    const playerInfo = await fetchUserInfo(playerMatchInfo.user_id);
-    const playerRank = await fetchUserRank(playerMatchInfo.user_id);
+    const playerBasicInfo = await fetchUserInfo(playerInfo.user_id);
+    const playerRank = await fetchUserRank(playerInfo.user_id);
 
     // Fetch card information for all cards
-    const cardInfoArray = await Promise.all(playerMatchInfo.cards.map(fetchCardInfo));
+    const cardInfoArray = await Promise.all(playerInfo.cards.map(fetchCardInfo));
     // Calculate mana curve data
     const manaCurveData = Array.from({ length: 10 }, (_, mana) => {
         if (mana === 0 || mana === 1) {
@@ -490,21 +488,21 @@ panel.innerHTML = `
     <div class="bar-graph">
         ${barGraphHTML}
     </div>
-    <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp">
-    <div class="player-overview-name" style="color: ${godTheme.color};">${playerInfo.username}</div>
-    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerInfo.user_id})</div>
+    <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerInfo.god_power}.webp">
+    <div class="player-overview-name" style="color: ${godTheme.color};">${playerBasicInfo.username}</div>
+    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerBasicInfo.user_id})</div>
     <div class="player-overview-rank" style="color: ${godTheme.color};">${playerRank}</div>
-    <div class="player-overview-level">Lv. ${playerInfo.xp_level}</div>
+    <div class="player-overview-level"><small>Lv.</small> ${playerBasicInfo.xp_level}</div>
 
     <div class="circle-container">
-        <div class="circle" style="background: ${godThemes['war'].gradient};">
-            <img src="images/gods/war.png" alt="War" class="zoomed-image">
+        <div class="circle" style="background-color: ${godThemes[playerMatchInfo.godsUsed[0]].color};">
+            <img src="${godThemes[playerMatchInfo.godsUsed[0]].image}" class="zoomed-image">
         </div>
-        <div class="circle" style="background: ${godThemes['light'].gradient};">
-            <img src="images/gods/light.png" alt="Light" class="zoomed-image">
+        <div class="circle" style="background-color: ${godThemes[playerMatchInfo.godsUsed[1]].color};">
+            <img src="${godThemes[playerMatchInfo.godsUsed[1]].image}" class="zoomed-image">
         </div>
-        <div class="circle" style="background: ${godThemes['nature'].gradient};">
-            <img src="images/gods/nature.png" alt="Nature" class="zoomed-image">
+        <div class="circle" style="background-color: ${godThemes[playerMatchInfo.godsUsed[2]].color};">
+            <img src="${godThemes[playerMatchInfo.godsUsed[2]].image}" class="zoomed-image">
         </div>
     </div>
 </div>
@@ -513,7 +511,7 @@ panel.innerHTML = `
     <div class="tabs">
         <button class="button tab-button active" id="statsTab">Stats</button>
         <button class="button tab-button" id="viewCardsTab">Deck</button>
-        <button class="button tab-button" id="setDetailsTab">Set Details</button>
+        <!-- <button class="button tab-button" id="setDetailsTab">Set Details</button> -->
         <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
     </div>
     
@@ -522,17 +520,17 @@ panel.innerHTML = `
     </div>
     
     <div class="tab-content" id="viewCardsTabContent">
-        <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
+        <div class="card-list ${panelId}-card-list" id="${panelId}-card-list"></div>
     </div>
     
     <div class="portrait-container">
-        <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
+        <img class="portrait" src="${godTheme.image}" alt="${playerInfo.god}">
     </div>
 </div>
 `;
 
 // Display card list for "View Cards" tab
-displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
+displayCardList(playerInfo.cards, `${panelId}-card-list`);
 
 // Set up tab functionality
 const statsTabButton = panel.querySelector('#statsTab');
@@ -561,7 +559,7 @@ viewCardsTabContent.style.display = 'none';
 
 const showMatchesButton = panel.querySelector('#showMatchesButton');
 showMatchesButton.addEventListener('click', async () => {
-await displayMatchList(playerMatchInfo.user_id);
+await displayMatchList(playerInfo.user_id);
 });
 }
 
@@ -649,8 +647,6 @@ function closeExistingModal() {
     }
 }
 
-
-
 // Build string for Time Ago
 function getTimeAgo(timestamp) {
     const currentTime = Math.floor(Date.now() / 1000);
@@ -682,9 +678,8 @@ function getTimeAgo(timestamp) {
     return `${monthsAgo} month${monthsAgo !== 1 ? 's' : ''} ago`;
 }
 
-
 // Handle matchlist click event and populate panels
-async function handleMatchClick(matchIndex) {
+async function handleMatchClick(matchIndex, playerWonMatchInfo, playerLostMatchInfo) {
     const match = matches[matchIndex];
 
     // Remove 'active' class from all match banners
@@ -700,8 +695,8 @@ async function handleMatchClick(matchIndex) {
         matchBanner.classList.add('active');
         matchBanner.style.opacity = 1; // Set full opacity for the selected banner
         // console.log(match);
-        displayPlayerPanel('panel-left', match.player_info[0], true);
-        displayPlayerPanel('panel-right', match.player_info[1], false);
+        displayPlayerPanel('panel-left', match.player_info[0], playerWonMatchInfo);
+        displayPlayerPanel('panel-right', match.player_info[1], playerLostMatchInfo);
     } else {
         console.error(`Match banner with ID match-banner-${matchIndex} not found.`);
     }
