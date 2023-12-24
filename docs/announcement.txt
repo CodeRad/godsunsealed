@@ -1,0 +1,24 @@
+Introducing Gods Unsealed. Find yourself an XMAS NOOB today!
+
+
+What it is?
+
+A sealed mode explorer and tracker and (eventually) a threat analyis tool to pick your best times to jump into a game.
+
+- Watch sets on the match list, so that you can avoid jumping into games against overly threatening player pools. 
+- After your first match of a set, have a nice view of your complete deck so you can keep your deck composition in mind.
+- Enter your Apollo ID to view past games and see your decks, with direct links to buy any of your cards from TokenTrove.
+
+What is it not. What isn't it?
+
+- A place to drag and drop your console.txt file to see decks of games in progress. Although I think it would be really funny to put that, but it just serves a video ad instead.
+
+Why is it? Doesn't GUDecks do that already?
+
+Kind of, but it's different. They don't really track wins and losses in sets or gods used in decks etc.  And this is decently fast (although lots of room for improvement) because there's not a lot of extra overhead.  Like I can drop in '1442' for the Apollo ID and see Copperpitch finished a complete set
+4 hours ago.  Chances are he's not going to be jumping in on one rihgt now.  Conversely if I see someone is steadily getting 75-90% win rates and is halfway through a set, and all the other players are mythic rank... probably a good time for a walk
+
+Plus, fancy fun graphics!  Really this is just a sandbox for me to brush up on my frontend skills, but if people find it useful we'll see where it goes.  I got lots of plans
+for stats and analysis, lots of behind the scenes stuff, but for now I wanted to get it out there so people could use it during the hoidays!  No cookies, no sign-in, just match data straight from the api.
+
+So yeah, check it out at http://coderad.github.io/godsunsealed if it sounds like it's up your alley.

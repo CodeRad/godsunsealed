@@ -69,7 +69,7 @@ async function fetchRecentMatches() {
     try {
         const itemsPerPage = 1000; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
-        const startTime = endTime - 60 * 5; // 10 minutes
+        const startTime = endTime - 60 * 10; // 10 minutes
 
         // Fetch only the first page without fetching the total count
         const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=1&game_mode=7&order=desc`);
@@ -220,11 +220,6 @@ async function fetchCardInfo(cardId) {
 async function getPlayerMatchStats(userId, endTime) {
     const matches = await fetchMatchesByUserId(userId, endTime);
 
-    // Get overall Sealed mode W/L
-    const winCountOverall = matches.filter(match => match.player_won === userId).length;
-    const lossCountOverall = matches.length - winCountOverall;
-    const winPercentageOverall = (winCountOverall / matches.length) * 100;
-
     // Figure out which gods are being used //
     // Get the main god for the player
     const mainGod = matches[0].player_info.find(player => player.user_id === userId).god;
@@ -254,6 +249,52 @@ async function getPlayerMatchStats(userId, endTime) {
     }
 
     console.log(`${userId} used gods: ${godsUsed.join(', ')}`);
+
+
+    // Get player overall match stats
+
+    let totalWins = 0;
+    let dominationWins = 0;
+    let decisiveWins = 0;
+    let closeCalls = 0;
+    let totalLosses = 0;
+    let dominationLosses = 0;
+    let decisiveLosses = 0;
+    let nearMisses = 0;
+    let concessions = 0;
+
+    // Iterate through each match
+    for (const match of matches) {
+        // Check if our player won or lost
+        const playerWon = match.player_won === userId;
+        const playerLost = match.player_lost === userId;
+
+        if (playerWon) {
+            totalWins++;
+            if (match.player_info[0].health >= 26) {
+                dominationWins++;
+            } else if (match.player_info[0].health >= 20) {
+                decisiveWins++;
+            } else if (match.player_info[0].health < 5) {
+                closeCalls++;
+            }
+        } else if (playerLost) {
+            totalLosses++;
+            if (match.player_info[0].status === "conceded") {
+                concessions++;
+            } else if (match.player_info[0].health >= 26) {
+                dominationLosses++;
+            } else if (match.player_info[0].health >= 20) {
+                decisiveLosses++;
+            } else if (match.player_info[0].health < 5) {
+                nearMisses++;
+            }
+
+        }
+    }
+
+    // Calculate win/loss percentages
+    const winPercentage = totalWins / (totalWins + totalLosses) * 100;
 
     // Get Sealed Set information //
     // Trim data to last 10 matches before we search for Game 1
@@ -305,9 +346,16 @@ async function getPlayerMatchStats(userId, endTime) {
     console.log(`${userId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
 
     return {
-        winCountOverall,
-        lossCountOverall,
-        winPercentageOverall,
+        totalWins,
+        dominationWins,
+        decisiveWins,
+        closeCalls,
+        totalLosses,
+        dominationLosses,
+        decisiveLosses,
+        nearMisses,
+        concessions,
+        winPercentage,
         winCountInSet,
         lossCountInSet,
         godsUsed
@@ -395,7 +443,7 @@ async function displayMatchList(userId) {
 
                                     ${playerWonLossPointsHTML}
                                     <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
-                                    <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                                    <div class="winrate">${playerWonMatchInfo.winPercentage.toFixed(2)}%</div>
                                 </div>
                             </div>
                         </div>
@@ -414,7 +462,7 @@ async function displayMatchList(userId) {
 
                                     ${playerLostLossPointsHTML}
                                     <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
-                                    <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                                    <div class="winrate winrate-right">${playerLostMatchInfo.winPercentage.toFixed(2)}%</div>
                                 </div>
                             </div>
                         </div>
@@ -482,7 +530,10 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     <div class="bar" style="background-color: ${godTheme.color}; height: ${count / maxCount * 100}%;"></div>
 `).join('');
 
-panel.innerHTML = `
+    const normalWins = playerMatchInfo.totalWins - playerMatchInfo.dominationWins - playerMatchInfo.decisiveWins - playerMatchInfo.closeCalls;
+    const normalLosses = playerMatchInfo.totalLosses - playerMatchInfo.dominationLosses - playerMatchInfo.decisiveLosses - playerMatchInfo.nearMisses - playerMatchInfo.concessions;
+
+    panel.innerHTML = `
 <div class="player-card" style="background: ${godTheme.gradient};">
 <div class="player-overview">
     <div class="bar-graph">
@@ -509,14 +560,79 @@ panel.innerHTML = `
 
     <!-- Tabbed section -->
     <div class="tabs">
-        <button class="tab-button active" id="statsTab">Stats</button>
+        <button class="tab-button active" id="statsTab">Overall</button>
         <button class="tab-button" id="viewCardsTab">Deck</button>
-        <button class="tab-button" id="setDetailsTab">Sets</button>
+        <!-- <button class="tab-button" id="setDetailsTab">Sets</button> -->
         <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
     </div>
     
     <div class="tab-content" id="statsTabContent">
-      
+    <div class="tab-rule"></div>
+    <div class="stats-container">
+    <p>Total Sealed Games: ${playerMatchInfo.totalWins + playerMatchInfo.totalLosses} (Data is for 3 Days)</p>
+    <p>Total Wins: ${playerMatchInfo.totalWins} Total Losses: ${playerMatchInfo.totalLosses}</p>
+    <p>Set Wins: ${playerMatchInfo.winCountInSet} Set Losses: ${playerMatchInfo.lossCountInSet}</p>
+
+    <div class="chart-container">
+
+    <div class="legend" id="${panelId}-legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: blue;"></div>
+        <span>${playerMatchInfo.dominationWins} Domination Wins</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: deepskyblue;"></div>
+        <span>${playerMatchInfo.decisiveWins} Decisive Wins</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: dodgerblue;"></div>
+        <span>${normalWins} Normal Wins</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: purple;"></div>
+        <span>${playerMatchInfo.closeCalls} Close Calls</span>
+      </div>
+    </div>
+
+
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: mediumorchid;"></div>
+        <span>${playerMatchInfo.dominationLosses} Domination Losses</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: darkorchid;"></div>
+        <span>${playerMatchInfo.decisiveLosses} Decisive Losses</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: red;"></div>
+        <span>${normalLosses} Normal Losses</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: orangered;"></div>
+        <span>${playerMatchInfo.nearMisses} Near Misses</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: black;"></div>
+        <span>${playerMatchInfo.concessions} Concessions</span>
+      </div>
+    </div>
+
+    <canvas id="${panelId}-wl-pie-chart" width="100" height="100"></canvas>
+    
+  </div>
+
+
+</div>
+    <div class="tab-rule"></div>
     </div>
     
     <div class="tab-content" id="viewCardsTabContent">
@@ -533,38 +649,42 @@ panel.innerHTML = `
 </div>
 `;
 
-// Display card list for "View Cards" tab
-displayCardList(playerInfo.cards, `${panelId}-card-list`);
+    drawWinLossPieChart(`${panelId}-wl-pie-chart`, playerMatchInfo);
 
-// Set up tab functionality
-const statsTabButton = panel.querySelector('#statsTab');
-const viewCardsTabButton = panel.querySelector('#viewCardsTab');
-const statsTabContent = panel.querySelector('#statsTabContent');
-const viewCardsTabContent = panel.querySelector('#viewCardsTabContent');
+    // Display card list for "View Cards" tab
+    displayCardList(playerInfo.cards, `${panelId}-card-list`);
 
-statsTabButton.addEventListener('click', () => {
-statsTabButton.classList.add('active');
-viewCardsTabButton.classList.remove('active');
-statsTabContent.style.display = 'block';
-viewCardsTabContent.style.display = 'none';
-});
 
-viewCardsTabButton.addEventListener('click', () => {
-statsTabButton.classList.remove('active');
-viewCardsTabButton.classList.add('active');
-statsTabContent.style.display = 'none';
-viewCardsTabContent.style.display = 'block';
-});
 
-// Initial state
-statsTabButton.classList.add('active');
-statsTabContent.style.display = 'block';
-viewCardsTabContent.style.display = 'none';
+    // Set up tab functionality
+    const statsTabButton = panel.querySelector('#statsTab');
+    const viewCardsTabButton = panel.querySelector('#viewCardsTab');
+    const statsTabContent = panel.querySelector('#statsTabContent');
+    const viewCardsTabContent = panel.querySelector('#viewCardsTabContent');
 
-const showMatchesButton = panel.querySelector('#showMatchesButton');
-showMatchesButton.addEventListener('click', async () => {
-await displayMatchList(playerInfo.user_id);
-});
+    statsTabButton.addEventListener('click', () => {
+        statsTabButton.classList.add('active');
+        viewCardsTabButton.classList.remove('active');
+        statsTabContent.style.display = 'block';
+        viewCardsTabContent.style.display = 'none';
+    });
+
+    viewCardsTabButton.addEventListener('click', () => {
+        statsTabButton.classList.remove('active');
+        viewCardsTabButton.classList.add('active');
+        statsTabContent.style.display = 'none';
+        viewCardsTabContent.style.display = 'block';
+    });
+
+    // Initial state
+    statsTabButton.classList.add('active');
+    statsTabContent.style.display = 'block';
+    viewCardsTabContent.style.display = 'none';
+
+    const showMatchesButton = panel.querySelector('#showMatchesButton');
+    showMatchesButton.addEventListener('click', async () => {
+        await displayMatchList(playerInfo.user_id);
+    });
 }
 
 async function displayCardList(cardIds, containerId) {
@@ -680,6 +800,88 @@ function getTimeAgo(timestamp) {
 
     const monthsAgo = Math.floor(daysAgo / 30);
     return `${monthsAgo} month${monthsAgo !== 1 ? 's' : ''} ago`;
+}
+
+function drawWinLossPieChart(canvasId, playerMatchInfo) {
+
+    const totalGames = playerMatchInfo.totalWins + playerMatchInfo.totalLosses;
+    const normalWins = playerMatchInfo.totalWins - playerMatchInfo.dominationWins - playerMatchInfo.decisiveWins - playerMatchInfo.closeCalls;
+    const normalLosses = playerMatchInfo.totalLosses - playerMatchInfo.dominationLosses - playerMatchInfo.decisiveLosses - playerMatchInfo.nearMisses - playerMatchInfo.concessions;
+
+    const percentages = [
+        getPercentage(totalGames, playerMatchInfo.dominationWins),
+        getPercentage(totalGames, playerMatchInfo.decisiveWins),
+        getPercentage(totalGames, normalWins),
+        getPercentage(totalGames, playerMatchInfo.closeCalls),
+        getPercentage(totalGames, playerMatchInfo.dominationLosses),
+        getPercentage(totalGames, playerMatchInfo.decisiveLosses),
+        getPercentage(totalGames, normalLosses),
+        getPercentage(totalGames, playerMatchInfo.nearMisses),
+        getPercentage(totalGames, playerMatchInfo.concessions)
+        // Add more percentages as needed
+    ];
+
+    drawConicalPieChart(canvasId, percentages, playerMatchInfo.winPercentage.toFixed(2));
+}
+
+
+function drawConicalPieChart(canvasId, percentages, winPercentage) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY);
+    const innerRadius = radius / 1.6; // Adjust as needed
+
+    let startAngle = 0;
+
+    // Draw the outer slices
+    percentages.forEach((percentage, index) => {
+        const endAngle = startAngle + (percentage / 100) * (2 * Math.PI);
+
+        const gradient = ctx.createLinearGradient(
+            centerX, centerY,
+            centerX + Math.cos(startAngle) * radius, centerY + Math.sin(startAngle) * radius
+        );
+
+        gradient.addColorStop(0, getGradientColor(index));
+        gradient.addColorStop(1, getGradientColor(index));
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle, false);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        startAngle = endAngle;
+    });
+
+    // Draw the inner circle to make it hollow
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333'; // Set the color to match your background
+    ctx.fill();
+
+    // Add the text in the center
+    ctx.fillStyle = 'beige'; // Set the color of the text
+    ctx.font = '28px Lilita One';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(winPercentage + '%', centerX, centerY);
+}
+
+function getGradientColor(index) {
+    // Provide your color logic here, for simplicity using a set of colors
+    const colors = [
+        'blue', 'deepskyblue', 'dodgerblue',
+        'purple', 'mediumorchid', 'darkorchid',
+        'red', 'orangered', 'black'
+    ];
+    return colors[index % colors.length];
+}
+
+function getPercentage(total, value) {
+    return (value / total) * 100;
 }
 
 // Handle matchlist click event and populate panels
