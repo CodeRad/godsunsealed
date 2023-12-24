@@ -509,18 +509,22 @@ panel.innerHTML = `
 
     <!-- Tabbed section -->
     <div class="tabs">
-        <button class="button tab-button active" id="statsTab">Stats</button>
-        <button class="button tab-button" id="viewCardsTab">Deck</button>
-        <!-- <button class="button tab-button" id="setDetailsTab">Set Details</button> -->
+        <button class="tab-button active" id="statsTab">Stats</button>
+        <button class="tab-button" id="viewCardsTab">Deck</button>
+        <button class="tab-button" id="setDetailsTab">Sets</button>
         <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
     </div>
     
     <div class="tab-content" id="statsTabContent">
-        Content for Stats tab goes here 
+      
     </div>
     
     <div class="tab-content" id="viewCardsTabContent">
-        <div class="card-list ${panelId}-card-list" id="${panelId}-card-list"></div>
+    <div class="tab-rule"></div>
+        <div class="card-list-container">
+            <div class="card-list ${panelId}-card-list" id="${panelId}-card-list"></div>
+        </div>
+        <div class="tab-rule"></div>
     </div>
     
     <div class="portrait-container">
