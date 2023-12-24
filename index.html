@@ -18,7 +18,18 @@
 
 <body>
     <div class="container">
-        <div class="panel" id="panel-left"></div>
+        <div class="panel" id="panel-left">
+            <div class="welcome-container"><div class="welcome-content">Welcome to Gods Unsealed.<br><br>To get started, click a match or enter an Apollo ID.<br><br>                
+                <input 
+                class="button" 
+                type="text" 
+                id="userId" 
+                name="userId" 
+                onkeypress="if (event.key === 'Enter') displayMatchList(this.value)" 
+                placeholder="Search by ID" 
+                style="width: 100px;"
+                autocomplete="on"></div></div>
+        </div>
 
         <div class="panel" id="panel-center">
             <div class="center-top">

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Conical Pie Chart</title>
+  <style>
+    canvas {
+      border: 1px solid #ddd;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="conicalPieChart" width="200" height="200"></canvas>
+
+  <script>
+    function drawConicalPieChart(canvasId, percentages) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(centerX, centerY);
+
+      let startAngle = 0;
+
+      percentages.forEach((percentage, index) => {
+        const endAngle = startAngle + (percentage / 100) * (2 * Math.PI);
+
+        const gradient = ctx.createLinearGradient(
+          centerX, centerY,
+          centerX + Math.cos(startAngle) * radius, centerY + Math.sin(startAngle) * radius
+        );
+
+        gradient.addColorStop(0, getGradientColor(index));
+        gradient.addColorStop(1, getGradientColor(index));
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle, false);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        startAngle = endAngle;
+      });
+    }
+
+    function getGradientColor(index) {
+      // Provide your color logic here, for simplicity using a set of colors
+      const colors = [
+        'red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet', 'brown', 'grey'
+      ];
+      return colors[index % colors.length];
+    }
+
+    function getPercentage(total, value) {
+      return (value / total) * 100;
+    }
+
+    // Example usage:
+    const totalGames = 100; // Replace with your actual total games count
+    const playerMatchInfo = {
+      dominationWins: 25,
+      decisiveWins: 20,
+      closeCalls: 15,
+      dominationLosses: 10,
+      decisiveLosses: 5,
+      nearMisses: 3,
+      concessions: 2
+      // Add more properties as needed
+    };
+
+    const percentages = [
+      getPercentage(totalGames, playerMatchInfo.dominationWins),
+      getPercentage(totalGames, playerMatchInfo.decisiveWins),
+      getPercentage(totalGames, playerMatchInfo.closeCalls),
+      getPercentage(totalGames, playerMatchInfo.dominationLosses),
+      getPercentage(totalGames, playerMatchInfo.decisiveLosses),
+      getPercentage(totalGames, playerMatchInfo.nearMisses),
+      getPercentage(totalGames, playerMatchInfo.concessions)
+      // Add more percentages as needed
+    ];
+
+    drawConicalPieChart('conicalPieChart', percentages);
+  </script>
+</body>
+</html>

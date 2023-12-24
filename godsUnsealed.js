@@ -69,7 +69,7 @@ async function fetchRecentMatches() {
     try {
         const itemsPerPage = 1000; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
-        const startTime = endTime - 60 * 5; // 10 minutes
+        const startTime = endTime - 60 * 10; // 10 minutes
 
         // Fetch only the first page without fetching the total count
         const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=1&game_mode=7&order=desc`);
@@ -220,11 +220,6 @@ async function fetchCardInfo(cardId) {
 async function getPlayerMatchStats(userId, endTime) {
     const matches = await fetchMatchesByUserId(userId, endTime);
 
-    // Get overall Sealed mode W/L
-    const winCountOverall = matches.filter(match => match.player_won === userId).length;
-    const lossCountOverall = matches.length - winCountOverall;
-    const winPercentageOverall = (winCountOverall / matches.length) * 100;
-
     // Figure out which gods are being used //
     // Get the main god for the player
     const mainGod = matches[0].player_info.find(player => player.user_id === userId).god;
@@ -254,6 +249,52 @@ async function getPlayerMatchStats(userId, endTime) {
     }
 
     console.log(`${userId} used gods: ${godsUsed.join(', ')}`);
+
+
+    // Get player overall match stats
+
+    let totalWins = 0;
+    let dominationWins = 0;
+    let decisiveWins = 0;
+    let closeCalls = 0;
+    let totalLosses = 0;
+    let dominationLosses = 0;
+    let decisiveLosses = 0;
+    let nearMisses = 0;
+    let concessions = 0;
+
+    // Iterate through each match
+    for (const match of matches) {
+        // Check if our player won or lost
+        const playerWon = match.player_won === userId;
+        const playerLost = match.player_lost === userId;
+
+        if (playerWon) {
+            totalWins++;
+            if (match.player_info[0].health >= 26) {
+                dominationWins++;
+            } else if (match.player_info[0].health >= 20) {
+                decisiveWins++;
+            } else if (match.player_info[0].health < 5) {
+                closeCalls++;
+            }
+        } else if (playerLost) {
+            totalLosses++;
+            if (match.player_info[0].status === "conceded") {
+                concessions++;
+            } else if (match.player_info[0].health >= 26) {
+                dominationLosses++;
+            } else if (match.player_info[0].health >= 20) {
+                decisiveLosses++;
+            } else if (match.player_info[0].health < 5) {
+                nearMisses++;
+            }
+
+        }
+    }
+
+    // Calculate win/loss percentages
+    const winPercentage = totalWins / (totalWins + totalLosses) * 100;
 
     // Get Sealed Set information //
     // Trim data to last 10 matches before we search for Game 1
@@ -305,9 +346,16 @@ async function getPlayerMatchStats(userId, endTime) {
     console.log(`${userId} Set Wins: ${winCountInSet} Losses: ${lossCountInSet}`);
 
     return {
-        winCountOverall,
-        lossCountOverall,
-        winPercentageOverall,
+        totalWins,
+        dominationWins,
+        decisiveWins,
+        closeCalls,
+        totalLosses,
+        dominationLosses,
+        decisiveLosses,
+        nearMisses,
+        concessions,
+        winPercentage,
         winCountInSet,
         lossCountInSet,
         godsUsed
@@ -369,7 +417,7 @@ async function displayMatchList(userId) {
                 const matchBanner = document.createElement('div');
                 matchBanner.className = 'match-banner dropIn';
                 matchBanner.id = `match-banner-${i}`;
-                matchBanner.onclick = () => handleMatchClick(i);
+                matchBanner.onclick = () => handleMatchClick(i, playerWonMatchInfo, playerLostMatchInfo);
 
                 // Your match banner content
                 matchBanner.innerHTML = `
@@ -395,7 +443,7 @@ async function displayMatchList(userId) {
 
                                     ${playerWonLossPointsHTML}
                                     <div class="won-matches">${playerWonMatchInfo.winCountInSet}</div>
-                                    <div class="winrate">${playerWonMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                                    <div class="winrate">${playerWonMatchInfo.winPercentage.toFixed(2)}%</div>
                                 </div>
                             </div>
                         </div>
@@ -414,7 +462,7 @@ async function displayMatchList(userId) {
 
                                     ${playerLostLossPointsHTML}
                                     <div class="won-matches">${playerLostMatchInfo.winCountInSet}</div>
-                                    <div class="winrate winrate-right">${playerLostMatchInfo.winPercentageOverall.toFixed(2)}%</div>
+                                    <div class="winrate winrate-right">${playerLostMatchInfo.winPercentage.toFixed(2)}%</div>
                                 </div>
                             </div>
                         </div>
@@ -449,19 +497,17 @@ async function displayMatchList(userId) {
 }
 
 // Display player panel
-async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
+async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     const panel = document.getElementById(panelId);
 
-    // const playerMatchHistory = await getPlayerMatchStats(playerMatchInfo.user_id);
-    const godTheme = godThemes[playerMatchInfo.god];
-    const outcomeClass = isWinner ? 'winner' : 'loser';
-    const outcomeText = isWinner ? 'WINNER' : 'LOSER';
+    // const playerMatchHistory = await getPlayerMatchStats(playerInfo.user_id);
+    const godTheme = godThemes[playerInfo.god];
 
-    const playerInfo = await fetchUserInfo(playerMatchInfo.user_id);
-    const playerRank = await fetchUserRank(playerMatchInfo.user_id);
+    const playerBasicInfo = await fetchUserInfo(playerInfo.user_id);
+    const playerRank = await fetchUserRank(playerInfo.user_id);
 
     // Fetch card information for all cards
-    const cardInfoArray = await Promise.all(playerMatchInfo.cards.map(fetchCardInfo));
+    const cardInfoArray = await Promise.all(playerInfo.cards.map(fetchCardInfo));
     // Calculate mana curve data
     const manaCurveData = Array.from({ length: 10 }, (_, mana) => {
         if (mana === 0 || mana === 1) {
@@ -484,85 +530,161 @@ async function displayPlayerPanel(panelId, playerMatchInfo, isWinner) {
     <div class="bar" style="background-color: ${godTheme.color}; height: ${count / maxCount * 100}%;"></div>
 `).join('');
 
-panel.innerHTML = `
+    const normalWins = playerMatchInfo.totalWins - playerMatchInfo.dominationWins - playerMatchInfo.decisiveWins - playerMatchInfo.closeCalls;
+    const normalLosses = playerMatchInfo.totalLosses - playerMatchInfo.dominationLosses - playerMatchInfo.decisiveLosses - playerMatchInfo.nearMisses - playerMatchInfo.concessions;
+
+    panel.innerHTML = `
 <div class="player-card" style="background: ${godTheme.gradient};">
 <div class="player-overview">
     <div class="bar-graph">
         ${barGraphHTML}
     </div>
-    <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerMatchInfo.god_power}.webp">
-    <div class="player-overview-name" style="color: ${godTheme.color};">${playerInfo.username}</div>
-    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerInfo.user_id})</div>
+    <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerInfo.god_power}.webp">
+    <div class="player-overview-name" style="color: ${godTheme.color};">${playerBasicInfo.username}</div>
+    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerBasicInfo.user_id})</div>
     <div class="player-overview-rank" style="color: ${godTheme.color};">${playerRank}</div>
-    <div class="player-overview-level">Lv. ${playerInfo.xp_level}</div>
+    <div class="player-overview-level"><small>Lv.</small> ${playerBasicInfo.xp_level}</div>
 
     <div class="circle-container">
-        <div class="circle" style="background: ${godThemes['war'].gradient};">
-            <img src="images/gods/war.png" alt="War" class="zoomed-image">
+        <div class="circle" style="background-color: ${godThemes[playerMatchInfo.godsUsed[0]].color};">
+            <img src="${godThemes[playerMatchInfo.godsUsed[0]].image}" class="zoomed-image">
         </div>
-        <div class="circle" style="background: ${godThemes['light'].gradient};">
-            <img src="images/gods/light.png" alt="Light" class="zoomed-image">
+        <div class="circle" style="background-color: ${godThemes[playerMatchInfo.godsUsed[1]].color};">
+            <img src="${godThemes[playerMatchInfo.godsUsed[1]].image}" class="zoomed-image">
         </div>
-        <div class="circle" style="background: ${godThemes['nature'].gradient};">
-            <img src="images/gods/nature.png" alt="Nature" class="zoomed-image">
+        <div class="circle" style="background-color: ${godThemes[playerMatchInfo.godsUsed[2]].color};">
+            <img src="${godThemes[playerMatchInfo.godsUsed[2]].image}" class="zoomed-image">
         </div>
     </div>
 </div>
 
     <!-- Tabbed section -->
     <div class="tabs">
-        <button class="button tab-button active" id="statsTab">Stats</button>
-        <button class="button tab-button" id="viewCardsTab">Deck</button>
-        <button class="button tab-button" id="setDetailsTab">Set Details</button>
+        <button class="tab-button active" id="statsTab">Overall</button>
+        <button class="tab-button" id="viewCardsTab">Deck</button>
+        <!-- <button class="tab-button" id="setDetailsTab">Sets</button> -->
         <button class="button player-matchlist-button" id="showMatchesButton">Match List</button>
     </div>
     
     <div class="tab-content" id="statsTabContent">
-        Content for Stats tab goes here 
+    <div class="tab-rule"></div>
+    <div class="stats-container">
+    <p>Total Sealed Games: ${playerMatchInfo.totalWins + playerMatchInfo.totalLosses} (Data is for 3 Days)</p>
+    <p>Total Wins: ${playerMatchInfo.totalWins} Total Losses: ${playerMatchInfo.totalLosses}</p>
+    <p>Set Wins: ${playerMatchInfo.winCountInSet} Set Losses: ${playerMatchInfo.lossCountInSet}</p>
+
+    <div class="chart-container">
+
+    <div class="legend" id="${panelId}-legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: blue;"></div>
+        <span>${playerMatchInfo.dominationWins} Domination Wins</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: deepskyblue;"></div>
+        <span>${playerMatchInfo.decisiveWins} Decisive Wins</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: dodgerblue;"></div>
+        <span>${normalWins} Normal Wins</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: purple;"></div>
+        <span>${playerMatchInfo.closeCalls} Close Calls</span>
+      </div>
+    </div>
+
+
+
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: mediumorchid;"></div>
+        <span>${playerMatchInfo.dominationLosses} Domination Losses</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: darkorchid;"></div>
+        <span>${playerMatchInfo.decisiveLosses} Decisive Losses</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: red;"></div>
+        <span>${normalLosses} Normal Losses</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: orangered;"></div>
+        <span>${playerMatchInfo.nearMisses} Near Misses</span>
+      </div>
+  
+      <div class="legend-item">
+        <div class="legend-color" style="background-color: black;"></div>
+        <span>${playerMatchInfo.concessions} Concessions</span>
+      </div>
+    </div>
+
+    <canvas id="${panelId}-wl-pie-chart" width="100" height="100"></canvas>
+    
+  </div>
+
+
+</div>
+    <div class="tab-rule"></div>
     </div>
     
     <div class="tab-content" id="viewCardsTabContent">
-        <div class="card-list ${outcomeClass}-card-list" id="${outcomeClass}-card-list"></div>
+    <div class="tab-rule"></div>
+        <div class="card-list-container">
+            <div class="card-list ${panelId}-card-list" id="${panelId}-card-list"></div>
+        </div>
+        <div class="tab-rule"></div>
     </div>
     
     <div class="portrait-container">
-        <img class="portrait" src="${godTheme.image}" alt="${playerMatchInfo.god}">
+        <img class="portrait" src="${godTheme.image}" alt="${playerInfo.god}">
     </div>
 </div>
 `;
 
-// Display card list for "View Cards" tab
-displayCardList(playerMatchInfo.cards, `${outcomeClass}-card-list`);
+    drawWinLossPieChart(`${panelId}-wl-pie-chart`, playerMatchInfo);
 
-// Set up tab functionality
-const statsTabButton = panel.querySelector('#statsTab');
-const viewCardsTabButton = panel.querySelector('#viewCardsTab');
-const statsTabContent = panel.querySelector('#statsTabContent');
-const viewCardsTabContent = panel.querySelector('#viewCardsTabContent');
+    // Display card list for "View Cards" tab
+    displayCardList(playerInfo.cards, `${panelId}-card-list`);
 
-statsTabButton.addEventListener('click', () => {
-statsTabButton.classList.add('active');
-viewCardsTabButton.classList.remove('active');
-statsTabContent.style.display = 'block';
-viewCardsTabContent.style.display = 'none';
-});
 
-viewCardsTabButton.addEventListener('click', () => {
-statsTabButton.classList.remove('active');
-viewCardsTabButton.classList.add('active');
-statsTabContent.style.display = 'none';
-viewCardsTabContent.style.display = 'block';
-});
 
-// Initial state
-statsTabButton.classList.add('active');
-statsTabContent.style.display = 'block';
-viewCardsTabContent.style.display = 'none';
+    // Set up tab functionality
+    const statsTabButton = panel.querySelector('#statsTab');
+    const viewCardsTabButton = panel.querySelector('#viewCardsTab');
+    const statsTabContent = panel.querySelector('#statsTabContent');
+    const viewCardsTabContent = panel.querySelector('#viewCardsTabContent');
 
-const showMatchesButton = panel.querySelector('#showMatchesButton');
-showMatchesButton.addEventListener('click', async () => {
-await displayMatchList(playerMatchInfo.user_id);
-});
+    statsTabButton.addEventListener('click', () => {
+        statsTabButton.classList.add('active');
+        viewCardsTabButton.classList.remove('active');
+        statsTabContent.style.display = 'block';
+        viewCardsTabContent.style.display = 'none';
+    });
+
+    viewCardsTabButton.addEventListener('click', () => {
+        statsTabButton.classList.remove('active');
+        viewCardsTabButton.classList.add('active');
+        statsTabContent.style.display = 'none';
+        viewCardsTabContent.style.display = 'block';
+    });
+
+    // Initial state
+    statsTabButton.classList.add('active');
+    statsTabContent.style.display = 'block';
+    viewCardsTabContent.style.display = 'none';
+
+    const showMatchesButton = panel.querySelector('#showMatchesButton');
+    showMatchesButton.addEventListener('click', async () => {
+        await displayMatchList(playerInfo.user_id);
+    });
 }
 
 async function displayCardList(cardIds, containerId) {
@@ -607,10 +729,10 @@ function openCardModal(cardInfo) {
     <span class="close-modal">&times;</span>
     <img src="https://card.godsunchained.com/?id=${cardInfo.id}&q=4" class="card-image">
     <div class="buy-links">
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: red;" target="_blank"></a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: blue;" target="_blank"></a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: gold;" target="_blank"></a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=GODS&ref=godsunsealed" class="buy-link" style="background-color: diamond;" target="_blank"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-4.png');" target="_blank" alt="Buy Meteorite at TokenTrove"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-3.png');" target="_blank" alt="Buy Shadow at TokenTrove"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-2.png');" target="_blank" alt="Buy Gold at TokenTrove"></a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-1.png');" target="_blank" alt="Buy Diamond at TokenTrove"></a>
     </div>
 </div>
     `;
@@ -649,8 +771,6 @@ function closeExistingModal() {
     }
 }
 
-
-
 // Build string for Time Ago
 function getTimeAgo(timestamp) {
     const currentTime = Math.floor(Date.now() / 1000);
@@ -682,9 +802,90 @@ function getTimeAgo(timestamp) {
     return `${monthsAgo} month${monthsAgo !== 1 ? 's' : ''} ago`;
 }
 
+function drawWinLossPieChart(canvasId, playerMatchInfo) {
+
+    const totalGames = playerMatchInfo.totalWins + playerMatchInfo.totalLosses;
+    const normalWins = playerMatchInfo.totalWins - playerMatchInfo.dominationWins - playerMatchInfo.decisiveWins - playerMatchInfo.closeCalls;
+    const normalLosses = playerMatchInfo.totalLosses - playerMatchInfo.dominationLosses - playerMatchInfo.decisiveLosses - playerMatchInfo.nearMisses - playerMatchInfo.concessions;
+
+    const percentages = [
+        getPercentage(totalGames, playerMatchInfo.dominationWins),
+        getPercentage(totalGames, playerMatchInfo.decisiveWins),
+        getPercentage(totalGames, normalWins),
+        getPercentage(totalGames, playerMatchInfo.closeCalls),
+        getPercentage(totalGames, playerMatchInfo.dominationLosses),
+        getPercentage(totalGames, playerMatchInfo.decisiveLosses),
+        getPercentage(totalGames, normalLosses),
+        getPercentage(totalGames, playerMatchInfo.nearMisses),
+        getPercentage(totalGames, playerMatchInfo.concessions)
+        // Add more percentages as needed
+    ];
+
+    drawConicalPieChart(canvasId, percentages, playerMatchInfo.winPercentage.toFixed(2));
+}
+
+
+function drawConicalPieChart(canvasId, percentages, winPercentage) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY);
+    const innerRadius = radius / 1.6; // Adjust as needed
+
+    let startAngle = 0;
+
+    // Draw the outer slices
+    percentages.forEach((percentage, index) => {
+        const endAngle = startAngle + (percentage / 100) * (2 * Math.PI);
+
+        const gradient = ctx.createLinearGradient(
+            centerX, centerY,
+            centerX + Math.cos(startAngle) * radius, centerY + Math.sin(startAngle) * radius
+        );
+
+        gradient.addColorStop(0, getGradientColor(index));
+        gradient.addColorStop(1, getGradientColor(index));
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle, false);
+        ctx.fillStyle = gradient;
+        ctx.fill();
+
+        startAngle = endAngle;
+    });
+
+    // Draw the inner circle to make it hollow
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333'; // Set the color to match your background
+    ctx.fill();
+
+    // Add the text in the center
+    ctx.fillStyle = 'beige'; // Set the color of the text
+    ctx.font = '28px Lilita One';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(winPercentage + '%', centerX, centerY);
+}
+
+function getGradientColor(index) {
+    // Provide your color logic here, for simplicity using a set of colors
+    const colors = [
+        'blue', 'deepskyblue', 'dodgerblue',
+        'purple', 'mediumorchid', 'darkorchid',
+        'red', 'orangered', 'black'
+    ];
+    return colors[index % colors.length];
+}
+
+function getPercentage(total, value) {
+    return (value / total) * 100;
+}
 
 // Handle matchlist click event and populate panels
-async function handleMatchClick(matchIndex) {
+async function handleMatchClick(matchIndex, playerWonMatchInfo, playerLostMatchInfo) {
     const match = matches[matchIndex];
 
     // Remove 'active' class from all match banners
@@ -700,8 +901,8 @@ async function handleMatchClick(matchIndex) {
         matchBanner.classList.add('active');
         matchBanner.style.opacity = 1; // Set full opacity for the selected banner
         // console.log(match);
-        displayPlayerPanel('panel-left', match.player_info[0], true);
-        displayPlayerPanel('panel-right', match.player_info[1], false);
+        displayPlayerPanel('panel-left', match.player_info[0], playerWonMatchInfo);
+        displayPlayerPanel('panel-right', match.player_info[1], playerLostMatchInfo);
     } else {
         console.error(`Match banner with ID match-banner-${matchIndex} not found.`);
     }
