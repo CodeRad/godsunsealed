@@ -716,11 +716,23 @@ async function displayCardList(cardIds, containerId) {
 }
 let currentModal = null;
 
-function openCardModal(cardInfo) {
+async function openCardModal(cardInfo) {
     // Close the existing modal, if any
     if (currentModal) {
         closeExistingModal();
     }
+	
+	// const cardPrices = [0.0,0.0,0.0,0.0];
+	
+	// cardPrices[0] = await fetch(`https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c&sell_metadata={%22proto%22%3A%20[%22${cardInfo.id}%22]%2C%22quality%22%3A[%22Meteorite%22]}`);
+	// cardPrices[1] = await fetch(`https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c&sell_metadata={%22proto%22%3A%20[%22${cardInfo.id}%22]%2C%22quality%22%3A[%22Shadow%22]}`);
+	// cardPrices[2] = await fetch(`https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c&sell_metadata={%22proto%22%3A%20[%22${cardInfo.id}%22]%2C%22quality%22%3A[%22Gold%22]}`);
+	// cardPrices[3] = await fetch(`https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c&sell_metadata={%22proto%22%3A%20[%22${cardInfo.id}%22]%2C%22quality%22%3A[%22Diamond%22]}`);
+	
+	const cardId = cardInfo.id;
+const cardPrices = await getCardPrices(cardId);
+console.log(cardPrices);
+	
 
     const modal = document.createElement('div');
     modal.className = 'card-modal';
@@ -729,11 +741,15 @@ function openCardModal(cardInfo) {
     <span class="close-modal">&times;</span>
     <img src="https://card.godsunchained.com/?id=${cardInfo.id}&q=4" class="card-image">
     <div class="buy-links">
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-4.png');" target="_blank" alt="Buy Meteorite at TokenTrove"></a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-3.png');" target="_blank" alt="Buy Shadow at TokenTrove"></a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-2.png');" target="_blank" alt="Buy Gold at TokenTrove"></a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-1.png');" target="_blank" alt="Buy Diamond at TokenTrove"></a>
-    </div>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-4.png');" target="_blank" alt="Buy Meteorite at TokenTrove">
+		<br><br><br>${cardPrices[0]}</a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-3.png');" target="_blank" alt="Buy Shadow at TokenTrove">
+		<br><br><br>{$cardPrices[1]}</a>
+		<a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-2.png');" target="_blank" alt="Buy Gold at TokenTrove">
+        <br><br><br>{$cardPrices[2]}</a>
+		<a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-1.png');" target="_blank" alt="Buy Diamond at TokenTrove">
+		<br><br><br>{$cardPrices[3]}</a>
+	</div>
 </div>
     `;
 
@@ -764,6 +780,27 @@ function openCardModal(cardInfo) {
     currentModal = modal;
 }
 
+async function getCardPrices(cardId) {
+  const cardPrices = [0.0, 0.0, 0.0, 0.0];
+  const baseUrl = "https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c";
+
+  const qualities = ["Meteorite", "Shadow", "Gold", "Diamond"];
+
+  const fetchCardPrice = async (quality, index) => {
+    const url = `${baseUrl}&sell_metadata={"proto":["${cardId}"],"quality":["${quality}"]}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    cardPrices[index] = data.result[0]?.sell?.buy?.data?.quantity_with_fees || 0;
+	console.log(cardPrices[index]);
+  };
+
+  const fetchPromises = qualities.map((quality, index) => fetchCardPrice(quality, index));
+
+  await Promise.all(fetchPromises);
+
+  return cardPrices;
+}
+
 function closeExistingModal() {
     if (currentModal) {
         document.body.removeChild(currentModal);
@@ -771,7 +808,6 @@ function closeExistingModal() {
     }
 }
 
-// Build string for Time Ago
 function getTimeAgo(timestamp) {
     const currentTime = Math.floor(Date.now() / 1000);
     const secondsAgo = currentTime - timestamp;
@@ -823,7 +859,6 @@ function drawWinLossPieChart(canvasId, playerMatchInfo) {
 
     drawConicalPieChart(canvasId, percentages, playerMatchInfo.winPercentage.toFixed(2));
 }
-
 
 function drawConicalPieChart(canvasId, percentages, winPercentage) {
     const canvas = document.getElementById(canvasId);

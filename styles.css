@@ -459,6 +459,8 @@ body {
   background-size: cover;
   display: inline-block;
   transition: transform 0.2s ease-out;
+  color: beige;
+  text-align: center;
 }
 
 .buy-link:hover {
