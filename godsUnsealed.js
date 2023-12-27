@@ -44,6 +44,11 @@ const godThemes = {
     }
 };
 
+const pieColors = [
+    'darkblue', 'steelblue', 'royalblue', 'lightskyblue',
+    'darkred', 'firebrick', 'indianred', 'lightcoral', 'black'
+];
+
 const godPowerNames = {
     100106: 'Soul Burn',
     102405: 'Create',
@@ -69,7 +74,7 @@ async function fetchRecentMatches() {
     try {
         const itemsPerPage = 1000; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
-        const startTime = endTime - 60 * 2; // 10 minutes
+        const startTime = endTime - 60 * 5; // 10 minutes
 
         // Fetch only the first page without fetching the total count
         const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=1&game_mode=7&order=desc`);
@@ -569,66 +574,65 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     <div class="tab-content" id="statsTabContent">
     <div class="tab-rule"></div>
     <div class="stats-container">
-    <p>Total Sealed Games: ${playerMatchInfo.totalWins + playerMatchInfo.totalLosses} (Data is for 3 Days)</p>
-    <p>Total Wins: ${playerMatchInfo.totalWins} Total Losses: ${playerMatchInfo.totalLosses}</p>
-    <p>Set Wins: ${playerMatchInfo.winCountInSet} Set Losses: ${playerMatchInfo.lossCountInSet}</p>
+    <p><span class="sealed-count">${playerMatchInfo.totalWins + playerMatchInfo.totalLosses}</span> Sealed Games in the past 3 Days.</p>
+
 
     <div class="chart-container">
 
-    <div class="legend" id="${panelId}-legend">
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: blue;"></div>
-        <span>${playerMatchInfo.dominationWins} Domination Wins</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: deepskyblue;"></div>
-        <span>${playerMatchInfo.decisiveWins} Decisive Wins</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: dodgerblue;"></div>
-        <span>${normalWins} Normal Wins</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: purple;"></div>
-        <span>${playerMatchInfo.closeCalls} Close Calls</span>
-      </div>
+    <div class="legend" id="${panelId}-legend">Total Wins: ${playerMatchInfo.totalWins}<br><br>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[0]};"></div>
+      <span>${playerMatchInfo.dominationWins} Domination</span>
     </div>
-
-
-
-    <div class="legend">
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: mediumorchid;"></div>
-        <span>${playerMatchInfo.dominationLosses} Domination Losses</span>
-      </div>
   
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: darkorchid;"></div>
-        <span>${playerMatchInfo.decisiveLosses} Decisive Losses</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: red;"></div>
-        <span>${normalLosses} Normal Losses</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: orangered;"></div>
-        <span>${playerMatchInfo.nearMisses} Near Misses</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: black;"></div>
-        <span>${playerMatchInfo.concessions} Concessions</span>
-      </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[1]};"></div>
+      <span>${playerMatchInfo.decisiveWins} Decisive</span>
     </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[2]};"></div>
+      <span>${normalWins} Confident</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[3]};"></div>
+      <span>${playerMatchInfo.closeCalls} Close Call</span>
+    </div>
+  </div>
+  
+  <div class="legend">Total Losses: ${playerMatchInfo.totalLosses}<br><br>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[4]};"></div>
+      <span>${playerMatchInfo.dominationLosses} Annihilated</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[5]};"></div>
+      <span>${playerMatchInfo.decisiveLosses} Overpowered</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[6]};"></div>
+      <span>${normalLosses} Outplayed</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[7]};"></div>
+      <span>${playerMatchInfo.nearMisses} Near Misses</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[8]};"></div>
+      <span>${playerMatchInfo.concessions} Concessions</span>
+    </div>
+  </div>
+  
 
     <canvas id="${panelId}-wl-pie-chart" width="100" height="100"></canvas>
     
   </div>
+  <p>Set Wins: ${playerMatchInfo.winCountInSet}<br>Set Losses: ${playerMatchInfo.lossCountInSet}</p>
 
 
 </div>
@@ -773,8 +777,6 @@ async function openCardModal(cardInfo) {
     currentModal = modal;
 }
 
-
-
 async function getCardPrices(cardId) {
     const cardPrices = [0, 0, 0, 0];
     const baseUrl =
@@ -815,10 +817,6 @@ async function getCardPrices(cardId) {
 
     return cardPrices;
 }
-
-
-
-
 
 function closeExistingModal() {
     if (currentModal) {
@@ -925,13 +923,8 @@ function drawConicalPieChart(canvasId, percentages, winPercentage) {
 }
 
 function getGradientColor(index) {
-    // Provide your color logic here, for simplicity using a set of colors
-    const colors = [
-        'blue', 'deepskyblue', 'dodgerblue',
-        'purple', 'mediumorchid', 'darkorchid',
-        'red', 'orangered', 'black'
-    ];
-    return colors[index % colors.length];
+
+    return pieColors[index % pieColors.length];
 }
 
 function getPercentage(total, value) {
@@ -965,5 +958,5 @@ async function handleMatchClick(matchIndex, playerWonMatchInfo, playerLostMatchI
 // Program entry point
 document.addEventListener('DOMContentLoaded', () => {
     // Fetch and display match data on page load
-    displayMatchList();//(1979626);
+    displayMatchList();
 });
