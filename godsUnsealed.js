@@ -44,6 +44,11 @@ const godThemes = {
     }
 };
 
+const pieColors = [
+    'darkblue', 'steelblue', 'royalblue', 'lightskyblue',
+    'darkred', 'firebrick', 'indianred', 'lightcoral', 'black'
+];
+
 const godPowerNames = {
     100106: 'Soul Burn',
     102405: 'Create',
@@ -569,66 +574,65 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     <div class="tab-content" id="statsTabContent">
     <div class="tab-rule"></div>
     <div class="stats-container">
-    <p>Total Sealed Games: ${playerMatchInfo.totalWins + playerMatchInfo.totalLosses} (Data is for 3 Days)</p>
-    <p>Total Wins: ${playerMatchInfo.totalWins} Total Losses: ${playerMatchInfo.totalLosses}</p>
-    <p>Set Wins: ${playerMatchInfo.winCountInSet} Set Losses: ${playerMatchInfo.lossCountInSet}</p>
+    <p><span class="sealed-count">${playerMatchInfo.totalWins + playerMatchInfo.totalLosses}</span> Sealed Games in the past 3 Days.</p>
+
 
     <div class="chart-container">
 
-    <div class="legend" id="${panelId}-legend">
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: blue;"></div>
-        <span>${playerMatchInfo.dominationWins} Domination Wins</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: deepskyblue;"></div>
-        <span>${playerMatchInfo.decisiveWins} Decisive Wins</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: dodgerblue;"></div>
-        <span>${normalWins} Normal Wins</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: purple;"></div>
-        <span>${playerMatchInfo.closeCalls} Close Calls</span>
-      </div>
+    <div class="legend" id="${panelId}-legend">Total Wins: ${playerMatchInfo.totalWins}<br><br>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[0]};"></div>
+      <span>${playerMatchInfo.dominationWins} Domination</span>
     </div>
-
-
-
-    <div class="legend">
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: mediumorchid;"></div>
-        <span>${playerMatchInfo.dominationLosses} Domination Losses</span>
-      </div>
   
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: darkorchid;"></div>
-        <span>${playerMatchInfo.decisiveLosses} Decisive Losses</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: red;"></div>
-        <span>${normalLosses} Normal Losses</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: orangered;"></div>
-        <span>${playerMatchInfo.nearMisses} Near Misses</span>
-      </div>
-  
-      <div class="legend-item">
-        <div class="legend-color" style="background-color: black;"></div>
-        <span>${playerMatchInfo.concessions} Concessions</span>
-      </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[1]};"></div>
+      <span>${playerMatchInfo.decisiveWins} Decisive</span>
     </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[2]};"></div>
+      <span>${normalWins} Confident</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[3]};"></div>
+      <span>${playerMatchInfo.closeCalls} Close Call</span>
+    </div>
+  </div>
+  
+  <div class="legend">Total Losses: ${playerMatchInfo.totalLosses}<br><br>
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[4]};"></div>
+      <span>${playerMatchInfo.dominationLosses} Annihilated</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[5]};"></div>
+      <span>${playerMatchInfo.decisiveLosses} Overpowered</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[6]};"></div>
+      <span>${normalLosses} Outplayed</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[7]};"></div>
+      <span>${playerMatchInfo.nearMisses} Near Misses</span>
+    </div>
+  
+    <div class="legend-item">
+      <div class="legend-color" style="background-color: ${pieColors[8]};"></div>
+      <span>${playerMatchInfo.concessions} Concessions</span>
+    </div>
+  </div>
+  
 
     <canvas id="${panelId}-wl-pie-chart" width="100" height="100"></canvas>
     
   </div>
+  <p>Set Wins: ${playerMatchInfo.winCountInSet}<br>Set Losses: ${playerMatchInfo.lossCountInSet}</p>
 
 
 </div>
@@ -716,11 +720,16 @@ async function displayCardList(cardIds, containerId) {
 }
 let currentModal = null;
 
-function openCardModal(cardInfo) {
+async function openCardModal(cardInfo) {
     // Close the existing modal, if any
     if (currentModal) {
         closeExistingModal();
     }
+
+    const cardId = cardInfo.id;
+    const cardPrices = await getCardPrices(cardId);
+    console.log(cardPrices);
+
 
     const modal = document.createElement('div');
     modal.className = 'card-modal';
@@ -729,11 +738,15 @@ function openCardModal(cardInfo) {
     <span class="close-modal">&times;</span>
     <img src="https://card.godsunchained.com/?id=${cardInfo.id}&q=4" class="card-image">
     <div class="buy-links">
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-4.png');" target="_blank" alt="Buy Meteorite at TokenTrove"></a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-3.png');" target="_blank" alt="Buy Shadow at TokenTrove"></a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-2.png');" target="_blank" alt="Buy Gold at TokenTrove"></a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-1.png');" target="_blank" alt="Buy Diamond at TokenTrove"></a>
-    </div>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=ETH&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-4.png');" target="_blank" alt="Buy Meteorite at TokenTrove">
+		<br><br><br>$${cardPrices[0]}</a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=ETH&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-3.png');" target="_blank" alt="Buy Shadow at TokenTrove">
+		<br><br><br>$${cardPrices[1]}</a>
+		<a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=ETH&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-2.png');" target="_blank" alt="Buy Gold at TokenTrove">
+        <br><br><br>$${cardPrices[2]}</a>
+		<a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=ETH&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-1.png');" target="_blank" alt="Buy Diamond at TokenTrove">
+		<br><br><br>$${cardPrices[3]}</a>
+	</div>
 </div>
     `;
 
@@ -764,6 +777,47 @@ function openCardModal(cardInfo) {
     currentModal = modal;
 }
 
+async function getCardPrices(cardId) {
+    const cardPrices = [0, 0, 0, 0];
+    const baseUrl =
+        "https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c";
+
+    const qualities = ["Meteorite", "Shadow", "Gold", "Diamond"];
+
+    // Function to fetch ETH to USD exchange rate
+    const fetchEthToUsdExchangeRate = async () => {
+        const exchangeRateUrl = "https://api.coinbase.com/v2/exchange-rates?currency=ETH";
+        const exchangeRateResponse = await fetch(exchangeRateUrl);
+        const exchangeRateData = await exchangeRateResponse.json();
+        return parseFloat(exchangeRateData.data.rates.USD) || 0;
+    };
+
+    const ethToUsdExchangeRate = await fetchEthToUsdExchangeRate();
+
+    const fetchCardPrice = async (quality, index) => {
+        const url = `${baseUrl}&sell_metadata={"proto":["${cardId}"],"quality":["${quality}"]}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        // Check if 'result' array is present and not empty
+        if (data.result && data.result.length > 0) {
+            const ethPrice = parseFloat(data.result[0]?.buy?.data?.quantity_with_fees || 0) / 1e18;
+            cardPrices[index] = (ethPrice * ethToUsdExchangeRate).toFixed(2);
+
+            console.log(`Card price for ${quality} in USD:`, cardPrices[index], ` ETH: ${ethPrice}`);
+        } else {
+            cardPrices[index] = ' ---';
+            console.error(`No data found for ${quality}`);
+        }
+    };
+
+    const fetchPromises = qualities.map((quality, index) => fetchCardPrice(quality, index));
+
+    await Promise.all(fetchPromises);
+
+    return cardPrices;
+}
+
 function closeExistingModal() {
     if (currentModal) {
         document.body.removeChild(currentModal);
@@ -771,7 +825,6 @@ function closeExistingModal() {
     }
 }
 
-// Build string for Time Ago
 function getTimeAgo(timestamp) {
     const currentTime = Math.floor(Date.now() / 1000);
     const secondsAgo = currentTime - timestamp;
@@ -824,7 +877,6 @@ function drawWinLossPieChart(canvasId, playerMatchInfo) {
     drawConicalPieChart(canvasId, percentages, playerMatchInfo.winPercentage.toFixed(2));
 }
 
-
 function drawConicalPieChart(canvasId, percentages, winPercentage) {
     const canvas = document.getElementById(canvasId);
     const ctx = canvas.getContext('2d');
@@ -871,13 +923,8 @@ function drawConicalPieChart(canvasId, percentages, winPercentage) {
 }
 
 function getGradientColor(index) {
-    // Provide your color logic here, for simplicity using a set of colors
-    const colors = [
-        'blue', 'deepskyblue', 'dodgerblue',
-        'purple', 'mediumorchid', 'darkorchid',
-        'red', 'orangered', 'black'
-    ];
-    return colors[index % colors.length];
+
+    return pieColors[index % pieColors.length];
 }
 
 function getPercentage(total, value) {
@@ -911,5 +958,5 @@ async function handleMatchClick(matchIndex, playerWonMatchInfo, playerLostMatchI
 // Program entry point
 document.addEventListener('DOMContentLoaded', () => {
     // Fetch and display match data on page load
-    displayMatchList();//(1979626);
+    displayMatchList();
 });
