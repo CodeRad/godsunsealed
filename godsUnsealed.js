@@ -74,7 +74,7 @@ async function fetchRecentMatches() {
     try {
         const itemsPerPage = 1000; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
-        const startTime = endTime - 60 * 5; // 10 minutes
+        const startTime = endTime - 60 * 10; // 10 minutes
 
         // Fetch only the first page without fetching the total count
         const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=1&game_mode=7&order=desc`);
