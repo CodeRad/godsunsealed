@@ -69,7 +69,7 @@ async function fetchRecentMatches() {
     try {
         const itemsPerPage = 1000; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
-        const startTime = endTime - 60 * 10; // 10 minutes
+        const startTime = endTime - 60 * 2; // 10 minutes
 
         // Fetch only the first page without fetching the total count
         const firstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&page=1&game_mode=7&order=desc`);
@@ -721,18 +721,11 @@ async function openCardModal(cardInfo) {
     if (currentModal) {
         closeExistingModal();
     }
-	
-	// const cardPrices = [0.0,0.0,0.0,0.0];
-	
-	// cardPrices[0] = await fetch(`https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c&sell_metadata={%22proto%22%3A%20[%22${cardInfo.id}%22]%2C%22quality%22%3A[%22Meteorite%22]}`);
-	// cardPrices[1] = await fetch(`https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c&sell_metadata={%22proto%22%3A%20[%22${cardInfo.id}%22]%2C%22quality%22%3A[%22Shadow%22]}`);
-	// cardPrices[2] = await fetch(`https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c&sell_metadata={%22proto%22%3A%20[%22${cardInfo.id}%22]%2C%22quality%22%3A[%22Gold%22]}`);
-	// cardPrices[3] = await fetch(`https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c&sell_metadata={%22proto%22%3A%20[%22${cardInfo.id}%22]%2C%22quality%22%3A[%22Diamond%22]}`);
-	
-	const cardId = cardInfo.id;
-const cardPrices = await getCardPrices(cardId);
-console.log(cardPrices);
-	
+
+    const cardId = cardInfo.id;
+    const cardPrices = await getCardPrices(cardId);
+    console.log(cardPrices);
+
 
     const modal = document.createElement('div');
     modal.className = 'card-modal';
@@ -741,14 +734,14 @@ console.log(cardPrices);
     <span class="close-modal">&times;</span>
     <img src="https://card.godsunchained.com/?id=${cardInfo.id}&q=4" class="card-image">
     <div class="buy-links">
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-4.png');" target="_blank" alt="Buy Meteorite at TokenTrove">
-		<br><br><br>${cardPrices[0]}</a>
-        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-3.png');" target="_blank" alt="Buy Shadow at TokenTrove">
-		<br><br><br>{$cardPrices[1]}</a>
-		<a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-2.png');" target="_blank" alt="Buy Gold at TokenTrove">
-        <br><br><br>{$cardPrices[2]}</a>
-		<a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=GODS&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-1.png');" target="_blank" alt="Buy Diamond at TokenTrove">
-		<br><br><br>{$cardPrices[3]}</a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-4?currency=ETH&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-4.png');" target="_blank" alt="Buy Meteorite at TokenTrove">
+		<br><br><br>$${cardPrices[0]}</a>
+        <a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-3?currency=ETH&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-3.png');" target="_blank" alt="Buy Shadow at TokenTrove">
+		<br><br><br>$${cardPrices[1]}</a>
+		<a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-2?currency=ETH&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-2.png');" target="_blank" alt="Buy Gold at TokenTrove">
+        <br><br><br>$${cardPrices[2]}</a>
+		<a href="https://tokentrove.com/collection/GodsUnchainedCards/${cardInfo.id}-1?currency=ETH&ref=godsunsealed" class="buy-link" style="background-image: url('images/icon-tt-1.png');" target="_blank" alt="Buy Diamond at TokenTrove">
+		<br><br><br>$${cardPrices[3]}</a>
 	</div>
 </div>
     `;
@@ -780,26 +773,52 @@ console.log(cardPrices);
     currentModal = modal;
 }
 
+
+
 async function getCardPrices(cardId) {
-  const cardPrices = [0.0, 0.0, 0.0, 0.0];
-  const baseUrl = "https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c";
+    const cardPrices = [0, 0, 0, 0];
+    const baseUrl =
+        "https://api.x.immutable.com/v3/orders?page_size=1&status=active&buy_token_type=ETH&sell_token_address=0xacb3c6a43d15b907e8433077b6d38ae40936fe2c";
 
-  const qualities = ["Meteorite", "Shadow", "Gold", "Diamond"];
+    const qualities = ["Meteorite", "Shadow", "Gold", "Diamond"];
 
-  const fetchCardPrice = async (quality, index) => {
-    const url = `${baseUrl}&sell_metadata={"proto":["${cardId}"],"quality":["${quality}"]}`;
-    const response = await fetch(url);
-    const data = await response.json();
-    cardPrices[index] = data.result[0]?.sell?.buy?.data?.quantity_with_fees || 0;
-	console.log(cardPrices[index]);
-  };
+    // Function to fetch ETH to USD exchange rate
+    const fetchEthToUsdExchangeRate = async () => {
+        const exchangeRateUrl = "https://api.coinbase.com/v2/exchange-rates?currency=ETH";
+        const exchangeRateResponse = await fetch(exchangeRateUrl);
+        const exchangeRateData = await exchangeRateResponse.json();
+        return parseFloat(exchangeRateData.data.rates.USD) || 0;
+    };
 
-  const fetchPromises = qualities.map((quality, index) => fetchCardPrice(quality, index));
+    const ethToUsdExchangeRate = await fetchEthToUsdExchangeRate();
 
-  await Promise.all(fetchPromises);
+    const fetchCardPrice = async (quality, index) => {
+        const url = `${baseUrl}&sell_metadata={"proto":["${cardId}"],"quality":["${quality}"]}`;
+        const response = await fetch(url);
+        const data = await response.json();
 
-  return cardPrices;
+        // Check if 'result' array is present and not empty
+        if (data.result && data.result.length > 0) {
+            const ethPrice = parseFloat(data.result[0]?.buy?.data?.quantity_with_fees || 0) / 1e18;
+            cardPrices[index] = (ethPrice * ethToUsdExchangeRate).toFixed(2);
+
+            console.log(`Card price for ${quality} in USD:`, cardPrices[index], ` ETH: ${ethPrice}`);
+        } else {
+            cardPrices[index] = ' ---';
+            console.error(`No data found for ${quality}`);
+        }
+    };
+
+    const fetchPromises = qualities.map((quality, index) => fetchCardPrice(quality, index));
+
+    await Promise.all(fetchPromises);
+
+    return cardPrices;
 }
+
+
+
+
 
 function closeExistingModal() {
     if (currentModal) {
