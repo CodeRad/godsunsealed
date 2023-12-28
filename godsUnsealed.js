@@ -285,7 +285,7 @@ async function getPlayerMatchStats(userId, endTime) {
             }
         } else if (playerLost) {
             totalLosses++;
-            if (match.player_info[0].status === "conceded") {
+            if (match.player_info[1].status === "conceded") {
                 concessions++;
             } else if (match.player_info[0].health >= 26) {
                 dominationLosses++;
