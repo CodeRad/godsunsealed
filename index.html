@@ -2,6 +2,16 @@
 <html lang="en">
 
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XR2TSE4W4R"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-XR2TSE4W4R');
+    </script>
+
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lilita+One&display=swap" rel="stylesheet">
-	<link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <title>Gods Unsealed</title>
 
 
@@ -20,16 +30,14 @@
 <body>
     <div class="container">
         <div class="panel" id="panel-left">
-            <div class="welcome-container"><div class="welcome-content">Welcome to Gods Unsealed.<br><br>To get started, click a match or enter an Apollo ID.<br><br>                
-                <input 
-                class="button" 
-                type="text" 
-                id="userId" 
-                name="userId" 
-                onkeypress="if (event.key === 'Enter') displayMatchList(this.value)" 
-                placeholder="Search by ID" 
-                style="width: 100px;"
-                autocomplete="on"></div></div>
+            <div class="welcome-container">
+                <div class="welcome-content">Welcome to Gods Unsealed.<br><br>To get started, click a match or enter an
+                    Apollo ID.<br><br>
+                    <input class="button" type="text" id="userId" name="userId"
+                        onkeypress="if (event.key === 'Enter') displayMatchList(this.value)" placeholder="Search by ID"
+                        style="width: 100px;" autocomplete="on">
+                </div>
+            </div>
         </div>
 
         <div class="panel" id="panel-center">
@@ -40,20 +48,16 @@
                 </div>
                 <button class="button" id="recents" onclick="displayMatchList()">Recent Matches</button>
 
-                <input 
-                    class="button" 
-                    type="text" 
-                    id="userId" 
-                    name="userId" 
-                    onkeypress="if (event.key === 'Enter') displayMatchList(this.value)" 
-                    placeholder="Search by ID" 
-                    style="width: 100px;"
-                    autocomplete="on">
+                <input class="button" type="text" id="userId" name="userId"
+                    onkeypress="if (event.key === 'Enter') displayMatchList(this.value)" placeholder="Search by ID"
+                    style="width: 100px;" autocomplete="on">
 
                 <button class="button" id="threats">Threat Analysis</button>
             </div>
 
-            <div class="center-bottom" id="match-list"></div>
+            <div class="center-bottom" id="match-list">
+                <div class="patch-notes-container"></div>
+            </div>
         </div>
 
         <div class="panel" id="panel-right"></div>
@@ -64,8 +68,8 @@
         <small>This website does not collect or store user data.</small>
     </div>
 
-    
-  
+
+
 </body>
 
 </html>
