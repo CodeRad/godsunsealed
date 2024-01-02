@@ -382,7 +382,13 @@ canvas {
   /* margin: 0 -10px; */
   /* outline: 1px solid #FF0; */
   /* width: 100%; */
+  /* position: relative; */
 
+}
+
+.card-container {
+  position: relative;
+  display: inline-block;
 }
 
 
@@ -397,7 +403,7 @@ canvas {
   transition: transform 0.5s;
   position: relative;
   overflow: hidden;
-  z-index: 1;
+  /* z-index: 1; */
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.8);
 }
 
@@ -407,7 +413,34 @@ canvas {
   color: #fff;
   z-index: 2;
   outline: 2px solid yellow;
+  border-radius: 50%;
+  box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.8);
 }
+
+.card-container:hover {
+  /* transform: scale(2.5); */
+
+}
+
+.legendary-overlay {
+  position: absolute;
+  top: 0;
+  /* vertical-align: middle; */
+  left: 0;
+  width: 60px;
+  height: 60px;
+  /* width: 40px; */
+  z-index: 1;
+  pointer-events: none;
+
+}
+
+.legendary-overlay:hover {
+  transform: scale(2.5);
+  z-index: 3;
+
+}
+
 
 
 .card-modal {

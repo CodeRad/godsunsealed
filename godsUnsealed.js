@@ -691,6 +691,34 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     });
 }
 
+// async function displayCardList(cardIds, containerId) {
+//     const cardListDiv = document.getElementById(containerId);
+
+//     // Clear previous content
+//     cardListDiv.innerHTML = '';
+
+//     // Fetch card information for all cards
+//     const cardInfoArray = await Promise.all(cardIds.map(fetchCardInfo));
+
+//     // Sort cards by mana cost
+//     cardInfoArray.sort((a, b) => a.mana - b.mana);
+
+//     // Create and append card elements
+//     for (const cardInfo of cardInfoArray) {
+//         const cardElement = document.createElement('img');
+//         cardElement.src = `https://images.godsunchained.com/art2/250/${cardInfo.id}.webp`;
+//         cardElement.title = `(${cardInfo.mana}) ${cardInfo.name}`;
+//         cardElement.className = 'card-icon';
+
+//         // Attach click event listener to each card
+//         cardElement.addEventListener('click', () => {
+//             openCardModal(cardInfo);
+//         });
+
+//         cardListDiv.appendChild(cardElement);
+//     }
+// }
+
 async function displayCardList(cardIds, containerId) {
     const cardListDiv = document.getElementById(containerId);
 
@@ -705,21 +733,33 @@ async function displayCardList(cardIds, containerId) {
 
     // Create and append card elements
     for (const cardInfo of cardInfoArray) {
-        const cardElement = document.createElement('img');
-        cardElement.src = `https://images.godsunchained.com/art2/250/${cardInfo.id}.webp`;
-        cardElement.title = `(${cardInfo.mana}) ${cardInfo.name}`;
-        cardElement.className = 'card-icon';
+        const cardElement = document.createElement('div');
+        cardElement.className = 'card-container';
+
+        const cardImage = document.createElement('img');
+        cardImage.src = `https://images.godsunchained.com/art2/250/${cardInfo.id}.webp`;
+        cardImage.title = `(${cardInfo.mana}) ${cardInfo.name}`;
+        cardImage.className = 'card-icon';
+
+        // Check if the card is legendary
+        if (cardInfo.rarity === 'legendary') {
+            const legendaryOverlay = document.createElement('img');
+            legendaryOverlay.src = 'images/wreath.png';
+            legendaryOverlay.className = 'legendary-overlay';
+            cardElement.appendChild(legendaryOverlay);
+        }
 
         // Attach click event listener to each card
-        cardElement.addEventListener('click', () => {
+        cardImage.addEventListener('click', () => {
             openCardModal(cardInfo);
         });
 
+        cardElement.appendChild(cardImage);
         cardListDiv.appendChild(cardElement);
     }
 }
-let currentModal = null;
 
+let currentModal = null;
 async function openCardModal(cardInfo) {
     // Close the existing modal, if any
     if (currentModal) {
