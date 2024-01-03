@@ -175,7 +175,7 @@ async function fetchPlayerBasicInfo(userId) {
         const userInfoResponse = await fetch(`https://api.godsunchained.com/v0/properties?user_id=${userId}`);
         const userInfo = await userInfoResponse.json();
         const username = userInfo.records[0]?.username;
-        const xpLevel = userInfo.records[0]?.xp_level;
+        const level = userInfo.records[0]?.xp_level;
 
         // Fetch user rank
         const userRankResponse = await fetch(`https://api.godsunchained.com/v0/rank?user_id=${userId}`);
@@ -186,7 +186,7 @@ async function fetchPlayerBasicInfo(userId) {
         const rank = userRecord ? userRecord.rank_level : '1';
 
         // Store the information in the cache
-        playerBasicInfoCache[userId] = { username, xpLevel, rank };
+        playerBasicInfoCache[userId] = { username, level, rank };
 
         // Return the combined information
         return { userId, ...playerBasicInfoCache[userId] };
@@ -546,7 +546,7 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     <div class="player-overview-name" style="color: ${godTheme.color};">${playerBasicInfo.username}</div>
     <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerBasicInfo.userId})</div>
     <div class="player-overview-rank" style="color: ${godTheme.color};">${playerBasicInfo.rank}</div>
-    <div class="player-overview-level"><small>Lv.</small> ${playerBasicInfo.xp_level}</div>
+    <div class="player-overview-level"><small>Lv.</small> ${playerBasicInfo.level}</div>
 
     <div class="circle-container">
         <div class="circle" style="background-color: ${godThemes[playerMatchInfo.godsUsed[0]].color};">
