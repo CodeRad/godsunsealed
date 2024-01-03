@@ -941,6 +941,32 @@ function getPercentage(total, value) {
     return (value / total) * 100;
 }
 
+function copyToClipboard(text) {
+    // Use the Clipboard API to copy the text to the clipboard
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            // Display the notification
+            showCopyNotification();
+
+            // Hide the notification after a short delay (e.g., 2 seconds)
+            setTimeout(hideCopyNotification, 2000);
+        })
+        .catch((err) => {
+            console.error('Unable to copy text to clipboard', err);
+        });
+}
+
+function showCopyNotification() {
+    const notification = document.getElementById('copyNotification');
+    notification.style.display = 'inline';
+}
+
+function hideCopyNotification() {
+    const notification = document.getElementById('copyNotification');
+    notification.style.display = 'none';
+}
+
+
 // Handle matchlist click event and populate panels
 async function handleMatchClick(matchIndex, playerWonMatchInfo, playerLostMatchInfo) {
     const match = matches[matchIndex];
@@ -970,3 +996,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch and display match data on page load
     displayMatchList();
 });
+
+
