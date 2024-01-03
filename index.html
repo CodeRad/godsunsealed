@@ -52,15 +52,43 @@
                     onkeypress="if (event.key === 'Enter') displayMatchList(this.value)" placeholder="Search by ID"
                     style="width: 100px;" autocomplete="on">
 
-                <button class="button" id="threats">Threat Analysis</button>
+               <!-- <button class="button" id="threats">Threat Analysis</button> -->
             </div>
 
-            <div class="center-bottom" id="match-list">
-                <div class="patch-notes-container"></div>
-            </div>
+            <div class="center-bottom" id="match-list"></div>
         </div>
 
-        <div class="panel" id="panel-right"></div>
+        <div class="panel" id="panel-right">
+            <div class="notes-container"><div class="notes-content">
+                <h1>What's new?</h1>
+                <ul>
+                  Jan 3, 2024:
+                  <li>-Re-configured playerInfo API calls. This should help eliminate some empty results page issues.</li>
+                  <li>-Created <a href="https://discord.gg/FB8RCKEh">Discord</a>.</li>
+                  <li>-Added str/hp to card tooltips.</li>
+                  <li>-Added overlays for legendary cards.</li>
+                </ul>
+                <br>
+                <h1>Coming soon:</h1>
+                <ul>
+                  <li>-Redo matchInfo API calls to fix remaining empty results issues, async issues and allow auto-refresh.</li>
+                  <li>-Threat Analysis page. Once I have some decent match history from above, I can do this bit.</li>
+                  <li>-Mobile/responsive. Big job, big priority, I'm doing a lot of the prep work as I go but this is a ways off.</li>
+                </ul>
+                <br>
+                <p class="notes-call">If you find this tool useful, feel free to toss me some gods/eth/cards (<a href="#" onclick="copyToClipboard('0x6a303302f30e4b86c699c098e56b913dae8823a3')">copy address</a>), or simply grab yourself some clutch legendaries through my tokentrove referral links on the card pop-ups!</p>
+<span id="copyNotification" style="display:none;">Copied to clipboard!</span><br><br>
+
+
+
+
+            </div></div>
+
+
+
+
+
+        </div>
     </div>
 
     <div class="footer">

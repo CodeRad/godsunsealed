@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading Card Data</title>
+</head>
+<body>
+
+<!-- HTML container for displaying cards -->
+<div id="app">
+    <h1>Trading Card Data</h1>
+
+    <!-- Display each card as a modern formatted item -->
+    <div id="cardContainer"></div>
+
+    <!-- Show a loading message while data is being fetched -->
+    <p id="loadingMessage">Loading...</p>
+
+    <!-- Button to load more cards -->
+    <button id="loadMoreButton" style="display: none;" onclick="loadMore()">Load More</button>
+</div>
+
+<script>
+    // Initialize variables
+    let cards = [];
+    let visibleCards = [];
+    let loading = true;
+    let itemsPerPage = 10;
+    let currentPage = 1;
+
+    // Fetch data from the provided URL
+    fetch('https://coderad.github.io/godsunsealed/cardDatabase.json')
+        .then(response => response.json())
+        .then(data => {
+            cards = data;
+            loading = false;
+            loadMore();
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+            loading = false;
+        });
+
+    function loadMore() {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+
+        // Render visible cards
+        visibleCards = cards.slice(0, endIndex);
+
+        // Render cards in the DOM
+        const cardContainer = document.getElementById('cardContainer');
+        cardContainer.innerHTML = visibleCards.map(renderCard).join('');
+
+        // Update current page
+        currentPage++;
+
+        // Show or hide the "Load More" button
+        const loadMoreButton = document.getElementById('loadMoreButton');
+        loadMoreButton.style.display = (visibleCards.length < cards.length) ? 'block' : 'none';
+    }
+
+    function renderCard(card) {
+        return `
+            <div class="card-item">
+                <h2>${card.name}</h2>
+                <p><strong>Effect:</strong> ${card.effect}</p>
+                <p><strong>God:</strong> ${card.god}</p>
+                <p><strong>Rarity:</strong> ${card.rarity}</p>
+                <p><strong>Mana:</strong> ${card.mana}</p>
+                <p><strong>Attack:</strong> ${card.attack?.Int64 || 'N/A'}</p>
+                <p><strong>Health:</strong> ${card.health?.Int64 || 'N/A'}</p>
+                <p><strong>Type:</strong> ${card.type}</p>
+                <p><strong>Set:</strong> ${card.set}</p>
+                <p><strong>Collectable:</strong> ${card.collectable ? 'Yes' : 'No'}</p>
+                <hr>
+            </div>
+        `;
+    }
+</script>
+
+<!-- Add some basic styling for better presentation -->
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        margin: 20px;
+    }
+
+    h1 {
+        text-align: center;
+    }
+
+    .card-item {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    button {
+        margin-top: 10px;
+        padding: 5px 10px;
+    }
+</style>
+
+</body>
+</html>

@@ -9,10 +9,10 @@
         "webRoot": "${workspaceFolder}"
       },
       {
-        "name": "Launch elementtest.html",
+        "name": "Launch vue.html",
         "type": "chrome",
         "request": "launch",
-        "url": "${workspaceFolder}/elementtest.html",
+        "url": "${workspaceFolder}/docs/ref/vue.html",
         "webRoot": "${workspaceFolder}"
       }     
     ]

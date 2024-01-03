@@ -1,5 +1,7 @@
 // import cardDatabase from './cardDatabase.json';
 
+const playerBasicInfoCache = {}; //Storage for player id, name, rank and level to avoid repeated API calls
+
 let matches;
 // let isMatchListLoading = false;
 
@@ -160,40 +162,40 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
     }
 }
 
-
-// Fetch user properties
-async function fetchUserInfo(userId) {
+// Fetch player basic information with caching
+async function fetchPlayerBasicInfo(userId) {
     try {
+        // Check if the information is already in the cache
+        if (playerBasicInfoCache[userId]) {
+            console.log(`Using cached data for user ${userId}`);
+            return { userId, ...playerBasicInfoCache[userId] };
+        }
+
+        // Fetch user properties
         const userInfoResponse = await fetch(`https://api.godsunchained.com/v0/properties?user_id=${userId}`);
         const userInfo = await userInfoResponse.json();
-        return userInfo.records[0];
-    } catch (error) {
-        console.error('Error fetching user info:', error);
-        return null;
-    }
-}
+        const username = userInfo.records[0]?.username;
+        const level = userInfo.records[0]?.xp_level;
 
-// Fetch user rank
-async function fetchUserRank(userId) {
-    try {
+        // Fetch user rank
         const userRankResponse = await fetch(`https://api.godsunchained.com/v0/rank?user_id=${userId}`);
         const userRank = await userRankResponse.json();
 
         // Find the rank of the player in constructed
         const userRecord = userRank.records.find(record => record.game_mode === 13);
+        const rank = userRecord ? userRecord.rank_level : '1';
 
-        if (userRecord) {
-            // Return the rank_level if the record is found
-            return userRecord.rank_level;
-        } else {
-            console.error(`No constructed rank record found for user ${userId}`);
-            return '1';
-        }
+        // Store the information in the cache
+        playerBasicInfoCache[userId] = { username, level, rank };
+
+        // Return the combined information
+        return { userId, ...playerBasicInfoCache[userId] };
     } catch (error) {
-        console.error('Error fetching user rank:', error);
-        return '1';
+        console.error('Error fetching player basic info:', error);
+        return null;
     }
 }
+
 
 // Fetch card data
 async function fetchCardInfo(cardId) {
@@ -394,15 +396,12 @@ async function displayMatchList(userId) {
 
         for (let i = 0; i < matches.length; i++) {
             const match = matches[i];
-            const playerWonInfo = await fetchUserInfo(match.player_won);
-            const playerLostInfo = await fetchUserInfo(match.player_lost);
-            const playerWonRank = await fetchUserRank(match.player_won);
-            const playerLostRank = await fetchUserRank(match.player_lost);
+
+            const playerWonBasicInfo = await fetchPlayerBasicInfo(match.player_won);
+            const playerLostBasicInfo = await fetchPlayerBasicInfo(match.player_lost);
             const playerWonMatchInfo = await getPlayerMatchStats(match.player_won, match.end_time);
             const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost, match.end_time);
 
-            // const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            // const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const matchLength = ((match.end_time - match.start_time) / 60).toFixed(2);
             const matchTimeAgo = getTimeAgo(match.end_time);
 
@@ -438,11 +437,11 @@ async function displayMatchList(userId) {
                                 <div class="god-tag" id="god-tag-1" style="background-color: ${godThemes[playerWonMatchInfo.godsUsed[2]].color}"></div>
                                 <div class="god-tag" id="god-tag-2" style="background-color: ${godThemes[playerWonMatchInfo.godsUsed[1]].color}"></div>
                                 <div class="god-tag" id="god-tag-3" style="background-color: ${godThemes[playerWonMatchInfo.godsUsed[0]].color}"></div>
-                                <div class="rank rank-left">${playerWonRank}</div>
+                                <div class="rank rank-left">${playerWonBasicInfo.rank}</div>
                             </div>
                             <div class="bar-container">
                                 <div class="list-bar" id="bar-top">
-                                    <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
+                                    <div class="user-list-text">${playerWonBasicInfo.username} (${playerWonBasicInfo.userId})</div>
                                 </div>
                                 <div class="list-bar" id="bar-bottom">
 
@@ -457,11 +456,11 @@ async function displayMatchList(userId) {
                                 <div class="god-tag" id="god-tag-1-right" style="background-color: ${godThemes[playerLostMatchInfo.godsUsed[2]].color}"></div>
                                 <div class="god-tag" id="god-tag-2-right" style="background-color: ${godThemes[playerLostMatchInfo.godsUsed[1]].color}"></div>
                                 <div class="god-tag" id="god-tag-3-right" style="background-color: ${godThemes[playerLostMatchInfo.godsUsed[0]].color}"></div>
-                                <div class="rank rank-right">${playerLostRank}</div>
+                                <div class="rank rank-right">${playerLostBasicInfo.rank}</div>
                             </div>
                             <div class="bar-container">
                                 <div class="list-bar bar-right" id="bar-top">
-                                    <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
+                                    <div class="user-list-text text-right">(${playerLostBasicInfo.userId}) ${playerLostBasicInfo.username}</div>
                                 </div>
                                 <div class="list-bar bar-right" id="bar-bottom">
 
@@ -508,8 +507,7 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     // const playerMatchHistory = await getPlayerMatchStats(playerInfo.user_id);
     const godTheme = godThemes[playerInfo.god];
 
-    const playerBasicInfo = await fetchUserInfo(playerInfo.user_id);
-    const playerRank = await fetchUserRank(playerInfo.user_id);
+    const playerBasicInfo = await fetchPlayerBasicInfo(playerInfo.user_id);
 
     // Fetch card information for all cards
     const cardInfoArray = await Promise.all(playerInfo.cards.map(fetchCardInfo));
@@ -546,9 +544,9 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     </div>
     <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerInfo.god_power}.webp">
     <div class="player-overview-name" style="color: ${godTheme.color};">${playerBasicInfo.username}</div>
-    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerBasicInfo.user_id})</div>
-    <div class="player-overview-rank" style="color: ${godTheme.color};">${playerRank}</div>
-    <div class="player-overview-level"><small>Lv.</small> ${playerBasicInfo.xp_level}</div>
+    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerBasicInfo.userId})</div>
+    <div class="player-overview-rank" style="color: ${godTheme.color};">${playerBasicInfo.rank}</div>
+    <div class="player-overview-level"><small>Lv.</small> ${playerBasicInfo.level}</div>
 
     <div class="circle-container">
         <div class="circle" style="background-color: ${godThemes[playerMatchInfo.godsUsed[0]].color};">
@@ -705,21 +703,33 @@ async function displayCardList(cardIds, containerId) {
 
     // Create and append card elements
     for (const cardInfo of cardInfoArray) {
-        const cardElement = document.createElement('img');
-        cardElement.src = `https://images.godsunchained.com/art2/250/${cardInfo.id}.webp`;
-        cardElement.title = `(${cardInfo.mana}) ${cardInfo.name}`;
-        cardElement.className = 'card-icon';
-
+        const cardElement = document.createElement('div');
+        cardElement.className = 'card-container';
+    
+        const cardImage = document.createElement('div'); // Change from img to div
+        cardImage.style.backgroundImage = `url(https://images.godsunchained.com/art2/250/${cardInfo.id}.webp)`;
+        cardImage.title = `(${cardInfo.mana}) ${cardInfo.attack?.Int64 || '-'}/${cardInfo.health?.Int64 || '-'} ${cardInfo.name}`;
+        cardImage.className = 'card-icon';
+    
+        // Check if the card is legendary
+        if (cardInfo.rarity === 'legendary') {
+            const legendaryOverlay = document.createElement('div'); // Change from img to div
+            legendaryOverlay.style.backgroundImage = 'url(images/wreath.png)';
+            legendaryOverlay.className = 'legendary-overlay';
+            cardImage.appendChild(legendaryOverlay); // Append the legendaryOverlay to cardImage
+        }
+    
         // Attach click event listener to each card
-        cardElement.addEventListener('click', () => {
+        cardImage.addEventListener('click', () => {
             openCardModal(cardInfo);
         });
-
+    
+        cardElement.appendChild(cardImage);
         cardListDiv.appendChild(cardElement);
     }
 }
-let currentModal = null;
 
+let currentModal = null;
 async function openCardModal(cardInfo) {
     // Close the existing modal, if any
     if (currentModal) {
@@ -931,6 +941,32 @@ function getPercentage(total, value) {
     return (value / total) * 100;
 }
 
+function copyToClipboard(text) {
+    // Use the Clipboard API to copy the text to the clipboard
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            // Display the notification
+            showCopyNotification();
+
+            // Hide the notification after a short delay (e.g., 2 seconds)
+            setTimeout(hideCopyNotification, 2000);
+        })
+        .catch((err) => {
+            console.error('Unable to copy text to clipboard', err);
+        });
+}
+
+function showCopyNotification() {
+    const notification = document.getElementById('copyNotification');
+    notification.style.display = 'inline';
+}
+
+function hideCopyNotification() {
+    const notification = document.getElementById('copyNotification');
+    notification.style.display = 'none';
+}
+
+
 // Handle matchlist click event and populate panels
 async function handleMatchClick(matchIndex, playerWonMatchInfo, playerLostMatchInfo) {
     const match = matches[matchIndex];
@@ -960,3 +996,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // Fetch and display match data on page load
     displayMatchList();
 });
+
+

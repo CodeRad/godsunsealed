@@ -4,7 +4,7 @@
 /* #region main template */
 body {
   margin: 0;
-  /* overflow: hidden; */
+  overflow: hidden;
   background-color: #000;
   background-image: url('images/background.jpg');
   background-size: cover;
@@ -94,7 +94,52 @@ body {
   text-shadow: 4px 4px 4px rgba(0, 0, 0, 0.8);
 }
 
+.notes-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
+
+}
+
+.notes-content {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: small;
+  color: #CCC;
+  margin: 12%;
+  padding: 3%;
+  border-radius: 3%;
+  /* background-color: #00000030; */
+}
+
+.notes-content h1 {
+  color: #FFFFFF;
+  font-size: medium;
+
+}
+
+.notes-content ul {
+  list-style: none; /* Remove default bullet points */
+  padding: 0; /* Remove default padding */
+  margin: 10px; /* Remove default margin */
+}
+
+.notes-content li {
+  margin-bottom: 5px; /* Adjust the margin between list items as needed */
+    /* background-color: #00000030; */
+}
+
+.notes-call {
+  color: #FFFFFF;
+}
+
+.notes-content a:link,
+.notes-content a:visited
+{
+  color: palegoldenrod;
+}
 
 /* #endregion */
 
@@ -113,9 +158,36 @@ body {
   outline-offset: -15px;
 }
 
+.player-matchlist-button {
+  margin-top: -20px;
+  margin-bottom: 20px;
+  margin-right: 20px;
+  margin-left: auto;
+  font-family: 'Lilita One';
+  font-size: large
+  /* padding: 10px 20px; */
+}
+
+.player-matchlist-button:hover {
+  scale: 101%;
+}
+
+.portrait-container {
+  display: flex;
+  margin-top: auto;
+  overflow: hidden;
+}
+
+.portrait {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
 /* #endregion */
 
-/* #region playercard player overview */
+/* #region player overview */
 
 .player-overview {
 
@@ -274,36 +346,6 @@ body {
 .tab-content.active {
   display: block;
 }
-
-
-
-
-.player-matchlist-button {
-  margin-top: -20px;
-  margin-bottom: 20px;
-  margin-right: 20px;
-  margin-left: auto;
-  font-family: 'Lilita One';
-  font-size: large
-  /* padding: 10px 20px; */
-}
-
-.player-matchlist-button:hover {
-  scale: 101%;
-}
-
-.portrait-container {
-  display: flex;
-  margin-top: auto;
-  overflow: hidden;
-}
-
-.portrait {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-}
-
 /* #endregion */
 
 /* #region tab stats */
@@ -370,46 +412,54 @@ canvas {
   justify-content: center;
   width: 100%;
   margin: 50px 0;
-  /* outline: 1px solid #fff; */
 }
 
 .card-list {
   display: flex;
-  /* width: fit-content; */
   flex-wrap: wrap;
-  /* justify-content: flex-start; */
   justify-content: center;
-  /* margin: 0 -10px; */
-  /* outline: 1px solid #FF0; */
-  /* width: 100%; */
-
 }
 
-
+.card-container {
+  position: relative;
+  display: inline-block;
+}
 
 .card-icon {
   height: 46px;
   width: 46px;
   border-radius: 50%;
-  overflow: hidden;
   margin: 3px;
-  /* gap: 3px; */
-  transition: transform 0.5s;
+  transition: transform 0.4s;
   position: relative;
-  overflow: hidden;
-  z-index: 1;
   box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.8);
+  background-size: cover;
 }
 
 .card-icon:hover {
   transform: scale(2.5);
-  background-color: #333;
-  color: #fff;
-  z-index: 2;
-  outline: 2px solid yellow;
+  z-index: 1;
+  outline: 1px solid yellow;
 }
 
+.legendary-overlay {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 56px;
+  height: 56px;
+  pointer-events: none;
+  transition: transform 0.5s; 
+  background-size: cover;
+}
 
+.legendary-overlay:hover {
+  transform: scale(2.5);
+  z-index: 1;
+}
+/* #endregion */
+
+/* #region card modal */
 .card-modal {
   position: fixed;
   top: 50%;
@@ -776,7 +826,4 @@ canvas {
 }
 
 /* #endregion */
-
-
-
 
