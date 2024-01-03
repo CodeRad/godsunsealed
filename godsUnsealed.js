@@ -1,5 +1,7 @@
 // import cardDatabase from './cardDatabase.json';
 
+const playerBasicInfoCache = {}; //Storage for player id, name, rank and level to avoid repeated API calls
+
 let matches;
 // let isMatchListLoading = false;
 
@@ -160,9 +162,15 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
     }
 }
 
-// Fetch player basic information
+// Fetch player basic information with caching
 async function fetchPlayerBasicInfo(userId) {
     try {
+        // Check if the information is already in the cache
+        if (playerBasicInfoCache[userId]) {
+            console.log(`Using cached data for user ${userId}`);
+            return { userId, ...playerBasicInfoCache[userId] };
+        }
+
         // Fetch user properties
         const userInfoResponse = await fetch(`https://api.godsunchained.com/v0/properties?user_id=${userId}`);
         const userInfo = await userInfoResponse.json();
@@ -177,13 +185,17 @@ async function fetchPlayerBasicInfo(userId) {
         const userRecord = userRank.records.find(record => record.game_mode === 13);
         const rank = userRecord ? userRecord.rank_level : '1';
 
+        // Store the information in the cache
+        playerBasicInfoCache[userId] = { username, xpLevel, rank };
+
         // Return the combined information
-        return { userId, username, xpLevel, rank };
+        return { userId, ...playerBasicInfoCache[userId] };
     } catch (error) {
         console.error('Error fetching player basic info:', error);
         return null;
     }
 }
+
 
 // Fetch card data
 async function fetchCardInfo(cardId) {
@@ -384,13 +396,12 @@ async function displayMatchList(userId) {
 
         for (let i = 0; i < matches.length; i++) {
             const match = matches[i];
+
             const playerWonBasicInfo = await fetchPlayerBasicInfo(match.player_won);
             const playerLostBasicInfo = await fetchPlayerBasicInfo(match.player_lost);
             const playerWonMatchInfo = await getPlayerMatchStats(match.player_won, match.end_time);
             const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost, match.end_time);
 
-            // const matchStartTime = new Date(match.start_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            // const matchEndTime = new Date(match.end_time * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             const matchLength = ((match.end_time - match.start_time) / 60).toFixed(2);
             const matchTimeAgo = getTimeAgo(match.end_time);
 
