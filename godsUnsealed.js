@@ -160,38 +160,28 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
     }
 }
 
-
-// Fetch user properties
-async function fetchUserInfo(userId) {
+// Fetch player basic information
+async function fetchPlayerBasicInfo(userId) {
     try {
+        // Fetch user properties
         const userInfoResponse = await fetch(`https://api.godsunchained.com/v0/properties?user_id=${userId}`);
         const userInfo = await userInfoResponse.json();
-        return userInfo.records[0];
-    } catch (error) {
-        console.error('Error fetching user info:', error);
-        return null;
-    }
-}
+        const username = userInfo.records[0]?.username;
+        const xpLevel = userInfo.records[0]?.xp_level;
 
-// Fetch user rank
-async function fetchUserRank(userId) {
-    try {
+        // Fetch user rank
         const userRankResponse = await fetch(`https://api.godsunchained.com/v0/rank?user_id=${userId}`);
         const userRank = await userRankResponse.json();
 
         // Find the rank of the player in constructed
         const userRecord = userRank.records.find(record => record.game_mode === 13);
+        const rank = userRecord ? userRecord.rank_level : '1';
 
-        if (userRecord) {
-            // Return the rank_level if the record is found
-            return userRecord.rank_level;
-        } else {
-            console.error(`No constructed rank record found for user ${userId}`);
-            return '1';
-        }
+        // Return the combined information
+        return { userId, username, xpLevel, rank };
     } catch (error) {
-        console.error('Error fetching user rank:', error);
-        return '1';
+        console.error('Error fetching player basic info:', error);
+        return null;
     }
 }
 
@@ -394,10 +384,8 @@ async function displayMatchList(userId) {
 
         for (let i = 0; i < matches.length; i++) {
             const match = matches[i];
-            const playerWonInfo = await fetchUserInfo(match.player_won);
-            const playerLostInfo = await fetchUserInfo(match.player_lost);
-            const playerWonRank = await fetchUserRank(match.player_won);
-            const playerLostRank = await fetchUserRank(match.player_lost);
+            const playerWonBasicInfo = await fetchPlayerBasicInfo(match.player_won);
+            const playerLostBasicInfo = await fetchPlayerBasicInfo(match.player_lost);
             const playerWonMatchInfo = await getPlayerMatchStats(match.player_won, match.end_time);
             const playerLostMatchInfo = await getPlayerMatchStats(match.player_lost, match.end_time);
 
@@ -438,11 +426,11 @@ async function displayMatchList(userId) {
                                 <div class="god-tag" id="god-tag-1" style="background-color: ${godThemes[playerWonMatchInfo.godsUsed[2]].color}"></div>
                                 <div class="god-tag" id="god-tag-2" style="background-color: ${godThemes[playerWonMatchInfo.godsUsed[1]].color}"></div>
                                 <div class="god-tag" id="god-tag-3" style="background-color: ${godThemes[playerWonMatchInfo.godsUsed[0]].color}"></div>
-                                <div class="rank rank-left">${playerWonRank}</div>
+                                <div class="rank rank-left">${playerWonBasicInfo.rank}</div>
                             </div>
                             <div class="bar-container">
                                 <div class="list-bar" id="bar-top">
-                                    <div class="user-list-text">${playerWonInfo.username} (${playerWonInfo.user_id})</div>
+                                    <div class="user-list-text">${playerWonBasicInfo.username} (${playerWonBasicInfo.userId})</div>
                                 </div>
                                 <div class="list-bar" id="bar-bottom">
 
@@ -457,11 +445,11 @@ async function displayMatchList(userId) {
                                 <div class="god-tag" id="god-tag-1-right" style="background-color: ${godThemes[playerLostMatchInfo.godsUsed[2]].color}"></div>
                                 <div class="god-tag" id="god-tag-2-right" style="background-color: ${godThemes[playerLostMatchInfo.godsUsed[1]].color}"></div>
                                 <div class="god-tag" id="god-tag-3-right" style="background-color: ${godThemes[playerLostMatchInfo.godsUsed[0]].color}"></div>
-                                <div class="rank rank-right">${playerLostRank}</div>
+                                <div class="rank rank-right">${playerLostBasicInfo.rank}</div>
                             </div>
                             <div class="bar-container">
                                 <div class="list-bar bar-right" id="bar-top">
-                                    <div class="user-list-text text-right">(${playerLostInfo.user_id}) ${playerLostInfo.username}</div>
+                                    <div class="user-list-text text-right">(${playerLostBasicInfo.userId}) ${playerLostBasicInfo.username}</div>
                                 </div>
                                 <div class="list-bar bar-right" id="bar-bottom">
 
@@ -508,8 +496,7 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     // const playerMatchHistory = await getPlayerMatchStats(playerInfo.user_id);
     const godTheme = godThemes[playerInfo.god];
 
-    const playerBasicInfo = await fetchUserInfo(playerInfo.user_id);
-    const playerRank = await fetchUserRank(playerInfo.user_id);
+    const playerBasicInfo = await fetchPlayerBasicInfo(playerInfo.user_id);
 
     // Fetch card information for all cards
     const cardInfoArray = await Promise.all(playerInfo.cards.map(fetchCardInfo));
@@ -546,8 +533,8 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     </div>
     <img class="player-overview-gp" src="https://images.godsunchained.com/art2/250/${playerInfo.god_power}.webp">
     <div class="player-overview-name" style="color: ${godTheme.color};">${playerBasicInfo.username}</div>
-    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerBasicInfo.user_id})</div>
-    <div class="player-overview-rank" style="color: ${godTheme.color};">${playerRank}</div>
+    <div class="player-overview-userid" style="color: ${godTheme.color};">(${playerBasicInfo.userId})</div>
+    <div class="player-overview-rank" style="color: ${godTheme.color};">${playerBasicInfo.rank}</div>
     <div class="player-overview-level"><small>Lv.</small> ${playerBasicInfo.xp_level}</div>
 
     <div class="circle-container">
