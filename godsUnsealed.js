@@ -710,7 +710,7 @@ async function displayCardList(cardIds, containerId) {
     
         const cardImage = document.createElement('div'); // Change from img to div
         cardImage.style.backgroundImage = `url(https://images.godsunchained.com/art2/250/${cardInfo.id}.webp)`;
-        cardImage.title = `(${cardInfo.mana}) ${cardInfo.name}`;
+        cardImage.title = `(${cardInfo.mana}) ${cardInfo.attack?.Int64 || '-'}/${cardInfo.health?.Int64 || '-'} ${cardInfo.name}`;
         cardImage.className = 'card-icon';
     
         // Check if the card is legendary
