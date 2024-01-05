@@ -71,6 +71,25 @@ const godPowerNames = {
     101309: 'Sacrifice'
 };
 
+const relicRemoval = [
+    1128, // Nightleaf Trapper
+    1444, // Counterfeit
+    2260, // Curious Wandercats
+    2267, // Frozen Rest
+    1672, // Vesper of Concession
+    941, // Spellbound Goblin
+    847, // Chiron
+    2466, // Rust Away
+    1554, // Sword Breaker Sage
+    1043, // Nefarious Briar
+    947, // Fenris Berserker
+    1591, // Ironborne Disruptor
+    376, // Iron-tooth Goblin
+    1214, // Bronze Servant
+    2331, // Eiko, Undaunted Duelist
+    1093 // Svart Basilisk
+];
+
 // Fetch recent matchlist
 async function fetchRecentMatches() {
     try {
@@ -689,44 +708,85 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     });
 }
 
+
+// Function to create and append a card element
+function createCardElement(cardInfo) {
+    const cardElement = document.createElement('div');
+    cardElement.className = 'card-container';
+
+    const cardImage = document.createElement('div');
+    cardImage.style.backgroundImage = `url(https://images.godsunchained.com/art2/250/${cardInfo.id}.webp)`;
+    cardImage.title = `(${cardInfo.mana}) ${cardInfo.attack?.Int64 || '-'}/${cardInfo.health?.Int64 || '-'} ${cardInfo.name}`;
+    cardImage.className = 'card-element';
+
+    // Check if the card is legendary
+    if (cardInfo.rarity === 'legendary') {
+        const legendaryOverlay = document.createElement('div');
+        legendaryOverlay.style.backgroundImage = 'url(images/wreath.png)';
+        legendaryOverlay.className = 'legendary-overlay';
+        cardImage.appendChild(legendaryOverlay);
+    }
+
+    // Attach click event listener to each card
+    cardImage.addEventListener('click', () => {
+        openCardModal(cardInfo);
+    });
+
+    cardElement.appendChild(cardImage);
+    return cardElement;
+}
+
+// Function to display a list of cards in a specified container
 async function displayCardList(cardIds, containerId) {
     const cardListDiv = document.getElementById(containerId);
 
     // Clear previous content
     cardListDiv.innerHTML = '';
 
-    // Fetch card information for all cards
-    const cardInfoArray = await Promise.all(cardIds.map(fetchCardInfo));
+    try {
+        // Fetch card information for all cards
+        const deck = await Promise.all(cardIds.map(fetchCardInfo));
 
-    // Sort cards by mana cost
-    cardInfoArray.sort((a, b) => a.mana - b.mana);
+        // Sort cards by mana cost
+        deck.sort((a, b) => a.mana - b.mana);
 
-    // Create and append card elements
-    for (const cardInfo of cardInfoArray) {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'card-container';
-    
-        const cardImage = document.createElement('div'); // Change from img to div
-        cardImage.style.backgroundImage = `url(https://images.godsunchained.com/art2/250/${cardInfo.id}.webp)`;
-        cardImage.title = `(${cardInfo.mana}) ${cardInfo.attack?.Int64 || '-'}/${cardInfo.health?.Int64 || '-'} ${cardInfo.name}`;
-        cardImage.className = 'card-icon';
-    
-        // Check if the card is legendary
-        if (cardInfo.rarity === 'legendary') {
-            const legendaryOverlay = document.createElement('div'); // Change from img to div
-            legendaryOverlay.style.backgroundImage = 'url(images/wreath.png)';
-            legendaryOverlay.className = 'legendary-overlay';
-            cardImage.appendChild(legendaryOverlay); // Append the legendaryOverlay to cardImage
+        // Create and append card elements
+        for (const cardInfo of deck) {
+            const cardElement = createCardElement(cardInfo);
+            cardListDiv.appendChild(cardElement);
         }
-    
-        // Attach click event listener to each card
-        cardImage.addEventListener('click', () => {
-            openCardModal(cardInfo);
-        });
-    
-        cardElement.appendChild(cardImage);
-        cardListDiv.appendChild(cardElement);
+
+                // Calculate and log card type totals
+                const totals = calculateCardTypeTotals(deck);
+                console.log('Creature Total:', totals.creature);
+                console.log('Spell Total:', totals.spell);
+                console.log('Relic Total:', totals.weapon);
+                console.log('Relic Removal Total:', totals.relicRemoval);
+        
+
+    } catch (error) {
+        console.error('Error fetching or displaying cards:', error);
     }
+}
+
+function calculateCardTypeTotals(deck) {
+    const totals = {
+        creature: 0,
+        spell: 0,
+        weapon: 0,
+        relicRemoval: 0,
+    };
+
+    for (const card of deck) {
+        totals[card.type]++; // Increment the corresponding type total
+
+        // Check if the card ID is in the relicRemoval array
+        if (relicRemoval.includes(card.id)) {
+            totals.relicRemoval++;
+        }
+    }
+
+    return totals;
 }
 
 let currentModal = null;
