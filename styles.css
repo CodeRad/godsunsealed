@@ -414,6 +414,11 @@ canvas {
   margin: 50px 0;
 }
 
+.totals-container {
+
+  padding: 10px;
+}
+
 .card-list {
   display: flex;
   flex-wrap: wrap;
@@ -772,10 +777,19 @@ canvas {
 }
 
 .lost-match {
-  background-color: rgb(158, 39, 39);
+  /* background-color: rgb(158, 39, 39); */
   color: black;
   font-size: 1.3em;
 }
+
+.lost-match-icon {
+  height: 20px;
+  width: 18px;
+  /* border-radius: 50%; */
+  justify-content: center;
+  align-items: center;
+}
+
 
 .won-matches {
   color: gold;

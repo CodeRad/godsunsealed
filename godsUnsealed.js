@@ -92,6 +92,9 @@ const relicRemoval = [
 
 // Fetch recent matchlist
 async function fetchRecentMatches() {
+
+    
+
     try {
         const itemsPerPage = 1000; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
@@ -131,6 +134,9 @@ async function fetchRecentMatches() {
 
 // Fetch matchlist by player ID
 async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 1000)) {
+
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
     try {
         const itemsPerPage = 1000;
         const startTime = endTime - 60 * 60 * 24 * 3; // 3 days, which is the max timeframe unfortunately
@@ -140,10 +146,14 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         const winsFirstPageData = await winsFirstPageResponse.json();
         const totalWins = winsFirstPageData.total;
 
+        await delay(250);
+
         // Fetch data for the first page of losses
         const lossesFirstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=1&game_mode=7&order=desc`);
         const lossesFirstPageData = await lossesFirstPageResponse.json();
         const totalLosses = lossesFirstPageData.total;
+
+        await delay(250);
 
         // Calculate the number of pages needed for wins and losses
         const totalPagesWins = Math.ceil(totalWins / itemsPerPage);
@@ -155,6 +165,8 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
             const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=${page}&game_mode=7&order=desc`);
             const pageData = await pageResponse.json();
             allWins = allWins.concat(pageData.records || []);
+
+            await delay(250);
         }
 
         // Fetch and concatenate data for all pages of losses
@@ -163,6 +175,8 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
             const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=${page}&game_mode=7&order=desc`);
             const pageData = await pageResponse.json();
             allLosses = allLosses.concat(pageData.records || []);
+
+            await delay(250);
         }
 
         // Combine wins and losses
@@ -424,15 +438,20 @@ async function displayMatchList(userId) {
             const matchLength = ((match.end_time - match.start_time) / 60).toFixed(2);
             const matchTimeAgo = getTimeAgo(match.end_time);
 
-            // Generate HTML for loss point elements based on the number of loss points
-            const playerWonLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
-                const isVisible = index < playerWonMatchInfo.lossCountInSet;
-                return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}">/</div>`;
-            }).join('');
-            const playerLostLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
-                const isVisible = index < playerLostMatchInfo.lossCountInSet;
-                return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}">/</div>`;
-            }).join('');
+// Generate HTML for loss point elements based on the number of loss points
+// Generate HTML for loss point elements based on the number of loss points
+const playerWonLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
+    const isVisible = index < playerWonMatchInfo.lossCountInSet;
+    return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}"><img src="${index < 2 ? 'images/icon-skull-white.png' : 'images/icon-skull-red.png'}" alt="Skull" class="lost-match-icon"></div>`;
+}).join('');
+
+const playerLostLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
+    const isVisible = index < playerLostMatchInfo.lossCountInSet;
+    return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}"><img src="${playerLostMatchInfo.lossCountInSet === 3 ? 'images/icon-skull-red.png' : 'images/icon-skull-white.png'}" alt="Skull" class="lost-match-icon"></div>`;
+}).join('');
+
+
+
 
             console.log('--------------------------------------------------------------------------------');
             if (!DEBUG) {
@@ -649,7 +668,7 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     <canvas id="${panelId}-wl-pie-chart" width="100" height="100"></canvas>
     
   </div>
-  <p>Set Wins: ${playerMatchInfo.winCountInSet}<br>Set Losses: ${playerMatchInfo.lossCountInSet}</p>
+  <!-- <p>Set Wins: ${playerMatchInfo.winCountInSet}<br>Set Losses: ${playerMatchInfo.lossCountInSet}</p> -->
 
 
 </div>
@@ -764,7 +783,7 @@ async function displayCardList(cardIds, containerId) {
                 // Display totals at the top
                 const totalsElement = document.createElement('div');
                 totalsElement.className = 'totals-container';
-                totalsElement.innerHTML = `Creature:${totals.creature} Spell:${totals.spell}<br>Relic:${totals.weapon} xRelic:${totals.relicRemoval}`;
+                totalsElement.innerHTML = `Creature:${totals.creature} Spell:${totals.spell}<br>Relic:${totals.weapon} Relic Remove:${totals.relicRemoval}`;
 
                 cardListDiv.appendChild(totalsElement);
 
