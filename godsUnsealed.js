@@ -771,7 +771,12 @@ async function displayCardList(cardIds, containerId) {
 
         // Calculate card type totals
         const totals = calculateCardTypeTotals(deck);
+                // Display totals at the top
+                const totalsElement = document.createElement('div');
+                totalsElement.className = 'totals-container';
+                totalsElement.innerHTML = `Creature:${totals.creature} Spell:${totals.spell} Relic:${totals.weapon} Relic Removal:${totals.relicRemoval}`;
 
+                cardListDiv.appendChild(totalsElement);
 
 
         // Create and append card elements
@@ -780,12 +785,7 @@ async function displayCardList(cardIds, containerId) {
             cardListDiv.appendChild(cardElement);
         }
 
-                // Display totals at the top
-                const totalsElement = document.createElement('div');
-                totalsElement.className = 'totals-container';
-                totalsElement.innerHTML = `Creature:${totals.creature} Spell:${totals.spell}<br>Relic:${totals.weapon} Relic Remove:${totals.relicRemoval}`;
 
-                cardListDiv.appendChild(totalsElement);
 
     } catch (error) {
         console.error('Error fetching or displaying cards:', error);
