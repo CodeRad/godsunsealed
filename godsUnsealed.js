@@ -750,24 +750,29 @@ async function displayCardList(cardIds, containerId) {
         // Sort cards by mana cost
         deck.sort((a, b) => a.mana - b.mana);
 
+        // Calculate card type totals
+        const totals = calculateCardTypeTotals(deck);
+
+
+
         // Create and append card elements
         for (const cardInfo of deck) {
             const cardElement = createCardElement(cardInfo);
             cardListDiv.appendChild(cardElement);
         }
 
-                // Calculate and log card type totals
-                const totals = calculateCardTypeTotals(deck);
-                console.log('Creature Total:', totals.creature);
-                console.log('Spell Total:', totals.spell);
-                console.log('Relic Total:', totals.weapon);
-                console.log('Relic Removal Total:', totals.relicRemoval);
-        
+                // Display totals at the top
+                const totalsElement = document.createElement('div');
+                totalsElement.className = 'totals-container';
+                totalsElement.innerHTML = `Creature:${totals.creature} Spell:${totals.spell}<br>Relic:${totals.weapon} xRelic:${totals.relicRemoval}`;
+
+                cardListDiv.appendChild(totalsElement);
 
     } catch (error) {
         console.error('Error fetching or displaying cards:', error);
     }
 }
+
 
 function calculateCardTypeTotals(deck) {
     const totals = {
