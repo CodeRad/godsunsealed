@@ -11,12 +11,14 @@ enter player on player card
 
 spell relic creatures 
 
-i need to make a list of work i need to do today on my tcg alanysis web app
-
 - make one match api call
 - get full set data
-- auto refresh
-- cookies?
-- unify player data and storage
-- what's new/patchnotes (legendarys)
+- auto refresh (more)
 - chageable backgrounds?
+
+fix black part on pie chart
+
+skulls!
+
+frontline?
+

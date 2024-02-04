@@ -71,8 +71,30 @@ const godPowerNames = {
     101309: 'Sacrifice'
 };
 
+const relicRemoval = [
+    1128, // Nightleaf Trapper
+    1444, // Counterfeit
+    2260, // Curious Wandercats
+    2267, // Frozen Rest
+    1672, // Vesper of Concession
+    941, // Spellbound Goblin
+    847, // Chiron
+    2466, // Rust Away
+    1554, // Sword Breaker Sage
+    1043, // Nefarious Briar
+    947, // Fenris Berserker
+    1591, // Ironborne Disruptor
+    376, // Iron-tooth Goblin
+    1214, // Bronze Servant
+    2331, // Eiko, Undaunted Duelist
+    1093 // Svart Basilisk
+];
+
 // Fetch recent matchlist
 async function fetchRecentMatches() {
+
+    
+
     try {
         const itemsPerPage = 1000; // Specify the desired items per page
         const endTime = Math.floor(Date.now() / 1000);
@@ -112,6 +134,9 @@ async function fetchRecentMatches() {
 
 // Fetch matchlist by player ID
 async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 1000)) {
+
+    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
     try {
         const itemsPerPage = 1000;
         const startTime = endTime - 60 * 60 * 24 * 3; // 3 days, which is the max timeframe unfortunately
@@ -121,10 +146,14 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
         const winsFirstPageData = await winsFirstPageResponse.json();
         const totalWins = winsFirstPageData.total;
 
+        await delay(250);
+
         // Fetch data for the first page of losses
         const lossesFirstPageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=1&game_mode=7&order=desc`);
         const lossesFirstPageData = await lossesFirstPageResponse.json();
         const totalLosses = lossesFirstPageData.total;
+
+        await delay(250);
 
         // Calculate the number of pages needed for wins and losses
         const totalPagesWins = Math.ceil(totalWins / itemsPerPage);
@@ -136,6 +165,8 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
             const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_won=${userId}&page=${page}&game_mode=7&order=desc`);
             const pageData = await pageResponse.json();
             allWins = allWins.concat(pageData.records || []);
+
+            await delay(250);
         }
 
         // Fetch and concatenate data for all pages of losses
@@ -144,6 +175,8 @@ async function fetchMatchesByUserId(userId, endTime = Math.floor(Date.now() / 10
             const pageResponse = await fetch(`https://api.godsunchained.com/v0/match?&end_time=${startTime}-${endTime}&perPage=${itemsPerPage}&player_lost=${userId}&page=${page}&game_mode=7&order=desc`);
             const pageData = await pageResponse.json();
             allLosses = allLosses.concat(pageData.records || []);
+
+            await delay(250);
         }
 
         // Combine wins and losses
@@ -405,15 +438,20 @@ async function displayMatchList(userId) {
             const matchLength = ((match.end_time - match.start_time) / 60).toFixed(2);
             const matchTimeAgo = getTimeAgo(match.end_time);
 
-            // Generate HTML for loss point elements based on the number of loss points
-            const playerWonLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
-                const isVisible = index < playerWonMatchInfo.lossCountInSet;
-                return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}">/</div>`;
-            }).join('');
-            const playerLostLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
-                const isVisible = index < playerLostMatchInfo.lossCountInSet;
-                return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}">/</div>`;
-            }).join('');
+// Generate HTML for loss point elements based on the number of loss points
+// Generate HTML for loss point elements based on the number of loss points
+const playerWonLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
+    const isVisible = index < playerWonMatchInfo.lossCountInSet;
+    return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}"><img src="${index < 2 ? 'images/icon-skull-white.png' : 'images/icon-skull-red.png'}" alt="Skull" class="lost-match-icon"></div>`;
+}).join('');
+
+const playerLostLossPointsHTML = Array.from({ length: 3 }, (_, index) => {
+    const isVisible = index < playerLostMatchInfo.lossCountInSet;
+    return `<div class="lost-match" id="lost-match-${index + 1}-right" style="display: ${isVisible ? '' : 'none'}"><img src="${playerLostMatchInfo.lossCountInSet === 3 ? 'images/icon-skull-red.png' : 'images/icon-skull-white.png'}" alt="Skull" class="lost-match-icon"></div>`;
+}).join('');
+
+
+
 
             console.log('--------------------------------------------------------------------------------');
             if (!DEBUG) {
@@ -630,7 +668,7 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     <canvas id="${panelId}-wl-pie-chart" width="100" height="100"></canvas>
     
   </div>
-  <p>Set Wins: ${playerMatchInfo.winCountInSet}<br>Set Losses: ${playerMatchInfo.lossCountInSet}</p>
+  <!-- <p>Set Wins: ${playerMatchInfo.winCountInSet}<br>Set Losses: ${playerMatchInfo.lossCountInSet}</p> -->
 
 
 </div>
@@ -689,44 +727,90 @@ async function displayPlayerPanel(panelId, playerInfo, playerMatchInfo) {
     });
 }
 
+
+// Function to create and append a card element
+function createCardElement(cardInfo) {
+    const cardElement = document.createElement('div');
+    cardElement.className = 'card-container';
+
+    const cardImage = document.createElement('div');
+    cardImage.style.backgroundImage = `url(https://images.godsunchained.com/art2/250/${cardInfo.id}.webp)`;
+    cardImage.title = `(${cardInfo.mana}) ${cardInfo.attack?.Int64 || '-'}/${cardInfo.health?.Int64 || '-'} ${cardInfo.name}`;
+    cardImage.className = 'card-element';
+
+    // Check if the card is legendary
+    if (cardInfo.rarity === 'legendary') {
+        const legendaryOverlay = document.createElement('div');
+        legendaryOverlay.style.backgroundImage = 'url(images/wreath.png)';
+        legendaryOverlay.className = 'legendary-overlay';
+        cardImage.appendChild(legendaryOverlay);
+    }
+
+    // Attach click event listener to each card
+    cardImage.addEventListener('click', () => {
+        openCardModal(cardInfo);
+    });
+
+    cardElement.appendChild(cardImage);
+    return cardElement;
+}
+
+// Function to display a list of cards in a specified container
 async function displayCardList(cardIds, containerId) {
     const cardListDiv = document.getElementById(containerId);
 
     // Clear previous content
     cardListDiv.innerHTML = '';
 
-    // Fetch card information for all cards
-    const cardInfoArray = await Promise.all(cardIds.map(fetchCardInfo));
+    try {
+        // Fetch card information for all cards
+        const deck = await Promise.all(cardIds.map(fetchCardInfo));
 
-    // Sort cards by mana cost
-    cardInfoArray.sort((a, b) => a.mana - b.mana);
+        // Sort cards by mana cost
+        deck.sort((a, b) => a.mana - b.mana);
 
-    // Create and append card elements
-    for (const cardInfo of cardInfoArray) {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'card-container';
-    
-        const cardImage = document.createElement('div'); // Change from img to div
-        cardImage.style.backgroundImage = `url(https://images.godsunchained.com/art2/250/${cardInfo.id}.webp)`;
-        cardImage.title = `(${cardInfo.mana}) ${cardInfo.attack?.Int64 || '-'}/${cardInfo.health?.Int64 || '-'} ${cardInfo.name}`;
-        cardImage.className = 'card-icon';
-    
-        // Check if the card is legendary
-        if (cardInfo.rarity === 'legendary') {
-            const legendaryOverlay = document.createElement('div'); // Change from img to div
-            legendaryOverlay.style.backgroundImage = 'url(images/wreath.png)';
-            legendaryOverlay.className = 'legendary-overlay';
-            cardImage.appendChild(legendaryOverlay); // Append the legendaryOverlay to cardImage
+        // Calculate card type totals
+        const totals = calculateCardTypeTotals(deck);
+                // Display totals at the top
+                const totalsElement = document.createElement('div');
+                totalsElement.className = 'totals-container';
+                totalsElement.innerHTML = `Creature:${totals.creature} Spell:${totals.spell} Relic:${totals.weapon} Relic Removal:${totals.relicRemoval}`;
+
+                cardListDiv.appendChild(totalsElement);
+
+
+        // Create and append card elements
+        for (const cardInfo of deck) {
+            const cardElement = createCardElement(cardInfo);
+            cardListDiv.appendChild(cardElement);
         }
-    
-        // Attach click event listener to each card
-        cardImage.addEventListener('click', () => {
-            openCardModal(cardInfo);
-        });
-    
-        cardElement.appendChild(cardImage);
-        cardListDiv.appendChild(cardElement);
+
+
+
+    } catch (error) {
+        console.error('Error fetching or displaying cards:', error);
     }
+}
+
+
+function calculateCardTypeTotals(deck) {
+    const totals = {
+        creature: 0,
+        spell: 0,
+        weapon: 0,
+        relicRemoval: 0,
+    };
+
+    for (const card of deck) {
+        totals[card.type]++; // Increment the corresponding type total
+
+        // Check if the card ID is in the relicRemoval array
+        if (relicRemoval.includes(card.id)) {
+            totals.relicRemoval++;
+        }
+    }
+
+    return totals;
 }
 
 let currentModal = null;

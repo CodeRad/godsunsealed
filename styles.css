@@ -411,7 +411,20 @@ canvas {
   display: flex;
   justify-content: center;
   width: 100%;
-  margin: 50px 0;
+  margin: 20px 0;
+}
+
+.totals-container {
+  width: 100%;
+  text-align: center;
+  /* padding: 10px; */
+  font-family:'Courier New', Courier, monospace;
+  color: chartreuse;
+  font-size: small;
+  /* border: chartreuse 1px solid; */
+  /* background-color: #00000066; */
+  border-radius: 10px;
+  margin: 5px;
 }
 
 .card-list {
@@ -425,7 +438,7 @@ canvas {
   display: inline-block;
 }
 
-.card-icon {
+.card-element {
   height: 46px;
   width: 46px;
   border-radius: 50%;
@@ -436,7 +449,7 @@ canvas {
   background-size: cover;
 }
 
-.card-icon:hover {
+.card-element:hover {
   transform: scale(2.5);
   z-index: 1;
   outline: 1px solid yellow;
@@ -772,10 +785,19 @@ canvas {
 }
 
 .lost-match {
-  background-color: rgb(158, 39, 39);
+  /* background-color: rgb(158, 39, 39); */
   color: black;
   font-size: 1.3em;
 }
+
+.lost-match-icon {
+  height: 20px;
+  width: 18px;
+  /* border-radius: 50%; */
+  justify-content: center;
+  align-items: center;
+}
+
 
 .won-matches {
   color: gold;
